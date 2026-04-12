@@ -500,6 +500,38 @@
             flex-shrink: 0;
         }
 
+        /* --- Premium Slim Gold Scrollbar --- */
+        *::-webkit-scrollbar {
+            width: 10px !important;
+            height: 10px !important;
+            display: block !important;
+        }
+
+        *::-webkit-scrollbar-track {
+            background: #0f172a !important;
+            border-radius: 10px !important;
+        }
+
+        *::-webkit-scrollbar-thumb {
+            background: #fbbf24 !important;
+            border-radius: 10px !important;
+            border: 2px solid #0f172a !important;
+        }
+
+        *::-webkit-scrollbar-thumb:hover {
+            background: #d4af37 !important;
+        }
+
+        *::-webkit-scrollbar-button {
+            display: none !important;
+        }
+
+        /* Firefox Support */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #fbbf24 #0f172a;
+        }
+
         .header-avatar {
             width: 32px;
             height: 32px;
@@ -1747,39 +1779,8 @@
             border-radius: 10px;
         }
 
-        /* --- Fast & Premium Scrollbar (V2.5) for Management Lists --- */
-        #usersListContainer::-webkit-scrollbar, 
-        #trashListContainer::-webkit-scrollbar, 
-        #inventoriesListContainer::-webkit-scrollbar {
-            width: 8px;
-            background: transparent;
-        }
-        #usersListContainer::-webkit-scrollbar-track, 
-        #trashListContainer::-webkit-scrollbar-track, 
-        #inventoriesListContainer::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.04);
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.02);
-        }
-        #usersListContainer::-webkit-scrollbar-thumb, 
-        #trashListContainer::-webkit-scrollbar-thumb, 
-        #inventoriesListContainer::-webkit-scrollbar-thumb {
-            background: linear-gradient(180deg, #8b5cf6, #d97706, #8b5cf6);
-            background-size: 100% 200%;
-            border-radius: 20px;
-            border: 2px solid rgba(15, 23, 42, 0.9);
-            box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        #usersListContainer::-webkit-scrollbar-thumb:hover, 
-        #trashListContainer::-webkit-scrollbar-thumb:hover, 
-        #inventoriesListContainer::-webkit-scrollbar-thumb:hover {
-            background-position: bottom center;
-            border-color: rgba(255,255,255,0.2);
-        }
+        /* Specific scrollbar styles consolidated into global style */
         #usersListContainer, #trashListContainer, #inventoriesListContainer {
-            scrollbar-width: thin;
-            scrollbar-color: #8b5cf6 rgba(255, 255, 255, 0.05);
             scroll-behavior: smooth;
             padding-right: 5px; /* Spacing for the scrollbar */
         }
@@ -2420,25 +2421,7 @@
             white-space: nowrap;
         }
 
-        .modal-tabs::-webkit-scrollbar {
-            height: 6px;
-            display: block;
-            /* Ensure it is displayed */
-        }
-
-        .modal-tabs::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-        }
-
-        .modal-tabs::-webkit-scrollbar-thumb {
-            background: linear-gradient(90deg, var(--gold2), var(--gold1));
-            border-radius: 10px;
-        }
-
-        .modal-tabs::-webkit-scrollbar-thumb:hover {
-            background: var(--gold1);
-        }
+        /* modal-tabs padding and overflow handled by global scrollbar */
 
         .tab-link {
             flex-shrink: 0;
@@ -2863,24 +2846,9 @@
             z-index: 99999 !important;
         }
 
-        /* Fast Vertical Scrollbar for Users */
-        #usersListContainer::-webkit-scrollbar {
-            width: 7px;
-        }
-        #usersListContainer::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
-        }
-        #usersListContainer::-webkit-scrollbar-thumb {
-            background: linear-gradient(180deg, #8b5cf6, #7c3aed);
-            border-radius: 10px;
-        }
-        #usersListContainer::-webkit-scrollbar-thumb:hover {
-            background: #a78bfa;
-        }
+        /* Specific scrollbar styles removed */
         #usersListContainer {
             scrollbar-width: thin;
-            scrollbar-color: #8b5cf6 rgba(0, 0, 0, 0.2);
         }
     </style>
     <style>
@@ -2975,7 +2943,7 @@
                         </div>
 
                         <button class="btn" id="backupBtn" style="font-size: 15px; padding: 7px 10px;"
-                            title="نظام النسخ الاحتياطي المتطور" onclick="showAdvancedBackupModal()">💾</button>
+                            title="تحميل نسخة احتياطية فورية" onclick="exportAllData()">💾</button>
                         <button class="btn" id="screenshotBtn" style="font-size: 15px; padding: 7px 10px;"
                             title="لقطة شاشة" onclick="takeScreenshot()">📸</button>
                         <button class="btn" id="waShareBtn" style="font-size: 15px; padding: 7px 10px; color: #22c55e;"
@@ -3000,7 +2968,7 @@
                     <div class="header-controls" style="width:100%;">
                         <!-- Dynamic Inventories Button -->
                         <div style="display:flex; gap:8px; width: 100%; justify-content: center; flex-wrap: wrap;">
-                            <button class="btn"
+                            <button class="btn" id="balancesBtn"
                                 style="background:var(--gold4);color:var(--gold1);padding:10px 18px;font-size:15px;border:1px solid var(--gold2); display:flex; align-items:center; gap:8px; flex: 1; min-width: 120px; justify-content: center; transition: all 0.3s;"
                                 onclick="openInventoriesSideMenu()" title="المخزون والأرصدة">📦 الأرصدة</button>
 
@@ -5293,8 +5261,8 @@
             const userPhone = localStorage.getItem('acc_user_phone') || '';
             const userNotes = localStorage.getItem('acc_user_notes') || '';
             const userLogo = localStorage.getItem('acc_user_logo') || '';
-            const date = dateInput.value;
-            const reportNum = getNextReportNumber(date);
+            const dateStr = document.getElementById('dateInput')?.value || new Date().toISOString().slice(0, 10);
+            const reportNum = getNextReportNumber(dateStr);
             let salesTotal = 0;
             let expensesTotal = 0;
 
@@ -5371,7 +5339,7 @@
                             <div style="text-align: right;">
                                 <div style="color: #6b7280; font-size: 12px; margin-bottom: 4px;">بيانات الاتصال</div>
                                 <div style="font-weight: 700; color: #374151;">📞 ${userPhone || 'غير مسجل'}</div>
-                                <div style="font-weight: 700; color: #374151; margin-top: 5px;">📅 بتاريخ: ${date}</div>
+                                <div style="font-weight: 700; color: #374151; margin-top: 5px;">📅 بتاريخ: ${dateStr}</div>
                             </div>
                             <div style="text-align: left;">
                                 <div style="color: #6b7280; font-size: 12px; margin-bottom: 4px;">مرجع التقرير</div>
@@ -5381,7 +5349,7 @@
                         </div>
 
                         <!-- Premium Summary Cards -->
-                        <div style="display: flex; gap: 15px; margin-bottom: 40px;">
+                        <div style="display: flex; gap: 15px; margin-bottom: 25px;">
                             <div style="flex: 1; background: #ecfdf5; border: 1px solid #b7903c44; padding: 20px; border-radius: 20px; text-align: center; border-bottom: 4px solid #059669;">
                                 <div style="font-size: 13px; color: #065f46; font-weight: 700; margin-bottom: 8px;">إجمالي الوارد (أعلى)</div>
                                 <div style="font-size: 24px; font-weight: 900; color: #059669;">${formatNum(salesTotal)} <small style="font-size: 12px;">ج.م</small></div>
@@ -5393,6 +5361,24 @@
                             <div style="flex: 1.2; background: linear-gradient(135deg, #064e3b, #065f46); padding: 20px; border-radius: 20px; text-align: center; color: #fff; box-shadow: 0 10px 20px rgba(6, 78, 59, 0.2);">
                                 <div style="font-size: 13px; color: #a7f3d0; font-weight: 700; margin-bottom: 8px;">صافي الأرباح النهائية</div>
                                 <div style="font-size: 28px; font-weight: 900; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">${formatNum(netProfit)} <small style="font-size: 12px;">ج.م</small></div>
+                            </div>
+                        </div>
+
+                        <!-- Cash & Wallet Summary (New Section) -->
+                        <div style="display: flex; gap: 15px; margin-bottom: 40px; background: #f8fafc; padding: 15px; border-radius: 16px; border: 1px dashed #cbd5e1;">
+                            <div style="flex: 1; text-align: center; border-left: 1px solid #e2e8f0;">
+                                <div style="font-size: 11px; color: #64748b; font-weight: bold;">💵 كاش الخزينة</div>
+                                <div style="font-size: 16px; font-weight: 800; color: #334155;">${document.getElementById('headerCashTotal')?.textContent || '0'}</div>
+                            </div>
+                            <div style="flex: 1; text-align: center; border-left: 1px solid #e2e8f0;">
+                                <div style="font-size: 11px; color: #64748b; font-weight: bold;">📱 إنستا باي</div>
+                                <div style="font-size: 16px; font-weight: 800; color: #334155;">${document.getElementById('headerInstaPayTotal')?.textContent || '0'}</div>
+                            </div>
+                            <div style="flex: 1; text-align: center;">
+                                <div style="font-size: 11px; color: #64748b; font-weight: bold;">🔍 عجز / زيادة</div>
+                                <div style="font-size: 16px; font-weight: 800; color: ${document.getElementById('headerDiffTotalEl')?.style.color || '#334155'};">
+                                    ${document.getElementById('headerDiffTotalEl')?.textContent || '0'}
+                                </div>
                             </div>
                         </div>
 
@@ -5485,7 +5471,7 @@
 
             const encodedData = btoa(unescape(encodeURIComponent(JSON.stringify(compressedRecords))));
             const appUrl = window.location.origin + window.location.pathname;
-            const fullLink = `${appUrl}#view?report=${reportNum}&date=${date}&data=${encodedData}`;
+            const fullLink = `${appUrl}#view?report=${reportNum}&date=${dateStr}&data=${encodedData}`;
 
             const qrData = fullLink;
             // Generate QR Code with better reliability
@@ -7410,7 +7396,7 @@
 
             <div style="background: rgba(15, 23, 42, 0.95); padding: 5px 20px; border-bottom: 1px solid rgba(212, 175, 55, 0.2); z-index: 5; flex-shrink: 0; overflow-x: auto;">
                 <div class="modal-tabs" style="margin-bottom: 0; border-bottom: none; display: flex; gap: 15px; white-space: nowrap;">
-                    <span class="tab-link active" data-tab="users" onclick="if(window.renderUsersList) window.renderUsersList()">
+                    <span class="tab-link active" data-tab="users" onclick="if(window.renderUsersList) window.renderUsersList(); if(typeof fetchConnectedDevices === 'function') fetchConnectedDevices();">
                         👥 الموظفين
                     </span>
                     <span class="tab-link" data-tab="user" onclick="if(typeof fetchConnectedDevices === 'function') fetchConnectedDevices()">
@@ -7440,8 +7426,16 @@
                 </div>
             </div>
 
-            <div style="padding: 20px; flex: 1; overflow-y: auto; position: relative;">
-
+            <div class="settings-modal-body" style="padding: 20px; flex: 1; overflow-y: auto; position: relative; direction: rtl;">
+                <style>
+                    .tab-content { 
+                        display: none; 
+                        max-height: 70vh; 
+                        overflow-y: auto; 
+                        padding-right: 15px;
+                    }
+                    .tab-content.active { display: block; }
+                </style>
 
             <!-- 1. بيانات الصفحة (General Manager Data) -->
             <div id="tab-user" class="tab-content">
@@ -7458,6 +7452,23 @@
                         <p style="color: #fbbf24; font-size: 13px; margin-top:8px; font-weight:bold; letter-spacing: 1px; text-transform:uppercase;">👑 رتبة: مدير عام المنشأة</p>
                         
                         <div style="margin-top: 35px; display: grid; gap: 15px; text-align: right;">
+                             <!-- License Serial Box -->
+                             <div class="field" style="background: linear-gradient(135deg, #1a1a1a, #000); padding: 20px; border-radius: 18px; border: 2px solid #d4af37; margin-bottom: 5px; box-shadow: 0 0 20px rgba(212, 175, 55, 0.2); text-align: center;">
+                                 <label style="color:#d4af37; font-size: 14px; font-weight: 900; margin-bottom:15px; display:block; text-transform:uppercase;">🔑 كود السيريال النشط (الترخيص)</label>
+                                 <div style="background: #000; padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px;">
+                                     <span id="settings-auth-serial-display" style="color: #fff; font-family: 'Courier New', monospace; font-size: 24px; font-weight: 900; letter-spacing: 5px; text-shadow: 0 0 10px #d4af37;">${localStorage.getItem('app_auth_serial') || '---'}</span>
+                                 </div>
+                                 <button class="btn" onclick="navigator.clipboard.writeText(document.getElementById('settings-auth-serial-display').innerText); if(window.showToast) window.showToast('📋 تم نسخ السيريال', 'success');" style="width: 100%; background: #d4af37; color: #111; border: none; padding: 12px; font-size: 14px; border-radius: 10px; font-weight: 800;">نسخ السيريال 📋</button>
+                             </div>
+
+                             <div class="field" style="background: linear-gradient(135deg, #111, #222); padding: 20px; border-radius: 18px; border: 2px solid #38bdf8; margin-bottom: 25px; box-shadow: 0 0 20px rgba(56, 189, 248, 0.2); text-align: center;">
+                                 <label style="color:#38bdf8; font-size: 14px; font-weight: 900; margin-bottom:15px; display:block; text-transform:uppercase;">🆔 كود التعريف الموحد للجهاز</label>
+                                 <div style="background: #000; padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px;">
+                                     <span id="settings-device-id-display" style="color: #fff; font-family: 'Courier New', monospace; font-size: 24px; font-weight: 900; letter-spacing: 2px; text-shadow: 0 0 10px #38bdf8;">${localStorage.getItem('acc_device_id') || 'BYN-WAIT-0000'}</span>
+                                 </div>
+                                 <button class="btn" onclick="copyDeviceId()" style="width: 100%; background: #38bdf8; color: #000; border: none; padding: 12px; font-size: 14px; border-radius: 10px; font-weight: 800;">نسخ الكود البرمجي 📋</button>
+                             </div>
+
                              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                                  <div class="field">
                                      <label style="color:#94a3b8; font-size: 12px; font-weight: 800; margin-bottom:8px; display:block;">👤 الاسم الكامل للمدير</label>
@@ -7740,15 +7751,24 @@
                                 <option value="staff">موظف</option>
                                 <option value="admin">مدير</option>
                             </select>
-                            <button class="btn" id="addUserButtonMain" onclick="alert('Triggering ADD...'); if(window.addNewUser) window.addNewUser(); else alert('Error: addNewUser not found!');" 
+                            <button class="btn" id="addUserButtonMain" onclick="if(window.addNewUser) window.addNewUser();" 
                                 onmousedown="this.style.transform='scale(0.95)'" 
                                 onmouseup="this.style.transform='scale(1)'"
-                                style="background: #f59e0b; color: #fff; padding: 10px 25px; border-radius: 10px; font-weight: bold; transition: all 0.2s; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);">إضافة مستخدم (V2.5)</button>
+                                style="background: #f59e0b; color: #fff; padding: 10px 25px; border-radius: 10px; font-weight: bold; transition: all 0.2s; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);">إضافة مستخدم</button>
                         </div>
                     </div>
                     
                     <div id="usersListContainer" style="max-height:350px; overflow-y:auto; display:grid; gap:12px; padding: 5px;">
                         <!-- Users list renders here -->
+                    </div>
+
+                    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05);">
+                        <h4 style="color:#22c55e; border:none; padding:0; margin-bottom: 5px; display:flex; align-items:center; gap:8px;">⚖️ أجهزة الفريق المتصلة (Licensing)</h4>
+                        <p style="font-size:11px; color:var(--muted); margin-bottom: 20px;">يمكنك تفعيل أو حظر وصول الأجهزة الفرعية للبيانات السحابية بشكل لحظي.</p>
+                        
+                        <div id="connectedDevicesList" style="max-height: 250px; overflow-y: auto; display:grid; gap:8px; padding: 5px;">
+                            <div style="text-align:center; padding:20px; color:#64748b; font-size:12px;">جاري الاتصال بمركز التراخيص...</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -7770,30 +7790,27 @@
             </div>
 
             <!-- 9. تصدير التقارير (Share/Reports) -->
-            <div id="tab-reports" class="tab-content">
+            <div id="tab-share" class="tab-content">
                 <div class="settings-card" style="border-right: 5px solid #3b82f6; background: rgba(30, 41, 59, 0.4); padding: 30px;">
                     <div style="text-align: center; margin-bottom: 30px;">
                         <h4 style="font-size: 24px; color: #60a5fa; margin: 0; border:none; display: inline-flex; align-items:center; gap:10px;">📊 مركز التقارير والإحصائيات</h4>
                         <p style="color: var(--muted); margin-top: 5px; font-size: 13px;">استخرج بياناتك بصيغ احترافية للمشاركة أو الطباعة.</p>
                     </div>
                     
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;">
-                        <button class="btn" onclick="generateDailyReport()" style="padding: 20px; background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); color: #a78bfa; border-radius: 18px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
-                            <span style="font-size: 24px;">📝</span>
-                            <span style="font-weight: 800;">تقرير اليوم</span>
-                        </button>
-                        <button class="btn" onclick="generateMonthlyStats()" style="padding: 20px; background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.3); color: #22d3ee; border-radius: 18px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
-                            <span style="font-size: 24px;">📅</span>
-                            <span style="font-weight: 800;">تقرير الشهر</span>
-                        </button>
-                        <button class="btn" onclick="shareToWhatsApp()" style="padding: 20px; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); color: #4ade80; border-radius: 18px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
-                            <span style="font-size: 24px;">💬</span>
-                            <span style="font-weight: 800;">واتساب</span>
-                        </button>
-                        <button class="btn" onclick="printDailyReport()" style="padding: 20px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); color: #fbbf24; border-radius: 18px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
-                            <span style="font-size: 24px;">🖨️</span>
-                            <span style="font-weight: 800;">طباعة</span>
-                        </button>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px;">
+                        <button class="btn" onclick="showDailySummaryAlert()" style="padding: 15px; background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); color: #a78bfa; border-radius: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: bold;">📝 ملخص اليوم</button>
+                        <button class="btn" onclick="generateMonthlyStats()" style="padding: 15px; background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.3); color: #22d3ee; border-radius: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: bold;">📅 ملخص الشهر</button>
+                        <button class="btn" onclick="printDailyReport()" style="padding: 15px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); color: #fbbf24; border-radius: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: bold;">🖨️ طباعة</button>
+                    </div>
+
+                    <div style="background: rgba(30,30,50,0.6); padding: 25px; border-radius: 20px; border: 1px solid rgba(59, 130, 246, 0.3); box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                        <h5 style="color: #60a5fa; margin-top: 0; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; font-size: 16px; border-bottom: 1px solid rgba(96, 165, 250, 0.2); padding-bottom: 10px;">🚀 مركز المشاركة والإرسال السريع</h5>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px;">
+                            <button class="btn" onclick="shareToWhatsApp()" style="background: #128c7e; color: #fff; border-radius: 12px; padding: 12px; font-size: 13px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s; height: 50px;">واتساب 🟢</button>
+                            <button class="btn" onclick="shareToTelegram()" style="background: #0088cc; color: #fff; border-radius: 12px; padding: 12px; font-size: 13px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s; height: 50px;">تيليجرام ✈️</button>
+                            <button class="btn" onclick="exportToExcel()" style="background: #217346; color: #fff; border-radius: 12px; padding: 12px; font-size: 13px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s; height: 50px;">إكسيل 📊</button>
+                            <button class="btn" onclick="if(navigator.share) { navigator.share({title: 'تقرير مبيعات', text: 'إليك تقرير مبيعات اليوم من بيان POS', url: window.location.href}); } else { copyReportText(); }" style="background: #6366f1; color: #fff; border-radius: 12px; padding: 12px; font-size: 13px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s; height: 50px;">مشاركة 🔗</button>
+                        </div>
                     </div>
 
                     <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05);">
@@ -7858,15 +7875,6 @@
                                 الإصدار التراكمي <span style="color: #fbbf24;">9.2.0 (Diamond)</span>
                             </div>
 
-                            <!-- New: Device Identity Card -->
-                            <div style="background: rgba(0,0,0,0.4); border-radius: 15px; border: 1px solid rgba(139, 92, 246, 0.3); padding: 20px; margin: 0 10px; display: flex; flex-direction: column; gap: 10px; text-align: center;">
-                                <div style="color: #a78bfa; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">🆔 كود الهوية الفريد لهذا الجهاز</div>
-                                <div id="display-device-id" style="font-family: monospace; font-size: 18px; color: #fff; letter-spacing: 2px; text-shadow: 0 0 10px rgba(69, 243, 255, 0.3);">BAYAN-XXXX-XXXX</div>
-                                <div style="display: flex; gap: 8px; justify-content: center;">
-                                    <button class="btn" onclick="copyDeviceId()" style="background: rgba(69, 243, 255, 0.1); color: #45f3ff; border: 1px solid rgba(69, 243, 255, 0.2); padding: 5px 15px; border-radius: 8px; font-size: 11px;">📋 نسخ الكود</button>
-                                    <button class="btn" onclick="generateNewDeviceId()" style="background: rgba(255, 255, 255, 0.05); color: #fff; border: 1px solid rgba(255, 255, 255, 0.1); padding: 5px 15px; border-radius: 8px; font-size: 11px;">🔄 تحديث</button>
-                                </div>
-                            </div>
                         </div>
                     </div>
 
@@ -12876,6 +12884,170 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
             if (typeof beep === 'function') beep(1000, 0.04, 0.05);
         }
 
+        function shareToTelegram() {
+            const date = typeof currentDate !== 'undefined' ? currentDate : new Date().toISOString().slice(0, 10);
+            const dataRecords = (typeof records !== 'undefined') ? records : [];
+            let text = `📊 *تقرير محاسبة يوم: ${date}*\n\n`;
+            const cashVal = document.getElementById('headerCashTotal')?.textContent || '0';
+            const instaVal = document.getElementById('headerInstaPayTotal')?.textContent || '0';
+            text += `💰 كاش: ${cashVal}\n💳 إنستا باي: ${instaVal}\n\n📋 *العمليات:*\n`;
+            dataRecords.slice(0, 10).forEach(r => {
+                text += `• ${r.category}: ${Number(r.top || 0) + Number(r.bottom || 0)}\n`;
+            });
+            const encodedText = encodeURIComponent(text);
+            window.open(`https://t.me/share/url?url=${encodeURIComponent('Bayan POS Report')}&text=${encodedText}`, '_blank');
+        }
+
+        function shareViaEmail() {
+            const date = typeof currentDate !== 'undefined' ? currentDate : new Date().toISOString().slice(0, 10);
+            const subject = encodeURIComponent(`تقرير مبيعات بيان POS - ${date}`);
+            const body = encodeURIComponent(`تحية طيبة،\n\nإليكم ملخص مبيعات اليوم (${date}):\n\nكاش: ${document.getElementById('headerCashTotal')?.textContent}\nإنستا باي: ${document.getElementById('headerInstaPayTotal')?.textContent}\n\nمرسل عبر نظام بيان POS المطور.`);
+            window.location.href = `mailto:?subject=${subject}&body=${body}`;
+        }
+
+        function shareToMessenger() {
+            if (typeof showToast === 'function') showToast('📦 جاري فتح ماسنجر لمشاركة التقرير...', 'info');
+            const date = typeof currentDate !== 'undefined' ? currentDate : new Date().toISOString().slice(0, 10);
+            const text = encodeURIComponent(`📊 تقرير بيان POS: يوم ${date}`);
+            window.open(`fb-messenger://share/?link=${encodeURIComponent(window.location.href)}&app_id=12345`, '_blank');
+        }
+
+        function exportToExcel() {
+            const date = typeof currentDate !== 'undefined' ? currentDate : new Date().toISOString().slice(0, 10);
+            const dataRecords = (typeof records !== 'undefined') ? records : [];
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+            csvContent += "التاريخ,الفئة,المبلغ,الملاحظات\n";
+            dataRecords.forEach(r => {
+                csvContent += `${date},${r.category},${Number(r.top || 0) + Number(r.bottom || 0)},${r.notes || ''}\n`;
+            });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Bayan_POS_${date}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            if (typeof showToast === 'function') showToast('📊 تم تصدير ملف الإكسيل بنجاح', 'success');
+        }
+
+        function showDailySummaryAlert() {
+            if (typeof showToast === 'function') showToast('📋 جاري تجميع ملخص اليوم...', 'info');
+            
+            const cashVal = document.getElementById('headerCashTotal')?.textContent || '0';
+            const instaVal = document.getElementById('headerInstaPayTotal')?.textContent || '0';
+            const diffVal = document.getElementById('headerDiffTotalEl')?.textContent || '0';
+            const opsCount = (typeof records !== 'undefined') ? records.length : 0;
+            
+            let totalTop = 0;
+            let totalBottom = 0;
+            let opsDetailedText = '';
+            
+            if (typeof records !== 'undefined' && records.length > 0) {
+                records.forEach((r, idx) => {
+                    const amt = Number(r.top || 0) + Number(r.bottom || 0);
+                    totalTop += Number(r.top || 0);
+                    totalBottom += Number(r.bottom || 0);
+                    const typeIcon = r.top > 0 ? '🟢' : '🔴';
+                    opsDetailedText += `${idx + 1}. ${typeIcon} ${r.category}: ${amt} ج.م (${r.notes || '...'})\n`;
+                });
+            } else {
+                opsDetailedText = '• لا يوجد عمليات مسجلة اليوم';
+            }
+            
+            const net = totalTop - totalBottom;
+            const summaryHeader = `💰 الوارد: ${totalTop} | 💸 المنصرف: ${totalBottom}\n📈 الصافي: ${net} ج.م | 🔢 العمليات: ${opsCount}\n--------------------------------`;
+            const footerInfo = `💵 كاش: ${cashVal} | 📱 إنستا: ${instaVal}\n🔍 عجز/زيادة: ${diffVal}`;
+
+            // Specialized Modal with Copy Button
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); backdrop-filter:blur(10px); display:flex; justify-content:center; align-items:center; z-index:999999; font-family:'El Messiri', sans-serif; direction:rtl;`;
+            
+            overlay.innerHTML = `
+                <div style="background:#fff; padding:30px; border-radius:30px; width:95%; max-width:450px; text-align:center; box-shadow:0 30px 60px rgba(0,0,0,0.6); border:2px solid #8b5cf6; display:flex; flex-direction:column; max-height:90vh;">
+                    <div style="font-size:40px; margin-bottom:10px;">📊</div>
+                    <h3 style="color:#1e293b; margin:0 0 15px 0;">كشف حساب اليوم</h3>
+                    
+                    <div style="text-align:right; background:#f1f5f9; padding:15px; border-radius:15px; color:#1e293b; font-size:13px; font-weight:bold; line-height:1.6; margin-bottom:15px; border-right:5px solid #8b5cf6;">
+                        ${summaryHeader}
+                    </div>
+
+                    <div style="flex:1; overflow-y:auto; text-align:right; background:#f8fafc; padding:15px; border-radius:15px; color:#475569; font-size:12px; line-height:1.8; margin-bottom:15px; border:1px solid #e2e8f0;">
+                        <div style="font-weight:bold; color:#8b5cf6; margin-bottom:8px; border-bottom:1px solid #e2e8f0; padding-bottom:5px;">📋 تفاصيل العمليات:</div>
+                        ${opsDetailedText}
+                    </div>
+
+                    <div style="text-align:right; background:#f0fdf4; padding:12px; border-radius:15px; color:#166534; font-size:12px; font-weight:bold; margin-bottom:20px; border:1px solid #bbf7d0;">
+                        ${footerInfo}
+                    </div>
+
+                    <div style="display:flex; gap:10px;">
+                        <button id="copySummaryBtn" style="flex:1.5; background:#8b5cf6; color:#fff; border:none; padding:14px; border-radius:15px; font-weight:bold; cursor:pointer; font-size:14px; box-shadow:0 4px 12px rgba(139, 92, 246, 0.3);">📋 نسخ وإرسال</button>
+                        <button id="closeSummaryBtn" style="flex:1; background:#f1f5f9; color:#64748b; border:none; padding:14px; border-radius:15px; font-weight:bold; cursor:pointer; font-size:14px;">إغلاق</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+            
+            overlay.querySelector('#copySummaryBtn').onclick = () => {
+                copyDailyReportText();
+                overlay.remove();
+            };
+            overlay.querySelector('#closeSummaryBtn').onclick = () => overlay.remove();
+        }
+
+        function generateMonthlyStats() {
+            if (typeof showToast === 'function') showToast('📊 جاري تجميع إحصائيات الشهر...', 'info');
+            let totalSales = 0, totalExpenses = 0, opsCount = 0;
+            const currentMonth = new Date().getMonth();
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('acc_day_')) {
+                    const dayParts = key.split('_');
+                    const dayDate = new Date(dayParts[dayParts.length-1]);
+                    if (dayDate.getMonth() === currentMonth) {
+                        try {
+                            const dayData = JSON.parse(localStorage.getItem(key));
+                            if (Array.isArray(dayData)) {
+                                dayData.forEach(r => {
+                                    totalSales += Number(r.top || 0);
+                                    totalExpenses += Number(r.bottom || 0);
+                                    opsCount++;
+                                });
+                            }
+                        } catch(e) {}
+                    }
+                }
+            }
+            const net = totalSales - totalExpenses;
+            const currentMonthName = new Date().toLocaleString('ar-EG', { month: 'long', year: 'numeric' });
+            const msg = `📊 إحصائيات شهر ${currentMonthName}:\n\n💰 مبيعات: ${totalSales} ج.م\n💸 مصروفات: ${totalExpenses} ج.م\n📈 الربح: ${net} ج.م\n🔢 العمليات: ${opsCount}`;
+
+            // Specialized Modal with Copy Button
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); backdrop-filter:blur(10px); display:flex; justify-content:center; align-items:center; z-index:999999; font-family:'El Messiri', sans-serif; direction:rtl;`;
+            
+            overlay.innerHTML = `
+                <div style="background:#fff; padding:30px; border-radius:25px; width:90%; max-width:400px; text-align:center; box-shadow:0 20px 50px rgba(0,0,0,0.5); border:2px solid #06b6d4;">
+                    <div style="font-size:50px; margin-bottom:15px;">📅</div>
+                    <h3 style="color:#1e293b; margin-bottom:20px;">إحصائيات الشهر</h3>
+                    <div style="text-align:right; background:#f8fafc; padding:15px; border-radius:15px; color:#475569; font-size:14px; line-height:1.8; margin-bottom:25px; white-space:pre-wrap;">${msg}</div>
+                    <div style="display:flex; gap:10px;">
+                        <button id="copyMonthlyBtn" style="flex:1; background:#06b6d4; color:#fff; border:none; padding:12px; border-radius:12px; font-weight:bold; cursor:pointer;">📋 نسخ التقرير</button>
+                        <button id="closeMonthlyBtn" style="flex:1; background:#e2e8f0; color:#475569; border:none; padding:12px; border-radius:12px; font-weight:bold; cursor:pointer;">إغلاق</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+            
+            overlay.querySelector('#copyMonthlyBtn').onclick = () => {
+                copyMonthlyStatsText();
+                overlay.remove();
+            };
+            overlay.querySelector('#closeMonthlyBtn').onclick = () => overlay.remove();
+        }
+
         function generateQRCodeModal() {
             if (typeof QRCode === 'undefined') {
                 if (typeof showToast === 'function') showToast('❌ مكتبة QR غير محملة، افحص الإنترنت', 'error');
@@ -12918,6 +13090,87 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                 if (typeof showToast === 'function') showToast('❌ فشل توليد رمز QR', 'error');
             }
         }
+
+        /* ---------- Report Copying Functions ---------- */
+        function copyDailyReportText() {
+            if (typeof showToast === 'function') showToast('📋 جاري تجهيز تقرير اليوم للنسخ...', 'info');
+            const date = document.getElementById('dateInput')?.value || new Date().toISOString().slice(0, 10);
+            let text = `📊 *ملخص مبيعات يوم: ${date}*\n\n`;
+            let totalTop = 0, totalBottom = 0;
+            let opsText = `📋 *كافة عمليات اليوم:*\n`;
+            
+            if (typeof records !== 'undefined' && records.length > 0) {
+                records.forEach((r, idx) => {
+                    const amt = Number(r.top || 0) + Number(r.bottom || 0);
+                    totalTop += Number(r.top || 0);
+                    totalBottom += Number(r.bottom || 0);
+                    const type = r.top > 0 ? '🟢 وارد' : '🔴 مصروف';
+                    opsText += `${idx + 1}. ${r.category}: ${amt} ج.م [${type}] (${r.notes || 'بلا ملاحظات'})\n`;
+                });
+            } else {
+                opsText += `• لا يوجد عمليات مسجلة اليوم\n`;
+            }
+            
+            text += `💰 إجمالي الوارد: ${totalTop} ج.م\n`;
+            text += `💸 إجمالي المنصرف: ${totalBottom} ج.م\n`;
+            text += `📈 صافي الربح: ${totalTop - totalBottom} ج.م\n`;
+            text += `🔢 عدد العمليات: ${records ? records.length : 0}\n`;
+            text += `\n--------------------------------\n\n`;
+            text += opsText;
+            text += `\n✨ *تم استخراجه من نظام بيان POS المطور*`;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                if (typeof showToast === 'function') showToast('✅ تم النسخ بنجاح! جاهز للصق', 'success');
+            }).catch(err => {
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                if (typeof showToast === 'function') showToast('✅ تم النسخ (طريقة بديلة)', 'success');
+            });
+        }
+
+        function copyMonthlyStatsText() {
+            if (typeof showToast === 'function') showToast('📋 جاري تجهيز تقرير الشهر للنسخ...', 'info');
+            const currentMonthName = new Date().toLocaleString('ar-EG', { month: 'long', year: 'numeric' });
+            let text = `📊 *إحصائيات شهر: ${currentMonthName}*\n\n`;
+            let totalSales = 0, totalExpenses = 0, opsCount = 0;
+            const currentMonth = new Date().getMonth();
+            const currentYear = new Date().getFullYear();
+            
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('acc_day_')) {
+                    const dayParts = key.split('_');
+                    const dayDate = new Date(dayParts[dayParts.length-1]);
+                    if (dayDate.getMonth() === currentMonth && dayDate.getFullYear() === currentYear) {
+                        try {
+                            const dayData = JSON.parse(localStorage.getItem(key));
+                            if (Array.isArray(dayData)) {
+                                dayData.forEach(r => {
+                                    totalSales += Number(r.top || 0);
+                                    totalExpenses += Number(r.bottom || 0);
+                                    opsCount++;
+                                });
+                            }
+                        } catch(e) {}
+                    }
+                }
+            }
+            
+            text += `💰 إجمالي مبيعات الشهر: ${totalSales} ج.م\n`;
+            text += `💸 إجمالي مصروفات الشهر: ${totalExpenses} ج.m\n`;
+            text += `📈 صافي أرباح الشهر: ${totalSales - totalExpenses} ج.م\n`;
+            text += `🔢 إجمالي عدد العمليات: ${opsCount}\n`;
+            text += `\n✨ *نظام بيان POS - شريكك في النجاح*`;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                if (typeof showToast === 'function') showToast('✅ تم النسخ بنجاح! جاهز للصق', 'success');
+            });
+        }
+
         /* ---------- Egg Balance Renaming ---------- */
         function renameEggBalance(event) {
             event.stopPropagation();
@@ -13359,10 +13612,10 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
             container.innerHTML = '';
             const date = dateInput ? dateInput.value : (new Date()).toISOString().slice(0, 10);
 
+            // 1. Render Configured/Static Inventories (Legacy)
             inventoriesConfig.forEach(inv => {
                 const stockKey = `acc_inv_stock_${inv.id}_${date}`;
                 let stock = { u1: '0', u2: '0' };
-                // Also migrate OLD egg stock if exists
                 if (inv.id === 'inv_egg') {
                     const oldStockKey = `acc_egg_stock_${date}`;
                     if (localStorage.getItem(oldStockKey) && !localStorage.getItem(stockKey)) {
@@ -13380,16 +13633,39 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                 const textColor = isEmpty ? '#aaa' : '#fff';
 
                 const html = `
-    <div class="electric-border-box" onclick="openInventoryModal('${inv.id}')" title="أضغط لتفاصيل ${inv.name}"
-        style="background: linear-gradient(var(--angle, 0deg), ${inv.borderColor}, #10b981, ${inv.borderColor}); width: 100%;">
-        <div class="electric-content" style="background: linear-gradient(145deg, ${inv.color1}, ${inv.color2}); min-width: 0;">
-            <span style="font-size: 11px; color: #bbf7d0; margin-bottom: 2px;">${inv.icon} ${inv.name}</span>
-            <div style="font-weight: bold; font-size: 14px; color: ${textColor}; white-space: nowrap;">
-                ${stock.u1} ${inv.unit1} | ${stock.u2} ${inv.unit2}
-            </div>
-        </div>
-    </div>
-    `;
+                    <div class="electric-border-box" onclick="openInventoryModal('${inv.id}')" title="أضغط لتفاصيل ${inv.name}"
+                        style="background: linear-gradient(var(--angle, 0deg), ${inv.borderColor}, #10b981, ${inv.borderColor}); width: 100%;">
+                        <div class="electric-content" style="background: linear-gradient(145deg, ${inv.color1}, ${inv.color2}); min-width: 0;">
+                            <span style="font-size: 11px; color: #bbf7d0; margin-bottom: 2px;">${inv.icon} ${inv.name}</span>
+                            <div style="font-weight: bold; font-size: 14px; color: ${textColor}; white-space: nowrap;">
+                                ${stock.u1} ${inv.unit1} | ${stock.u2} ${inv.unit2}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', html);
+            });
+
+            // 2. Render Dynamic Warehouse Products (New)
+            const warehouse = JSON.parse(localStorage.getItem('acc_bayan_inventory') || '[]');
+            warehouse.forEach((item, idx) => {
+                const isEmpty = item.stock <= 0;
+                const textColor = isEmpty ? '#f87171' : '#fff';
+                const cardColor1 = isEmpty ? '#450a0a' : '#1e293b';
+                const cardColor2 = isEmpty ? '#7f1d1d' : '#334155';
+                const borderColor = item.stock < 5 ? '#ef4444' : '#60a5fa';
+
+                const html = `
+                    <div class="electric-border-box" onclick="editProduct(${idx})" title="تعديل ${item.name}"
+                        style="background: linear-gradient(var(--angle, 0deg), ${borderColor}, #4f46e5, ${borderColor}); width: 100%;">
+                        <div class="electric-content" style="background: linear-gradient(145deg, ${cardColor1}, ${cardColor2}); min-width: 0;">
+                            <span style="font-size: 11px; color: #93c5fd; margin-bottom: 2px;">📦 ${item.name}</span>
+                            <div style="font-weight: bold; font-size: 14px; color: ${textColor}; white-space: nowrap;">
+                                ${item.stock} قطعة | ${formatNum(item.price)} ج
+                            </div>
+                        </div>
+                    </div>
+                `;
                 container.insertAdjacentHTML('beforeend', html);
             });
         }
@@ -13560,22 +13836,131 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
             // --- بناء واجهة السيريال الديناميكية ---
             if (!document.getElementById('auth-overlay')) {
                 const overlayHTML = `
-                <div id="auth-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--neu-bg, #1e293b); z-index:999999; display:flex; flex-direction:column; justify-content:center; align-items:center; color:var(--neu-text, #e2e8f0); text-align:center;">
-                    <div style="background:var(--card, rgba(30,41,59,0.95)); padding:30px; border-radius:16px; width:90%; max-width:400px; box-shadow:0 10px 30px rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1);">
-                        <h2 style="margin-top:0; color:var(--gold2, #d4af37); font-size:24px;">تسجيل الدخول / إنشاء حساب 🔐</h2>
-                        <p style="margin-bottom:20px; color:var(--muted, #bfc7d2); font-size:14px;">للحفاظ على بياناتك وفصلها عن الباقيين بطريقة آمنة وسهلة.</p>
-                        
-                        <div id="new-user-section" style="margin-bottom: 20px; text-align: right; border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 8px;">
-                            <h4 style="margin:0 0 10px 0; color:var(--gold2);">✨ مستخدم جديد</h4>
-                            <input type="text" id="new-user-name" placeholder="الاسم (اختياري)" style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px; border:none;">
-                            <input type="tel" id="new-user-phone" placeholder="رقم الهاتف (اختياري)" style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px; border:none;">
-                            <button id="generate-serial-btn" class="btn glowing" style="width:100%; font-size:14px; padding:10px;">إنشاء كود سريالي خاص بي</button>
-                        </div>
-                        
-                        <div id="existing-user-section" style="text-align: right; border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 8px;">
-                            <h4 style="margin:0 0 10px 0; color:var(--success);">📥 لدي كود سريال بالفعل</h4>
-                            <input type="text" id="existing-serial" placeholder="أدخل رقم السريال الخاص بك هنا..." style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px; border:none; text-transform: uppercase;">
-                            <button id="login-serial-btn" class="btn green" style="width:100%; font-size:14px; padding:10px;">تسجيل الدخول بالكود</button>
+                <div id="auth-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#111; z-index:20000000; display:flex; justify-content:center; align-items:center; direction: rtl; font-family: 'Poppins', 'El Messiri', sans-serif;">
+                    <style>
+                        #auth-overlay .neon-reg-outer {
+                            position: relative;
+                            width: 100%;
+                            max-width: 400px;
+                            min-height: 580px;
+                            background: #1c1c1c;
+                            border-radius: 25px;
+                            overflow: hidden;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+                        }
+                        #auth-overlay .neon-reg-outer::before {
+                            content: '';
+                            position: absolute;
+                            top: -50%;
+                            left: -50%;
+                            width: 400px;
+                            height: 600px;
+                            background: linear-gradient(0deg, transparent, transparent, #45f3ff, #ff3b7e);
+                            z-index: 1;
+                            transform-origin: bottom right;
+                            animation: neon-animate 6s linear infinite;
+                        }
+                        #auth-overlay .neon-reg-outer::after {
+                            content: '';
+                            position: absolute;
+                            top: -50%;
+                            left: -50%;
+                            width: 400px;
+                            height: 600px;
+                            background: linear-gradient(0deg, transparent, transparent, #45f3ff, #ff3b7e);
+                            z-index: 1;
+                            transform-origin: bottom right;
+                            animation: neon-animate 6s linear infinite;
+                            animation-delay: -3s;
+                        }
+                        #auth-overlay .reg-inner {
+                            position: absolute;
+                            inset: 4px;
+                            background: #23242a;
+                            padding: 30px 30px;
+                            border-radius: 22px;
+                            z-index: 2;
+                            display: flex;
+                            flex-direction: column;
+                            text-align: center;
+                        }
+                        #auth-overlay .reg-inner h2 {
+                            color: var(--gold2, #d4af37);
+                            font-size: 20px;
+                            margin-bottom: 5px;
+                            text-shadow: 0 0 10px rgba(212,175,55,0.3);
+                        }
+                        #auth-overlay .reg-inner p {
+                            color: #8f8f96;
+                            font-size: 12px;
+                            margin-bottom: 20px;
+                        }
+                        #auth-overlay .reg-section {
+                            background: rgba(255,255,255,0.03);
+                            padding: 15px;
+                            border-radius: 15px;
+                            border: 1px solid rgba(255,255,255,0.05);
+                            margin-bottom: 20px;
+                            text-align: right;
+                        }
+                        #auth-overlay .reg-section h4 {
+                            margin: 0 0 10px 0;
+                            font-size: 14px;
+                            color: #45f3ff;
+                        }
+                        #auth-overlay .reg-input {
+                            width: 100%;
+                            padding: 10px 15px;
+                            background: #2b2c34;
+                            border: 1px solid rgba(255,255,255,0.1);
+                            border-radius: 10px;
+                            color: #fff;
+                            margin-bottom: 10px;
+                            outline: none;
+                            font-size: 13px;
+                            text-align: center;
+                        }
+                        #auth-overlay .reg-btn {
+                            width: 100%;
+                            padding: 12px;
+                            border: none;
+                            border-radius: 10px;
+                            font-weight: bold;
+                            cursor: pointer;
+                            transition: 0.3s;
+                            font-size: 14px;
+                        }
+                        #auth-overlay .btn-gold {
+                            background: linear-gradient(90deg, #d4af37, #b8860b);
+                            color: #000;
+                        }
+                        #auth-overlay .btn-cyan {
+                            background: #45f3ff;
+                            color: #111;
+                            box-shadow: 0 0 15px rgba(69,243,255,0.3);
+                        }
+                    </style>
+                    <div class="neon-reg-outer">
+                        <div class="reg-inner">
+                            <div style="font-size:30px; margin-bottom:10px;">🔐</div>
+                            <h2>تسجيل الدخول / إنشاء حساب</h2>
+                            <p>للحفاظ على بياناتك وفصلها عن الباقيين بطريقة آمنة وسهلة.</p>
+                            
+                            <div class="reg-section">
+                                <h4>✨ مستخدم جديد</h4>
+                                <input type="text" id="new-user-name" class="reg-input" placeholder="الاسم (اختياري)">
+                                <input type="tel" id="new-user-phone" class="reg-input" placeholder="رقم الهاتف (اختياري)">
+                                <button id="generate-serial-btn" class="reg-btn btn-gold">إنشاء كود سريالي خاص بي</button>
+                            </div>
+                            
+                            <div class="reg-section" style="margin-bottom:0;">
+                                <h4 style="color:#ff3b7e;">📥 لدي كود سريال بالفعل</h4>
+                                <input type="text" id="existing-serial" class="reg-input" placeholder="أدخل الكود الخاص بك هنا (مثال : 12345-ACC)" style="text-transform: uppercase;">
+                                <button id="login-serial-btn" class="reg-btn btn-cyan">تسجيل الدخول بالكود</button>
+                            </div>
                         </div>
                     </div>
                 </div>`;
@@ -13583,76 +13968,92 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
 
                 // أحداث الأزرار
                 document.getElementById('generate-serial-btn').addEventListener('click', () => {
-                    const name = document.getElementById('new-user-name').value;
-                    const phone = document.getElementById('new-user-phone').value;
+                    const nameInput = document.getElementById('new-user-name');
+                    const phoneInput = document.getElementById('new-user-phone');
+                    const name = nameInput ? nameInput.value.trim() : '';
+                    const phone = phoneInput ? phoneInput.value.trim() : '';
 
-                    // توليد سيريال مميز مثل ACC-XYZ987
-                    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-                    let randomPart = '';
-                    for (let i = 0; i < 6; i++) randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
-                    const newSerial = 'ACC-' + randomPart;
-
-                    if (name) localStorage.setItem('acc_user_name', name);
-                    if (phone) localStorage.setItem('acc_user_phone', phone);
-
-                    // 1) حفظ السيريال محلياً كمسجل للرجوع له (أوفلاين)
-                    const offlineSerials = JSON.parse(localStorage.getItem('acc_registered_serials') || '[]');
-                    if (!offlineSerials.includes(newSerial)) {
-                        offlineSerials.push(newSerial);
-                        localStorage.setItem('acc_registered_serials', JSON.stringify(offlineSerials));
+                    if (!name) {
+                        showModernAlert('يرجى إدخال الاسم للمتابعة', 'warning');
+                        return;
                     }
 
-                    // 2) إنشاء السيريال في قاعدة البيانات السحابية (أونلاين)
-                    if (typeof db !== 'undefined' && typeof firebaseConfig !== 'undefined' && firebaseConfig.apiKey !== "YOUR_API_KEY_HIDDEN" && navigator.onLine) {
+                    // توليد سيريال مميز مثل 12345-ACC
+                    const chars = '0123456789';
+                    let randomPart = '';
+                    for (let i = 0; i < 5; i++) randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
+                    const newSerial = randomPart + '-ACC';
+
+                    // حفظ البيانات محلياً فوراً لتعكس في التطبيق
+                    localStorage.setItem('acc_user_name', name);
+                    localStorage.setItem('acc_user_phone', phone);
+                    localStorage.setItem('app_auth_serial', newSerial);
+
+                    // تسجيل السيريال في السيرفر مع بيانات المالك
+                    if (typeof db !== 'undefined' && navigator.onLine) {
                         db.collection("users").doc(newSerial).set({
                             registered: true,
-                            createdAt: new Date().toISOString()
-                        }, { merge: true }).catch(e => console.error("Cloud registration init error:", e));
+                            ownerName: name,
+                            ownerPhone: phone,
+                            createdAt: new Date().toISOString(),
+                            role: 'master'
+                        }, { merge: true }).catch(e => console.error("Cloud registration error:", e));
+                        
+                        // إضافة هذا الجهاز كجهاز مفعل تلقائياً (Master)
+                        const deviceId = localStorage.getItem('acc_device_id') || 'BYN-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+                        localStorage.setItem('acc_device_id', deviceId);
+                        
+                        db.collection("users").doc(newSerial).collection("devices").doc(deviceId).set({
+                            id: deviceId,
+                            name: 'الجهاز الرئيسي (Master)',
+                            status: 'authorized',
+                            role: 'master',
+                            lastSeen: new Date().toISOString(),
+                            isMaster: true
+                        }, { merge: true });
                     }
 
-                    // Remove the old simple alert and show a nice modal for screenshotting
+                    // إظهار كارت الحفظ الاحترافي
                     const modalHtml = `
-                    <div id="serial-screenshot-modal" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.8); z-index:9999999; display:flex; justify-content:center; align-items:center;">
-                        <div id="serial-card" style="background:#111; padding:30px; border-radius:15px; text-align:center; border:2px solid var(--gold2); max-width:90%;">
-                            <h2 style="color:var(--gold2); margin-top:0;">🎉 تم إنشاء الحساب بنجاح</h2>
-                            <p style="color:#fff; font-size:14px;">هذا هو الكود السري الخاص بك. يرجى حفظه جيدا لاسترجاع بياناتك.</p>
-                            <div style="background:var(--glass); padding:20px; font-size:24px; font-weight:bold; letter-spacing:2px; color:var(--success); border-radius:10px; margin:20px 0;">
-                                ${newSerial}
+                    <div id="serial-save-modal" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.9); z-index:21000000; display:flex; justify-content:center; align-items:center; direction:rtl; font-family:'El Messiri', sans-serif;">
+                        <div id="serial-card-premium" style="background:linear-gradient(135deg, #1e293b, #0f172a); padding:40px; border-radius:30px; text-align:center; border:2px solid #d4af37; max-width:450px; width:90%; box-shadow:0 20px 50px rgba(0,0,0,0.5);">
+                            <div style="font-size:50px; margin-bottom:15px;">🏁</div>
+                            <h2 style="color:#d4af37; margin:0 0 10px 0;">تم إنشاء الحساب بنجاح!</h2>
+                            <p style="color:#cbd5e1; font-size:15px; margin-bottom:25px;">أهلاً بك يا <b>${name}</b> في بيان POS. هذا هو كود الدخول الخاص بك، حافظ عليه جيداً.</p>
+                            
+                            <div style="background:rgba(255,255,255,0.05); border:1px dashed #d4af37; padding:25px; border-radius:20px; margin-bottom:30px;">
+                                <div style="font-size:12px; color:#94a3b8; text-transform:uppercase; letter-spacing:2px; margin-bottom:10px;">Your Private License Key</div>
+                                <div id="display-serial-text" style="font-size:32px; font-weight:bold; color:#f8fafc; letter-spacing:5px;">${newSerial}</div>
                             </div>
-                            <div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
-                                <button class="btn green" id="btn-save-serial-img" style="flex:1;">📸 حفظ الصورة</button>
-                                <button class="btn" id="btn-close-serial-modal" style="flex:1;">دخول للتطبيق</button>
+                            
+                            <div style="display:flex; gap:15px; justify-content:center;">
+                                <button id="download-serial-img" style="flex:1; padding:15px; background:#d4af37; color:#111; border:none; border-radius:15px; font-weight:bold; cursor:pointer; font-size:15px;">📸 حفظ الصورة</button>
+                                <button id="start-app-btn" style="flex:1; padding:15px; background:#22c55e; color:#fff; border:none; border-radius:15px; font-weight:bold; cursor:pointer; font-size:15px;">دخول التطبيق</button>
                             </div>
                         </div>
                     </div>`;
 
                     document.body.insertAdjacentHTML('beforeend', modalHtml);
 
-                    document.getElementById('btn-close-serial-modal').addEventListener('click', () => {
-                        document.getElementById('serial-screenshot-modal').remove();
-                        loginWithSerial(newSerial);
+                    // فعالية الأزرار في المودال
+                    document.getElementById('start-app-btn').addEventListener('click', () => {
+                        document.getElementById('serial-save-modal').remove();
+                        window.location.reload(); // Reload to finalize everything
                     });
 
-                    document.getElementById('btn-save-serial-img').addEventListener('click', () => {
-                        const serialCard = document.getElementById('serial-card');
-                        const origBg = serialCard.style.background;
-                        serialCard.style.background = '#111'; // make sure it's dark for screenshot
-
-                        // Hide buttons for screenshot
-                        const btns = serialCard.querySelector('div[style*="display:flex;"]');
-                        if (btns) btns.style.display = 'none';
-
-                        html2canvas(serialCard, { backgroundColor: '#111' }).then(canvas => {
+                    document.getElementById('download-serial-img').addEventListener('click', () => {
+                        const card = document.getElementById('serial-card-premium');
+                        // Hide buttons temp
+                        const btnGroup = card.querySelector('div[style*="display:flex"]');
+                        btnGroup.style.opacity = '0';
+                        
+                        html2canvas(card, { backgroundColor: '#0f172a', borderRadius: 30 }).then(canvas => {
                             const link = document.createElement('a');
-                            link.download = 'accounting-secret-code.png';
+                            link.download = `License-${newSerial}.png`;
                             link.href = canvas.toDataURL();
                             link.click();
-                            alert('تم حفظ صورة الكود السري في جهازك! يرجى التأكد من الاحتفاظ بها في مكان آمن.');
-
-                            if (btns) btns.style.display = 'flex';
-                        }).catch(err => {
-                            alert('حدث خطأ أثناء حفظ الصورة.');
-                            if (btns) btns.style.display = 'flex';
+                            btnGroup.style.opacity = '1';
+                            showToast('✅ تم حفظ صورة الترخيص', 'success');
                         });
                     });
                 });
@@ -13660,78 +14061,32 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                 document.getElementById('login-serial-btn').addEventListener('click', () => {
                     let serial = document.getElementById('existing-serial').value.trim().toUpperCase();
                     if (!serial) {
-                        alert('يرجى إدخال كود السريال أولاً.');
+                        showModernAlert('يرجى إدخال السيريال للمتابعة', 'warning');
                         return;
                     }
-                    if (!serial.startsWith('ACC-')) {
-                        serial = 'ACC-' + serial; // إضافة البادئة لو نسيها المستخدم
+                    if (!serial.endsWith('-ACC')) {
+                        serial = serial + '-ACC';
                     }
-                    if (serial.length !== 10) {
-                        alert('❌ النظام لا يدخل إلا برقم السريال الخاص بك كاملاً وبشكل دقيق. يُرجى مراجعته والمحاولة مرة أخرى.');
-                        return;
-                    }
-                    // Validate that the characters after ACC- are ONLY uppercase letters and numbers
-                    const serialPattern = /^ACC-[A-Z0-9]{6}$/;
-                    if (!serialPattern.test(serial)) {
-                        alert('❌ النظام لا يدخل إلا برقم السريال الخاص بك كاملاً وبشكل دقيق. يُرجى مراجعته والمحاولة مرة أخرى.');
-                        return;
-                    }
-
-                    const btn = document.getElementById('login-serial-btn');
-                    const origHtml = btn.innerHTML;
-
-                    function proceedOffline() {
-                        const offlineSerials = JSON.parse(localStorage.getItem('acc_registered_serials') || '[]');
-                        if (offlineSerials.includes(serial)) {
-                            loginWithSerial(serial);
-                        } else {
-                            if (confirm("⚠️ هذا السيريال غير مسجل على جهازك الحالي.\n\nهل تريد تسجيل الدخول باستخدام هذا الكود لربط جهازك ومشاركة وتزامن البيانات مع أجهزة أخرى تستخدم نفس هذا السيريال؟")) {
-                                offlineSerials.push(serial);
-                                localStorage.setItem('acc_registered_serials', JSON.stringify(offlineSerials));
-                                loginWithSerial(serial);
-                            }
-                        }
-                    }
-
-                    // لو كان التطبيق مربوطاً أونلاين بمفتاح صحيح
-                    if (typeof db !== 'undefined' && typeof firebaseConfig !== 'undefined' && firebaseConfig.apiKey !== "YOUR_API_KEY_HIDDEN" && navigator.onLine) {
-                        btn.innerHTML = 'جاري التحقق... ⏳';
-                        btn.disabled = true;
-
-                        db.collection("users").doc(serial).get().then(doc => {
-                            btn.innerHTML = origHtml;
-                            btn.disabled = false;
-
-                            // التحقق الصارم من وجود السيريال فعلياً في السيرفر
-                            if (doc.exists) {
-                                loginWithSerial(serial);
-                            } else {
-                                if (confirm("⚠️ هذا السيريال غير مسجل على السيرفر بعد.\n\nهل أنت متأكد من دقة هذا السيريال وأنك تريد ربطه ومشاركته عبر الأجهزة لإنشاء شبكة مشتركة؟")) {
-                                    db.collection("users").doc(serial).set({
-                                        registered: true,
-                                        createdAt: new Date().toISOString()
-                                    }, { merge: true }).catch(e => console.error(e));
-
-                                    const offlineSerials = JSON.parse(localStorage.getItem('acc_registered_serials') || '[]');
-                                    if (!offlineSerials.includes(serial)) {
-                                        offlineSerials.push(serial);
-                                        localStorage.setItem('acc_registered_serials', JSON.stringify(offlineSerials));
-                                    }
-                                    loginWithSerial(serial);
-                                }
-                            }
-                        }).catch(e => {
-                            // فشل استخراج البيانات (قد يكون النت ضعيفاً أو حساباً مقفلاً)
-                            btn.innerHTML = origHtml;
-                            btn.disabled = false;
-                            console.warn("Cloud Check Error:", e);
-                            proceedOffline();
-                        });
-                    } else {
-                        // وضع الأوفلاين (المحلي بالكامل بدون API Key)
-                        proceedOffline();
-                    }
+                    loginWithSerial(serial);
                 });
+            }
+
+            window.logoutFromSerial = function() {
+                if (!confirm('هل أنت متأكد من تسجيل الخروج من هذا السيريال؟ سيتم قفل الوصول للبيانات السحابية من هذا الجهاز.')) return;
+                
+                // تنظيف شامل للبيانات قبل الخروج
+                if (typeof clearLocalCache === 'function') clearLocalCache();
+                
+                localStorage.removeItem('app_auth_serial');
+                localStorage.removeItem('acc_current_user_id');
+                localStorage.removeItem('acc_current_user_name');
+                localStorage.removeItem('acc_current_user_role');
+                // Clear any other login related keys
+                localStorage.removeItem('acc_logged_in_user');
+                sessionStorage.clear();
+                if (unsubscribeSync) unsubscribeSync();
+                window.location.reload(); 
+            };
 
                 // إضافة زر تسجيل خروج للأعلى (في شريط الأدوات بتصميم مميز)
                 const toolsContainer = document.querySelector('.system-tools');
@@ -13741,8 +14096,11 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                     if (existing) existing.remove();
 
                     const userName = localStorage.getItem('acc_user_name') || 'المستخدم';
+                    const isAuth = localStorage.getItem('app_auth_serial');
                     const logoutBtnHtml = `
-                    <button id="header-logout-btn" class="btn-logout-premium" title="حساب: ${userName}">
+                    <button id="header-logout-btn" class="btn-logout-premium" title="حساب: ${userName}" 
+                        style="display: ${isAuth ? 'inline-flex' : 'none'};"
+                        onclick="if(window.logoutFromSerial) window.logoutFromSerial();">
                         <div class="user-info-mini">
                             <span class="user-name-text" style="font-size: 11px; opacity: 0.8; margin-left: 5px;">${userName}</span>
                         </div>
@@ -13753,26 +14111,25 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                     </button>
                     <style>
                         .btn-logout-premium {
-                            display: none; 
                             align-items: center;
-                            gap: 4px;
+                            gap: 6px;
                             padding: 6px 14px;
-                            background: rgba(239, 68, 68, 0.08);
-                            border: 1px solid rgba(239, 68, 68, 0.3);
+                            background: linear-gradient(135deg, rgba(239, 68, 68, 0.4), rgba(239, 68, 68, 0.6));
+                            border: 1px solid rgba(239, 68, 68, 0.5);
                             border-radius: 12px;
-                            color: #f87171;
+                            color: #fff;
                             cursor: pointer;
                             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                             font-size: 13px;
                             font-weight: 700;
-                            backdrop-filter: blur(10px);
-                            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+                            backdrop-filter: blur(15px);
+                            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
                             margin-right: 10px;
                         }
                         .btn-logout-premium:hover {
                             background: #ef4444;
                             border-color: #ef4444;
-                            color: #fff;
+                            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
                             transform: translateY(-2px);
                         }
                         .user-info-mini {
@@ -13799,106 +14156,286 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                     `;
                     toolsContainer.insertAdjacentHTML('beforeend', logoutBtnHtml);
 
+                    // Login handled by window.logoutFromSerial via onclick
                     const btn = document.getElementById('header-logout-btn');
-                    btn.addEventListener('click', () => {
-                        if (confirm('🔒 هل أنت متأكد من تسجيل الخروج؟\n\nتأكد أنك تحفظ "الكود السري" الخاص بك للعودة مجدداً لهذا الحساب.')) {
-                            localStorage.removeItem('app_auth_serial');
-                            location.reload();
-                        }
-                    });
 
                     // Add a small device count badge next to logout if possible
                     const badgeHtml = `<span id="header-device-badge" title="الأجهزة المتصلة" style="position: absolute; top: -5px; right: -5px; background: var(--success); color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; display: none; align-items: center; justify-content: center; border: 2px solid var(--neu-bg); font-weight: bold; z-index: 5;">0</span>`;
                     btn.style.position = 'relative';
                     btn.insertAdjacentHTML('beforeend', badgeHtml);
                 }
-            }
 
             globalUserId = localStorage.getItem('app_auth_serial') || null;
             unsubscribeSync = null;
 
-            function loginWithSerial(serialString) {
-                localStorage.setItem('app_auth_serial', serialString);
-                globalUserId = serialString;
+            // دالة لتنظيف الذاكرة المحلية لضمان استقلالية البيانات لكل سيريال
+            function clearLocalCache() {
+                const keysToKeep = [
+                    'app_auth_serial', 
+                    'acc_device_id', 
+                    'acc_user_name', 
+                    'acc_user_phone', 
+                    'acc_registered_serials',
+                    'acc_current_user_id', 
+                    'acc_current_user_name', 
+                    'acc_current_user_role'
+                ];
+                
+                const keys = Object.keys(localStorage);
+                keys.forEach(key => {
+                    if (!keysToKeep.includes(key) && (key.startsWith('acc_') || key.startsWith('app_') || key.includes('data_'))) {
+                        localStorage.removeItem(key);
+                    }
+                });
+                console.log("🧹 Local cache cleared for new serial session.");
+            }
 
+            function loginWithSerial(serialString) {
+                if (typeof showToast === 'function') showToast('🔍 جاري التحقق من ترخيص الجهاز...', 'info');
+                
                 const authOverlay = document.getElementById('auth-overlay');
                 const appContainer = document.getElementById('app');
                 const logoutBtn = document.getElementById('header-logout-btn');
+                const currentDeviceId = localStorage.getItem('acc_device_id') || 'BYN-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+                localStorage.setItem('acc_device_id', currentDeviceId);
 
-                if (authOverlay) authOverlay.style.display = 'none';
-                if (appContainer) appContainer.style.display = 'block';
-                if (logoutBtn) logoutBtn.style.display = 'inline-flex';
+                // Check Device on Server
+                db.collection("users").doc(serialString).collection("devices").doc(currentDeviceId).get().then(doc => {
+                    const deviceData = doc.exists ? doc.data() : null;
+                    
+                    if (!doc.exists) {
+                        // New Device Attempt
+                        db.collection("users").doc(serialString).collection("devices").get().then(snap => {
+                            const isFirstDevice = snap.empty;
+                            const newDevice = {
+                                id: currentDeviceId,
+                                name: localStorage.getItem('acc_user_name') || 'جهاز جديد',
+                                status: isFirstDevice ? 'authorized' : 'pending',
+                                role: isFirstDevice ? 'master' : 'slave',
+                                lastSeen: new Date().toISOString(),
+                                platform: navigator.platform || 'غير معروف'
+                            };
+                            
+                            db.collection("users").doc(serialString).collection("devices").doc(currentDeviceId).set(newDevice).then(() => {
+                                if (isFirstDevice) {
+                                    completeLogin(serialString);
+                                } else {
+                                    showModernAlert(`⚠️ هذا السيريال مسجل لجهاز آخر.\n\nتم إرسال طلب انضمام للجهاز الرئيسي (Master).\nيرجى الانتظار حتى يتم تفعيل جهازك بنجاح.`, 'warning');
+                                }
+                            });
+                        });
+                    } else if (deviceData.status === 'blocked') {
+                        showModernAlert('🚫 عذراً، تم حظر هذا الجهاز من قبل المسؤول. يرجى التواصل مع الإدارة لاستعادة الوصول.', 'error');
+                        localStorage.removeItem('app_auth_serial');
+                    } else if (deviceData.status === 'pending') {
+                        let countdown = 10;
+                        const loginMsg = `⏳ يرجى الانتظار لتفعيل الحساب من الجهاز الرئيسي...\n\nسيتم الفحص التلقائي خلال: ${countdown} ثانية`;
+                        showModernAlert(loginMsg, 'info');
+                        
+                        // مراقب لحظي للجهاز نفسه: إذا تم تفعيله يدخل فوراً
+                        const selfUnsub = db.collection("users").doc(serialString).collection("devices").doc(currentDeviceId).onSnapshot(d => {
+                             if (d.exists && d.data().status === 'authorized') {
+                                 clearInterval(timer);
+                                 selfUnsub();
+                                 const modal = document.getElementById('modern-alert-modal');
+                                 if (modal) modal.remove();
+                                 
+                                 // رسالة نجاح سريعة للجهاز الفرعي
+                                 if (typeof showToast === 'function') {
+                                     showToast('✅ تم تفعيل حسابك بنجاح من قبل الجهاز الرئيسي', 'success');
+                                 }
+                                 
+                                 completeLogin(serialString, d.data());
+                             }
+                        });
 
-                console.log("👤 User Authenticated with Serial:", globalUserId);
+                        const timer = setInterval(() => {
+                            countdown--;
+                            const alertBody = document.querySelector('#modern-alert-modal p');
+                            if (alertBody) {
+                                alertBody.innerText = `⏳ يرجى الانتظار لتفعيل الحساب من الجهاز الرئيسي...\n\nسيتم الفحص التلقائي خلال: ${countdown} ثانية`;
+                            }
+                            if (countdown <= 0) {
+                                clearInterval(timer);
+                                // لا نحتاج للريفريش، سيبقى المستمع (selfUnsub) يعمل حتى تخرج أو تقبل
+                                if (alertBody) alertBody.innerText = `⏳ ما زلنا بانتظار المدير...\nيرجى التواصل معه لتفعيل جهازك.`;
+                            }
+                        }, 1000);
+                    } else {
+                        // Authorized Device
+                        completeLogin(serialString, deviceData);
+                        // Update last seen
+                        db.collection("users").doc(serialString).collection("devices").doc(currentDeviceId).update({
+                            lastSeen: new Date().toISOString()
+                        });
+                    }
+                }).catch(err => {
+                    console.error("Login Auth Error:", err);
+                    showModernAlert('❌ فشل الاتصال بخادم التراخيص. تأكد من الإنترنت.', 'error');
+                });
 
-                // بدلاً من فتح التطبيق فوراً، سنطلب تسجيل دخول الموظف من فريق العمل
-                if (typeof window.showTeamLogin === 'function') {
-                    window.showTeamLogin();
-                } else {
+                function completeLogin(serial, currentDeviceData = null) {
+                    // إذا كان السيريال مختلف عن المسجل سابقاً، قم بتصفير الـ Cache المحلي
+                    const prevSerial = localStorage.getItem('app_auth_serial');
+                    if (prevSerial && prevSerial !== serial) {
+                        clearLocalCache();
+                    }
+
+                    localStorage.setItem('app_auth_serial', serial);
+                    globalUserId = serial;
+
+                    // جلب اسم المنشئ ليعكس في التطبيق وفي الإعدادات
+                    db.collection("users").doc(serial).get().then(ownerDoc => {
+                        if (ownerDoc.exists && ownerDoc.data().ownerName) {
+                            localStorage.setItem('acc_user_name', ownerDoc.data().ownerName);
+                            localStorage.setItem('acc_user_phone', ownerDoc.data().ownerPhone || '');
+                            
+                            // تحديث الواجهة فوراً
+                            const nameText = document.querySelector('.user-name-text');
+                            if (nameText) nameText.innerText = ownerDoc.data().ownerName;
+                            
+                            // تحديث العناوين
+                            if (typeof updateHeaderName === 'function') updateHeaderName();
+                            
+                            // ملء خانات الإعدادات إذا كانت مفتوحة
+                            const setNm = document.getElementById('settingsName');
+                            const setPh = document.getElementById('settingsPhone');
+                            if (setNm) setNm.value = ownerDoc.data().ownerName;
+                            if (setPh) setPh.value = ownerDoc.data().ownerPhone || '';
+                        }
+                    });
+
+                    if (authOverlay) authOverlay.style.display = 'none';
                     if (appContainer) appContainer.style.display = 'block';
-                }
-                
-                let devId = localStorage.getItem('acc_device_id');
-                if (!devId) {
-                    devId = 'DEV_' + Math.random().toString(36).substr(2, 9);
-                    localStorage.setItem('acc_device_id', devId);
-                }
-                db.collection("users").doc(globalUserId).collection("devices").doc(devId).set({
-                    lastSeen: new Date().toISOString(),
-                    name: localStorage.getItem('acc_user_name') || 'جهاز غير مسمى',
-                    platform: navigator.platform || 'غير معروف'
-                }, { merge: true }).catch(console.error);
+                    if (logoutBtn) logoutBtn.style.display = 'inline-flex';
+                    console.log("👤 Device Authorized with Serial:", globalUserId);
+                    if (typeof window.showTeamLogin === 'function') window.showTeamLogin();
+                    startRealtimeSync();
+                    
+                    // Start individual device watcher
+                    listenToDeviceStatus(serial, currentDeviceId);
 
-                // نشغل المزامنة
-                startRealtimeSync();
+                    // تخزين الصلاحية الحالية في متغير عالمي
+                    window.currentDeviceRole = (currentDeviceData && currentDeviceData.role) ? currentDeviceData.role : 'slave';
+
+                    // إذا كان هذا هو الجهاز الرئيسي، ابدأ في مراقبة طلبات الانضمام الجديدة
+                    if (window.currentDeviceRole === 'master') {
+                        startPendingDevicesListener(serial);
+                    } else {
+                        // محاولة جلب البيانات في حال لم تمرر للتأكد من الصلاحية
+                        db.collection("users").doc(serial).collection("devices").doc(currentDeviceId).get().then(d => {
+                             if(d.exists) {
+                                 window.currentDeviceRole = d.data().role || 'slave';
+                                 if (window.currentDeviceRole === 'master') startPendingDevicesListener(serial);
+                             }
+                        });
+                    }
+                }
+            }
+
+            function listenToDeviceStatus(serial, devId) {
+                db.collection("users").doc(serial).collection("devices").doc(devId).onSnapshot(doc => {
+                    if (doc.exists && doc.data().status === 'blocked') {
+                        showModernAlert('🔴 تم إنهاء جلستك: تم حظر هذا الجهاز من قبل المسؤول.', 'error');
+                        setTimeout(() => window.location.reload(), 3000);
+                    }
+                });
             }
 
             function fetchConnectedDevices() {
-                const section = document.getElementById('connectedDevicesSection');
-                const countBadge = document.getElementById('connectedDevicesCount');
-                const headerBadge = document.getElementById('header-device-badge');
+                const container = document.getElementById('connectedDevicesList');
+                if (!container || !globalUserId) return;
 
-                if (!globalUserId) return;
-
-                if (typeof db !== 'undefined' && firebaseConfig && firebaseConfig.apiKey !== "YOUR_API_KEY_HIDDEN") {
-                    if (section) section.style.display = 'flex';
-
-                    if (!navigator.onLine) {
-                        if (countBadge) countBadge.innerText = "أنت حالياً أوفلاين (غير متصل بالنت)";
+                db.collection("users").doc(globalUserId).collection("devices").onSnapshot(snap => {
+                    if (snap.empty) {
+                        container.innerHTML = '<li>لا يوجد أجهزة متصلة</li>';
                         return;
                     }
-
-                    db.collection("users").doc(globalUserId).collection("devices").get().then(snap => {
-                        let totalCount = snap.size;
-                        let activeCount = 0;
-                        const now = new Date();
-
-                        snap.forEach(doc => {
-                            const data = doc.data();
-                            if (data.lastSeen) {
-                                const last = new Date(data.lastSeen);
-                                const diffHours = (now - last) / (1000 * 60 * 60);
-                                if (diffHours <= 24) activeCount++;
-                            }
-                        });
-
-                        if (countBadge) {
-                            countBadge.innerHTML = `
-                                يوجد <b style="color:var(--gold1);">${totalCount}</b> أجهزة مرتبطة بهذا السريال.<br>
-                                <span style="font-size:10px; opacity:0.8;">(${activeCount} جهاز نشط مؤخراً)</span>
-                            `;
-                        }
-
-                        if (headerBadge) {
-                            headerBadge.innerText = totalCount;
-                            headerBadge.style.display = totalCount > 1 ? 'flex' : 'none';
-                        }
-                    }).catch(err => {
-                        console.warn("Fetch devices error:", err);
-                        if (countBadge) countBadge.innerText = "جاري الاتصال بالسحابة...";
+                    
+                    let html = '';
+                    snap.forEach(doc => {
+                        const device = doc.data();
+                        const devId = device.id || doc.id;
+                        const devName = device.name || device.deviceName || 'جهاز مجهول';
+                        const isCurrent = devId === localStorage.getItem('acc_device_id');
+                        const statusColor = device.status === 'authorized' ? '#22c55e' : (device.status === 'blocked' ? '#ef4444' : '#eab308');
+                        const statusAr = device.status === 'authorized' ? 'نشط' : (device.status === 'blocked' ? 'محظور' : 'انتظار');
+                        
+                        html += `
+                        <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); padding:12px; border-radius:12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <div style="font-size:13px; font-weight:bold; color:#fff;">${devName} ${isCurrent ? '<span style="color:#a78bfa; font-size:10px;">(هذا الجهاز)</span>' : ''}</div>
+                                <div style="font-size:11px; color:#64748b;">ID: ${devId} | ${(device.role === 'master' || device.isMaster || (isCurrent && window.currentDeviceRole === 'master')) ? '👑 رئيسي' : '👤 فرعي'}</div>
+                                <div style="font-size:11px; color:#64748b; margin-top:2px;">👤 الموظف المسئول: <span style="color:#cbd5e1;">${device.currentUser || 'غير محدد'}</span></div>
+                                <div style="display:inline-block; font-size:10px; color:${statusColor}; border:1px solid ${statusColor}; padding:1px 6px; border-radius:4px; margin-top:5px;">${statusAr}</div>
+                            </div>
+                            <div style="display:flex; gap:5px;">
+                                ${ (window.currentDeviceRole === 'master' && device.role !== 'master' && !isCurrent) ? `
+                                    <button class="btn" onclick="updateDeviceStatus('${devId}', '${device.status === 'authorized' ? 'blocked' : 'authorized'}')" style="padding:5px 10px; background:${device.status === 'authorized' ? '#ef4444' : '#22c55e'}22; color:${device.status === 'authorized' ? '#ef4444' : '#22c55e'}; border:1px solid ${device.status === 'authorized' ? '#ef4444' : '#22c55e'}44; font-size:11px;">
+                                        ${device.status === 'authorized' ? 'حظر' : 'تفعيل'}
+                                    </button>
+                                    <button class="btn" onclick="deleteDeviceRecord('${devId}')" style="padding:5px; background:rgba(100,116,139,0.1); color:#64748b; border:none; font-size:11px;">🗑️</button>
+                                ` : ''}
+                            </div>
+                        </div>`;
                     });
-                }
+                    container.innerHTML = html;
+                });
             }
+
+            function startPendingDevicesListener(serial) {
+                if (window.isPendingListenerActive) return;
+                window.isPendingListenerActive = true;
+                console.log("📡 Master Radar Active: Listening for pending devices...");
+                
+                db.collection("users").doc(serial).collection("devices").where("status", "==", "pending").onSnapshot(snap => {
+                    snap.docChanges().forEach(change => {
+                        if (change.type === "added") {
+                            const device = change.doc.data();
+                            const devId = change.doc.id;
+                            
+                            console.log("🔔 New Pending Device Detected:", devId);
+
+                            // ظهور تنبيه فوري للمدير مع صوت تنبيه
+                            if (typeof showModernAlert === 'function') {
+                                if (typeof beep === 'function') beep(600, 0.1, 0.3); // صوت تنبيه
+                                
+                                showModernAlert({
+                                    title: '🚨 طلب انضمام جهاز جديد',
+                                    body: `هناك جهاز جديد يحاول الدخول بالسيريال الخاص بك:\n\n👤 المالك/المدير: ${localStorage.getItem('acc_user_name')}\n📱 الجهاز: ${device.name || 'جهاز فرعي'}\n🆔 كود الجهاز: ${devId.substring(0, 10)}...\n\nهل تسمح لهذا الجهاز بالوصول لبياناتك السحابية؟`,
+                                    type: 'info',
+                                    confirmText: '✅ تفعيل وصلاحية',
+                                    cancelText: '❌ حظر الوصول',
+                                    onConfirm: () => {
+                                        db.collection("users").doc(serial).collection("devices").doc(devId).update({ status: 'authorized' });
+                                        if (window.showToast) showToast('✅ تم تفعيل الجهاز بنجاح', 'success');
+                                    },
+                                    onCancel: () => {
+                                        db.collection("users").doc(serial).collection("devices").doc(devId).update({ status: 'blocked' });
+                                        if (window.showToast) showToast('🚫 تم حظر الجهاز', 'error');
+                                    }
+                                });
+                            }
+                        }
+                    });
+                });
+            }
+
+            window.updateDeviceStatus = function(devId, newStatus) {
+                if (!globalUserId) return;
+                db.collection("users").doc(globalUserId).collection("devices").doc(devId).update({
+                    status: newStatus
+                }).then(() => {
+                    if (typeof showToast === 'function') showToast(`✅ تم تحديث حالة الجهاز إلى ${newStatus === 'authorized' ? 'نشط' : 'محظور'}`, 'success');
+                });
+            };
+
+            window.deleteDeviceRecord = function(devId) {
+                if (!confirm('هل أنت متأكد من حذف سجل هذا الجهاز بالكامل؟')) return;
+                db.collection("users").doc(globalUserId).collection("devices").doc(devId).delete().then(() => {
+                    if (typeof showToast === 'function') showToast('🗑️ تم حذف الجهاز بنجاح', 'success');
+                });
+            };
 
             // الاستماع لحالة تسجيل الدخول محلياً عند فتح التطبيق
             const savedSerial = localStorage.getItem('app_auth_serial');
@@ -14150,8 +14687,7 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
 
             // Hook: Settings Save (User Profile)
             window.originalSaveUserProfile = window.saveUserProfileFromSettings;
-            if (window.originalSaveUserProfile) { // Check if defined
-                window.saveUserProfileFromSettings = function () {
+        window.saveUserProfileFromSettings = function () {
                     // We need to implement the logic here since we can't easily wrap the internal logic of the original if it reads DOM elements we closed
                     // Actually, saveUserProfileFromSettings reads from DOM.
                     // Best to re-implement for safety to ensure sync happens AFTER storage set.
@@ -14170,6 +14706,15 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                     localStorage.setItem('acc_user_phone', phone);
                     localStorage.setItem('acc_user_notes', notes);
 
+                    // تحديث اسم المدير في قائمة فريق العمل أيضاً
+                    let users = JSON.parse(localStorage.getItem('acc_bayan_users') || '[]');
+                    const admin = users.find(u => String(u.id) === 'admin1');
+                    if (admin) {
+                        admin.name = name.includes('المدير') ? name : `المدير العام ${name}`;
+                        localStorage.setItem('acc_bayan_users', JSON.stringify(users));
+                    }
+
+                    if (typeof updateHeaderName === 'function') updateHeaderName();
 
                     showToast('✅ تم حفظ البيانات ومزامنتها', 'success');
                     beep(1000, 0.04, 0.06);
@@ -14177,7 +14722,6 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                     // Sync
                     if (window.saveToCloud) window.saveToCloud();
                 }
-            }
 
         } catch (e) {
             console.error("Factory Error:", e);
@@ -14486,7 +15030,27 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
         });
     }
 
+    function showModal(title, contentHtml) {
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        overlay.style.zIndex = '1000001';
+        overlay.innerHTML = `
+            <div class="modal-box" style="max-width: 500px; background: #1e293b; border: 1px solid #334155; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); padding: 0; overflow: hidden;">
+                <div style="background: linear-gradient(90deg, #1e293b, #0f172a); padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="margin: 0; color: #fff; font-size: 18px;">${title}</h3>
+                    <button class="btn ghost" onclick="this.closest('.modal-overlay').remove()" style="color: #94a3b8; font-size: 20px;">✕</button>
+                </div>
+                <div style="padding: 25px;">
+                    ${contentHtml}
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        if (typeof beep === 'function') beep(1000, 0.05, 0.05);
+    }
+
     // Export key functions for HTML onclick events
+    window.showModal = showModal;
     window.showSearchModal = showSearchModal;
     window.backupData = backupData;
     window.showAdvancedBackupModal = showAdvancedBackupModal;
@@ -14499,6 +15063,8 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
 
     // --- نظام تسجيل دخول فريق العمل الإجباري ---
     window.showTeamLogin = function() {
+        if (!localStorage.getItem('app_auth_serial')) return;
+
         const app = document.getElementById('app');
         if (app) app.style.display = 'none';
         
@@ -14512,7 +15078,16 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
         try { users = JSON.parse(localStorage.getItem('acc_bayan_users') || '[]'); } catch(e){}
         
         if (users.length === 0) {
-            users.push({ id: 'admin1', name: 'المدير العام', role: 'admin', pass: '123' });
+            const ownerName = localStorage.getItem('acc_user_name') || 'المدير العام';
+            // إذا كان المستخدم طه، سيظهر "المدير العام طه"
+            const finalName = ownerName.includes('المدير') ? ownerName : `المدير العام ${ownerName}`;
+            
+            users.push({ 
+                id: 'admin1', 
+                name: finalName, 
+                role: 'admin', 
+                pass: '123' // الباسورد الافتراضي لأول مرة فقط
+            });
             localStorage.setItem('acc_bayan_users', JSON.stringify(users));
         }
 
@@ -14573,6 +15148,15 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
             localStorage.setItem('acc_current_user_id', user.id);
             localStorage.setItem('acc_current_user_role', user.role || 'staff');
             
+            // تحديث الموظف المسؤول في السيرفر ليعرف المدير من يستخدم الجهاز حالياً
+            const serial = localStorage.getItem('app_auth_serial');
+            const devId = localStorage.getItem('acc_device_id');
+            if (serial && devId && typeof db !== 'undefined') {
+                db.collection("users").doc(serial).collection("devices").doc(devId).update({
+                    currentUser: user.name
+                }).catch(e => console.error("Error updating current user on device:", e));
+            }
+
             // Remember for next time
             localStorage.setItem('acc_last_emp_id', user.id);
             localStorage.setItem('acc_last_emp_name', user.name);
@@ -14616,15 +15200,30 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
         }
     };
     function updateHeaderName() {
-        const userName = localStorage.getItem('acc_current_user_name') || 'المستخدم';
-        const logNameEl = document.querySelector('.user-name-text');
-        if (logNameEl) logNameEl.textContent = userName;
+        const ownerName = localStorage.getItem('acc_user_name') || 'المدير';
+        const currentStaffName = localStorage.getItem('acc_current_user_name') || ownerName;
         
-        const headerNameEl = document.getElementById('header-user-name-display');
-        if (headerNameEl) headerNameEl.textContent = userName;
+        // تحديث كل العناصر الممكنة في الواجهة
+        const logNameEls = document.querySelectorAll('.user-name-text');
+        logNameEls.forEach(el => el.textContent = currentStaffName);
         
-        const hubNameEl = document.getElementById('header-user-name-display-main');
-        if (hubNameEl) hubNameEl.textContent = userName;
+        const headerIds = ['header-user-name-display', 'header-user-name-display-main', 'appTitle'];
+        headerIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                if (id === 'appTitle') {
+                    // الحفاظ على الهيكل مع الأفاتار
+                    const prefix = localStorage.getItem('acc_app_name_prefix') || 'تطبيق المحاسبة اليومي';
+                    const logo = localStorage.getItem('acc_user_logo');
+                    const avatarHtml = logo ? `<img src="${logo}" class="header-avatar" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(currentStaffName)}&background=0f172a&color=fbbf24'">` : `<div class="header-avatar" style="display:flex; align-items:center; justify-content:center; font-size:14px;">👤</div>`;
+                    el.innerHTML = `${avatarHtml} <span style="font-weight: 800;">${prefix} — ${currentStaffName}</span>`;
+                } else {
+                    el.textContent = currentStaffName;
+                }
+            }
+        });
+        
+        document.title = currentStaffName;
     }
 
     // Explicitly Clear Session on Refresh (as requested)
@@ -14789,6 +15388,9 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
         localStorage.setItem('acc_bayan_users', JSON.stringify(users));
         window.resetUserForm();
         window.renderUsersList();
+        
+        // مزامنة التعديلات سحابياً فوراً (لضمان حفظ الباسورد الجديد 11)
+        if (typeof window.saveToCloud === 'function') window.saveToCloud();
     };
 
     window.deleteUser = function(idx) {
@@ -14805,6 +15407,9 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
         localStorage.setItem('acc_bayan_users', JSON.stringify(users));
         window.renderUsersList();
         if (window.showToast) window.showToast('🗑️ تم الحذف بنجاح', 'success');
+        
+        // مزامنة الحذف سحابياً
+        if (typeof window.saveToCloud === 'function') window.saveToCloud();
     };
 
     window.togglePasswordVisibility = function (inputId, iconId) {
@@ -14860,6 +15465,73 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
     // Check status immediately and after a short delay to ensure UI is ready
     updateAppNetworkStatus();
     // --- Inventory & Product Management Logic ---
+    window.renderInventoriesSettings = function() {
+        console.log('📦 Initializing Inventory Tab...');
+        if (window.renderInventoryList) window.renderInventoryList();
+    };
+
+    window.exportInventoryExcel = function() {
+        const inventory = JSON.parse(localStorage.getItem('acc_bayan_inventory') || '[]');
+        if (inventory.length === 0) {
+            if (window.showToast) window.showToast('⚠️ لا توجد سلع لتصديرها', 'warning');
+            return;
+        }
+
+        if (typeof XLSX === 'undefined') {
+            alert('مكتبة Excel غير محملة');
+            return;
+        }
+
+        const data = inventory.map(item => ({
+            'اسم الصنف': item.name,
+            'السعر': item.price,
+            'الكمية المتوفرة': item.stock,
+            'تاريخ الإضافة': new Date(item.id).toLocaleDateString('ar-EG')
+        }));
+
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "المخزون");
+        XLSX.writeFile(wb, `inventory_report_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    };
+
+    window.editProduct = function(idx) {
+        const inventory = JSON.parse(localStorage.getItem('acc_bayan_inventory') || '[]');
+        const item = inventory[idx];
+        if (!item) return;
+
+        const modalHtml = `
+            <div style="display:grid; gap:15px; direction:rtl;">
+                <input type="text" id="editProdName" value="${item.name}" placeholder="اسم الصنف" class="custom-input">
+                <input type="number" id="editProdPrice" value="${item.price}" placeholder="سعر البيع" class="custom-input">
+                <input type="number" id="editProdStock" value="${item.stock}" placeholder="الكمية" class="custom-input">
+                <button class="btn" onclick="saveEditedProduct(${idx})" style="background:#fbbf24; color:#000; padding:12px; font-weight:bold;">💾 حفظ التعديلات</button>
+            </div>
+        `;
+        if (window.showModal) window.showModal('تعديل بيانات الصنف', modalHtml);
+    };
+
+    window.saveEditedProduct = function(idx) {
+        const inventory = JSON.parse(localStorage.getItem('acc_bayan_inventory') || '[]');
+        inventory[idx].name = document.getElementById('editProdName').value.trim();
+        inventory[idx].price = parseFloat(document.getElementById('editProdPrice').value) || 0;
+        inventory[idx].stock = parseInt(document.getElementById('editProdStock').value) || 0;
+
+        localStorage.setItem('acc_bayan_inventory', JSON.stringify(inventory));
+        document.querySelector('.modal-overlay').remove();
+        window.renderInventoryList();
+        if (window.showToast) window.showToast('✅ تم تحديث الصنف بنجاح', 'success');
+    };
+
+    window.deleteProduct = function(idx) {
+        if (!confirm('هل أنت متأكد من حذف هذا الصنف نهائياً من المخزن؟')) return;
+        const inventory = JSON.parse(localStorage.getItem('acc_bayan_inventory') || '[]');
+        inventory.splice(idx, 1);
+        localStorage.setItem('acc_bayan_inventory', JSON.stringify(inventory));
+        window.renderInventoryList();
+        if (window.showToast) window.showToast('🗑️ تم حذف الصنف', 'info');
+    };
+
     window.renderInventoryList = function() {
         const container = document.getElementById('inventoriesListContainer');
         if (!container) return;
@@ -14928,7 +15600,19 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
         
         window.renderInventoryList();
         if (window.showToast) window.showToast('📦 تم إضافة الصنف للمخزن', 'success');
+        if (window.updateBalancesBadge) window.updateBalancesBadge();
     };
+
+    window.updateBalancesBadge = function() {
+        const btn = document.getElementById('balancesBtn');
+        if (!btn) return;
+        const inventory = JSON.parse(localStorage.getItem('acc_bayan_inventory') || '[]');
+        const count = inventory.length;
+        btn.innerHTML = `📦 الأرصدة ${count > 0 ? `<span style="background:var(--gold1); color:var(--gold4); padding:2px 8px; border-radius:10px; font-size:12px; font-weight:900; margin-right:5px;">${count}</span>` : ''}`;
+    };
+
+    // Initialize badge on load
+    setTimeout(() => { if(window.updateBalancesBadge) window.updateBalancesBadge(); }, 1000);
 
     // --- Dashboard Live Stats Logic ---
     window.updateDashboardStats = function() {
@@ -15118,29 +15802,8 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
     // Auto-update on load
     updateDeviceIdDisplay();
 
-    // --- Strict Security: Force Login on Reload ---
-    function initAppSecurity() {
-        // Clear active session to force login
-        localStorage.removeItem('acc_current_user_name');
-        localStorage.removeItem('acc_current_user_id');
-        localStorage.removeItem('acc_current_user_role');
-
-        if (!localStorage.getItem('app_auth_serial')) {
-            localStorage.setItem('app_auth_serial', 'ACC-BAYAN-PRO');
-            localStorage.setItem('acc_user_name', 'المدير العام');
-        }
-
-        // Show Neon Login Overlay immediately
-        if (typeof window.showTeamLogin === 'function') {
-            window.showTeamLogin();
-        } else {
-            // Fallback if UI not yet fully ready
-            setTimeout(initAppSecurity, 100);
-        }
-    }
-
-    // Execute security check on startup
-    initAppSecurity();
+    // app security is now handled by the Serial Auth Sync block above
+    updateDeviceIdDisplay();
 </script>
 </body>
 </html>
