@@ -1,3 +1,4 @@
+
 <!-- saved from url=(0128)file:///C:/Users/Test/Desktop/%D8%A8%D8%B1%D9%86%D8%A7%D9%85%D8%AC%20%D8%A7%D9%84%D9%85%D8%AD%D8%A7%D8%B3%D8%A8%D8%A9/index.html -->
 <html lang="ar" dir="rtl">
 
@@ -28,29 +29,49 @@
     <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Anti-Inspect Script (Code Protection) -->
+    <!-- 🛡️ درع الأمان وتشفير الوصول (Code Protection Shield) -->
     <script>
-        // Anti-Inspect DISABLED for a better development experience
-        /*
-        document.addEventListener('contextmenu', event => event.preventDefault());
-        document.addEventListener('dragstart', event => event.preventDefault());
-        document.onkeydown = function (e) {
-            if (e.keyCode === 123 || // F12
-                (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || // Ctrl+Shift+I/J/C
-                (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83 || e.keyCode === 80))) { // Ctrl+U/S/P
-                e.preventDefault();
-                return false;
-            }
-        };
-        // Advanced DevTools detection Loop - DISABLED
-        setInterval(function () {
-            const widthThreshold = window.outerWidth - window.innerWidth > 160;
-            const heightThreshold = window.outerHeight - window.innerHeight > 160;
-            if (widthThreshold || heightThreshold) {
-                // document.body.innerHTML = "<h1 style='text-align:center;margin-top:20%;color:red;font-size:30px;'>⚠️ الكود مشفر ⚠️<br><br>غير مسموح بعرض مصدر الصفحة</h1>";
-            }
-        }, 1000);
-        */
+        (function() {
+            // 1. منع النقر الأيمن
+            document.addEventListener('contextmenu', event => event.preventDefault());
+
+            // 2. منع الاختصارات الحساسة
+            document.onkeydown = function (e) {
+                if (e.keyCode === 123 || // F12
+                    (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || // Ctrl+Shift+I/J/C
+                    (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83 || e.keyCode === 80 || e.keyCode === 72))) { // Ctrl+U/S/P/H
+                    
+                    if (window.showToast) window.showToast('🛡️ تم حظر الوصول لأدوات المطورين لحماية النظام', 'error');
+                    e.preventDefault();
+                    return false;
+                }
+            };
+
+            // 3. فخ المصحح (Debugger Trap) - يقوم بتجميد الصفحة إذا فُتحت أدوات المطورين
+            setInterval(function() {
+                const startTime = performance.now();
+                debugger;
+                const endTime = performance.now();
+                if (endTime - startTime > 100) {
+                    document.body.innerHTML = `
+                        <div style="height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; background:#0f172a; color:#fff; font-family:'El Messiri', sans-serif; text-align:center; padding:20px;">
+                            <div style="font-size:80px; margin-bottom:20px;">🛡️</div>
+                            <h1 style="color:#ef4444; font-size:32px;">نظام الحماية نشط</h1>
+                            <p style="color:#94a3b8; font-size:18px; max-width:500px; line-height:1.8;">
+                                عذراً، تم اكتشاف محاولة لفحص الشفرة البرمجية. <br> 
+                                هذا النظام محمي ومشفر بالكامل ضد الاختراق. 
+                                <br><br>
+                                <span style="color:#38bdf8;">يرجى إغلاق أدوات المطورين وإعادة تحميل الصفحة للمتابعة.</span>
+                            </p>
+                            <button onclick="window.location.reload()" style="margin-top:30px; padding:12px 30px; border-radius:12px; border:none; background:#38bdf8; color:#0f172a; font-weight:bold; cursor:pointer;">إعادة تحميل الصفحة</button>
+                        </div>
+                    `;
+                }
+            }, 1000);
+
+            // 4. منع السحب والإفلات للمحتوى
+            document.addEventListener('dragstart', event => event.preventDefault());
+        })();
     </script>
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192x192.png">
@@ -120,6 +141,9 @@
         window.takeScreenshot = window.takeScreenshot || function() {};
     </script>
     <style>
+        #aggTable thead tr {
+            background: #064e3b !important;
+        }
         /* --- Refined Glowing Neon Login (Exact Match) --- */
         #team-login-overlay {
             position: fixed;
@@ -2927,9 +2951,17 @@
 
                     <h1 class="title-container" id="appTitle" onclick="showSettingsModal()" style="flex-shrink:0;">تطبيق المحاسبة اليومي — عمرو</h1>
                     
-                    <div id="staff-active-hub" style="display:flex; align-items:center; gap:10px; background:rgba(139, 92, 246, 0.1); padding:5px 15px; border-radius:30px; border:1px solid rgba(139, 92, 246, 0.3); cursor:pointer;" onclick="openSettingsTab('users')">
-                        <div style="width:10px; height:10px; border-radius:50%; background:#22c55e; box-shadow:0 0 8px #22c55e;"></div>
-                        <span style="font-size:12px; color:#fff; font-weight:800;">👤 الموظف المسئول: <span id="header-user-name-display-main" style="color:#a78bfa;">...</span></span>
+                    <!-- حاوية مجمعة للحالة (الاشتراك + الموظف) -->
+                    <div style="display:flex; flex-direction:column; gap:5px; align-items:flex-start;">
+                        <div id="subscription-hub" style="display:flex; align-items:center; gap:10px; background:rgba(212, 175, 55, 0.1); padding:5px 15px; border-radius:30px; border:1px solid rgba(212, 175, 55, 0.3); cursor:pointer;" onclick="event.stopPropagation(); window.showSubscriptionModal();">
+                            <div style="width:10px; height:10px; border-radius:50%; background:#d4af37; box-shadow:0 0 8px #d4af37;"></div>
+                            <span style="font-size:12px; color:#fff; font-weight:800;">💳 اشتراكي: <span style="color:#d4af37;">ترخيص فعال (مدى الحياة)</span></span>
+                        </div>
+
+                        <div id="staff-active-hub" style="display:flex; align-items:center; gap:10px; background:rgba(139, 92, 246, 0.1); padding:5px 15px; border-radius:30px; border:1px solid rgba(139, 92, 246, 0.3); cursor:pointer;" onclick="openSettingsTab('users')">
+                            <div style="width:10px; height:10px; border-radius:50%; background:#22c55e; box-shadow:0 0 8px #22c55e;"></div>
+                            <span style="font-size:12px; color:#fff; font-weight:800;">👤 الموظف المسئول: <span id="header-user-name-display-main" style="color:#a78bfa;">...</span></span>
+                        </div>
                     </div>
 
                     <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: flex-end; flex: 1;">
@@ -7766,6 +7798,7 @@
                                 <option value="staff">موظف</option>
                                 <option value="admin">مدير</option>
                             </select>
+                            <input type="text" id="newUserEmergencyCode" placeholder="كود الطوارئ" class="custom-input" style="flex:0.5; min-width:100px; background: rgba(0,0,0,0.2);">
                             <button class="btn" id="addUserButtonMain" onclick="if(window.addNewUser) window.addNewUser();" 
                                 onmousedown="this.style.transform='scale(0.95)'" 
                                 onmouseup="this.style.transform='scale(1)'"
@@ -13996,6 +14029,11 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                                 <h4 style="color:#ff3b7e;">📥 لدي كود سريال بالفعل</h4>
                                 <input type="text" id="existing-serial" class="reg-input" placeholder="أدخل الكود الخاص بك هنا (مثال : 12345-ACC)" style="text-transform: uppercase;">
                                 <button id="login-serial-btn" class="reg-btn btn-cyan">تسجيل الدخول بالكود</button>
+                                <div style="margin-top: 15px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 10px;">
+                                    <a href="#" id="emergency-reset-link" style="color: #ff3b7e; font-size: 11px; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 5px;">
+                                        <i class="fa-solid fa-triangle-exclamation"></i> زر الطوارئ: تصفير الجلسة عبر الهاتف
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -14025,7 +14063,18 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                     localStorage.setItem('acc_user_phone', phone);
                     localStorage.setItem('app_auth_serial', newSerial);
 
-                    // تسجيل السيريال في السيرفر مع بيانات المالك
+                    // تسجيل السيريال في السيرفر المحلي (SQLite) لضمان الربط بقاعدة بيانات حقيقية
+                    if (typeof DB_API !== 'undefined') {
+                        DB_API.saveUser({
+                            serial: newSerial,
+                            name: name,
+                            phone: phone,
+                            role: 'master',
+                            createdAt: new Date().toISOString()
+                        });
+                    }
+
+                    // تسجيل السيريال في السيرفر السحابي (Firebase)
                     if (typeof db !== 'undefined' && navigator.onLine) {
                         db.collection("users").doc(newSerial).set({
                             registered: true,
@@ -14100,11 +14149,60 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                         showModernAlert('يرجى إدخال السيريال للمتابعة', 'warning');
                         return;
                     }
-                    if (!serial.endsWith('-ACC')) {
-                        serial = serial + '-ACC';
+
+                    // تنبيه "هذا ليس كودك" إذا كان مختلفاً عن السيريال السابق (اختياري للتنبيه فقط)
+                    const lastUsedSerial = localStorage.getItem('app_auth_serial');
+                    if (lastUsedSerial && serial !== lastUsedSerial) {
+                        showModernAlert({
+                            title: '⚠️ تنبيه أمني',
+                            body: `هذا الكود يختلف عن الكود المستخدم سابقاً على هذا الجهاز.\n\nهل تود المتابعة؟`,
+                            type: 'warning',
+                            confirmText: 'نعم، تابع للأهمية',
+                            cancelText: 'إلغاء',
+                            onConfirm: () => {
+                                if (window.showToast) showToast('🚀 جاري بدء عملية الدخول...', 'info');
+                                loginWithSerial(serial);
+                            }
+                        });
+                        return;
                     }
+
+                    if (window.showToast) showToast('🚀 جاري بدء عملية الدخول...', 'info');
                     loginWithSerial(serial);
                 });
+
+                // --- زر الطوارئ (تصفير الجلسة عبر ميزة الهاتف) ---
+                const emergencyLink = document.getElementById('emergency-reset-link');
+                if (emergencyLink) {
+                    emergencyLink.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const serial = document.getElementById('existing-serial').value.trim().toUpperCase();
+                        if (!serial) {
+                            showModernAlert('⚠️ يرجى إدخال كود السيريال أولاً لكي نعرف الحساب المطلوب تصفيره.', 'warning');
+                            return;
+                        }
+
+                        // محاكاة طلب كود التحقق أو التحقق المباشر من رقم الهاتف المسجل
+                        showModernAlert({
+                            title: '🆘 تصفير جلسة الطوارئ',
+                            body: `أدخل رقم الهاتف المرتبط بالسيريال (${serial}) لتأكيد ملكيتك للجلسة وتفعيل هذا الجهاز فوراً.`,
+                            type: 'info',
+                            confirmText: 'التحقق وتفعيل الجهاز',
+                            cancelText: 'إلغاء',
+                            hasInput: true,
+                            inputPlaceholder: 'رقم الهاتف المسجل (مثال: 05xxxxxxx)',
+                            onConfirm: (phone) => {
+                                if (!phone) {
+                                    if (typeof showToast === 'function') showToast('⚠️ يرجى إدخال رقم الهاتف', 'error');
+                                    return;
+                                }
+                                if (typeof handleEmergencyReset === 'function') {
+                                    handleEmergencyReset(serial, phone);
+                                }
+                            }
+                        });
+                    });
+                }
             }
 
             window.logoutFromSerial = function() {
@@ -14226,6 +14324,71 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                 console.log("🧹 Local cache cleared for new serial session.");
             }
 
+            async function getDeviceFingerprint() {
+                const nav = window.navigator;
+                const screen = window.screen;
+                const fingerprint = [
+                    nav.userAgent,
+                    nav.language,
+                    nav.platform,
+                    screen.width + 'x' + screen.height,
+                    screen.colorDepth,
+                    new Date().getTimezoneOffset(),
+                    !!window.indexedDB,
+                    !!window.sessionStorage,
+                    !!window.localStorage
+                ].join('|');
+                
+                let hash = 0;
+                for (let i = 0; i < fingerprint.length; i++) {
+                    const char = fingerprint.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash = hash & hash; 
+                }
+                return 'PRINT-' + Math.abs(hash).toString(16).toUpperCase();
+            }
+
+            async function handleEmergencyReset(serial, phone) {
+                if (typeof showToast === 'function') showToast('⏳ جاري التحقق من البيانات...', 'info');
+                
+                try {
+                    const userDoc = await db.collection("users").doc(serial).get();
+                    if (!userDoc.exists) {
+                        showModernAlert('❌ هذا السيريال غير موجود في السجلات لدينا.', 'error');
+                        return;
+                    }
+
+                    const userData = userDoc.data();
+                    const registeredPhone = String(userData.ownerPhone || userData.phone || '').replace(/\D/g, '');
+                    const inputPhone = String(phone).replace(/\D/g, '');
+
+                    // التحقق من آخر 6 أرقام لضمان المرونة مع مفاتيح الدول
+                    if (registeredPhone && inputPhone.length >= 6 && registeredPhone.endsWith(inputPhone.slice(-6))) {
+                        const currentDeviceId = localStorage.getItem('acc_device_id') || 'BYN-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+                        localStorage.setItem('acc_device_id', currentDeviceId);
+                        const fingerprint = await getDeviceFingerprint();
+
+                        await db.collection("users").doc(serial).collection("devices").doc(currentDeviceId).set({
+                            id: currentDeviceId,
+                            name: (userData.ownerName || 'جهاز طوارئ') + ' (Reset)',
+                            status: 'authorized',
+                            role: 'master',
+                            lastSeen: new Date().toISOString(),
+                            fingerprint: fingerprint,
+                            platform: navigator.platform || 'unknown'
+                        }, { merge: true });
+
+                        showModernAlert('✅ تم التحقق بنجاح! تم تفعيل هذا الجهاز كجهاز رئيسي (Master)، يمكنك الدخول الآن.', 'success');
+                        loginWithSerial(serial);
+                    } else {
+                        showModernAlert('❌ عذراً، رقم الهاتف غير مطابق للرقم المسجل لهذا السيريال.', 'error');
+                    }
+                } catch (err) {
+                    console.error("Emergency Reset Error:", err);
+                    showModernAlert('❌ حدث خطأ أثناء عملية التحقق. تأكد من الإنترنت وحاول ثانية.', 'error');
+                }
+            }
+
             function loginWithSerial(serialString) {
                 if (typeof showToast === 'function') showToast('🔍 جاري التحقق من ترخيص الجهاز...', 'info');
                 
@@ -14235,32 +14398,80 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                 const currentDeviceId = localStorage.getItem('acc_device_id') || 'BYN-' + Math.random().toString(36).substr(2, 9).toUpperCase();
                 localStorage.setItem('acc_device_id', currentDeviceId);
 
-                // Check Device on Server
-                db.collection("users").doc(serialString).collection("devices").doc(currentDeviceId).get().then(doc => {
-                    const deviceData = doc.exists ? doc.data() : null;
-                    
-                    if (!doc.exists) {
-                        // New Device Attempt
-                        db.collection("users").doc(serialString).collection("devices").get().then(snap => {
-                            const isFirstDevice = snap.empty;
-                            const newDevice = {
-                                id: currentDeviceId,
-                                name: localStorage.getItem('acc_user_name') || 'جهاز جديد',
-                                status: isFirstDevice ? 'authorized' : 'pending',
-                                role: isFirstDevice ? 'master' : 'slave',
-                                lastSeen: new Date().toISOString(),
-                                platform: navigator.platform || 'غير معروف'
-                            };
-                            
-                            db.collection("users").doc(serialString).collection("devices").doc(currentDeviceId).set(newDevice).then(() => {
-                                if (isFirstDevice) {
-                                    completeLogin(serialString);
-                                } else {
-                                    showModernAlert(`⚠️ هذا السيريال مسجل لجهاز آخر.\n\nتم إرسال طلب انضمام للجهاز الرئيسي (Master).\nيرجى الانتظار حتى يتم تفعيل جهازك بنجاح.`, 'warning');
-                                }
+                // الاستعانة ببصمة الجهاز للتعرف الذكي
+                getDeviceFingerprint().then(fingerprint => {
+                    // Check Device on Server
+                    db.collection("users").doc(serialString).collection("devices").doc(currentDeviceId).get().then(doc => {
+                        let deviceData = doc.exists ? doc.data() : null;
+                        
+                        // الخطوة 1: محاولة التحقق عبر قاعدة البيانات المحلية (DB_API) أولاً
+                        if (typeof DB_API !== 'undefined') {
+                             DB_API.getAllUsers().then(localUsers => {
+                                 if (localUsers && Array.isArray(localUsers)) {
+                                     const matched = localUsers.find(u => u.serial === serialString || (u.id && u.id === serialString));
+                                     if (matched) {
+                                         console.log("📂 Local Database Match Found:", matched);
+                                         return completeLogin(serialString, { role: matched.role || 'master' });
+                                     }
+                                 }
+                                 
+                                 // إذا لم يجد في المحلي، نواصل العمل كجهاز جديد أو نبحث في السحاب
+                                 checkCloudOrRegister();
+                             });
+                        } else {
+                            checkCloudOrRegister();
+                        }
+
+                        function checkCloudOrRegister() {
+                            // محاولة التعرف الذكي لو الجهاز غير مسجل (لحالات مسح الـ LocalStorage)
+                            if (!doc.exists) {
+                                return db.collection("users").doc(serialString).collection("devices")
+                                         .where("fingerprint", "==", fingerprint)
+                                         .get()
+                                         .then(snap => {
+                                             if (!snap.empty) {
+                                                const matchedDoc = snap.docs[0];
+                                                localStorage.setItem('acc_device_id', matchedDoc.id);
+                                                return completeLogin(serialString, matchedDoc.data());
+                                             }
+                                             return registerAsNewDevice();
+                                         }).catch(() => registerAsNewDevice()); // Fallback to registration
+                            }
+                        }
+                        
+                        function registerAsNewDevice() {
+                            db.collection("users").doc(serialString).collection("devices").get().then(snap => {
+                                const isFirstDevice = snap.empty;
+                                const newDevice = {
+                                    id: currentDeviceId,
+                                    name: localStorage.getItem('acc_user_name') || 'جهاز جديد',
+                                    status: 'authorized', // تفعيل تلقائي فوراً كما طلبت
+                                    role: isFirstDevice ? 'master' : 'slave',
+                                    lastSeen: new Date().toISOString(),
+                                    fingerprint: fingerprint,
+                                    platform: navigator.platform || 'غير معروف'
+                                };
+                                
+                                db.collection("users").doc(serialString).collection("devices").doc(currentDeviceId).set(newDevice).then(() => {
+                                    if (!isFirstDevice) {
+                                        // نظهر التنبيه التحذيري لكن ندخله فوراً بعد الضغط على إغلاق
+                                        showModernAlert({
+                                            title: '❌ عذراً، هذا الكود ليس ملكك!',
+                                            body: `هذا السيريال (${serialString}) مسجل بالفعل لجهاز آخر.\n\nسيتم السماح لك بالدخول الآن، ولكن يرجى التأكد من أنك تستخدم الكود الصحيح الخاص ببياناتك.`,
+                                            type: 'warning',
+                                            confirmText: 'فهمت، ادخلني للتطبيق',
+                                            onConfirm: () => {
+                                                completeLogin(serialString);
+                                            }
+                                        });
+                                    } else {
+                                        completeLogin(serialString);
+                                    }
+                                });
                             });
-                        });
-                    } else if (deviceData.status === 'blocked') {
+                        }
+
+                        if (deviceData.status === 'blocked') {
                         showModernAlert('🚫 عذراً، تم حظر هذا الجهاز من قبل المسؤول. يرجى التواصل مع الإدارة لاستعادة الوصول.', 'error');
                         localStorage.removeItem('app_auth_serial');
                     } else if (deviceData.status === 'pending') {
@@ -14309,7 +14520,11 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                     console.error("Login Auth Error:", err);
                     showModernAlert('❌ فشل الاتصال بخادم التراخيص. تأكد من الإنترنت.', 'error');
                 });
+            });
 
+
+
+                
                 function completeLogin(serial, currentDeviceData = null) {
                     // إذا كان السيريال مختلف عن المسجل سابقاً، قم بتصفير الـ Cache المحلي
                     const prevSerial = localStorage.getItem('app_auth_serial');
@@ -15198,7 +15413,7 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                     <button class="neon-submit-btn" onclick="window.attemptTeamLogin()">Sign In</button>
 
                     <div class="neon-group">
-                        <a href="#" onclick="alert('اتصل بالمسؤول لإعادة تعيين كلمة السر')">Forgot Password</a>
+                        <a href="#" onclick="alert('اتصل بالمسؤول لإعادة تعيين كلمة السر، أو استخدم كود الطوارئ الخاص بك')">Forgot Password</a>
                         <a href="#" onclick="alert('يتم إنشاء الحسابات من خلال قسم فريق العمل في الإعدادات')">Sign up</a>
                     </div>
                 </div>
@@ -15218,11 +15433,30 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
 
         const userId = select.value;
         const pass = passInput.value.trim();
-        
+
+        // --- ميزة كود الطوارئ (Emergency Code) ---
         let users = [];
         try { users = JSON.parse(localStorage.getItem('acc_bayan_users') || '[]'); } catch(e){}
         
-        const user = users.find(u => String(u.id) === String(userId));
+        const selectedUser = users.find(u => String(u.id) === String(userId));
+
+        // التحقق من كود الطوارئ الخاص بالمستخدم المختار فقط
+        if (selectedUser && selectedUser.emergencyCode && pass === selectedUser.emergencyCode) {
+            if (window.showToast) window.showToast(`🆘 تم الدخول عبر كود الطوارئ لـ: ${selectedUser.name}`, 'warning');
+            
+            localStorage.setItem('acc_current_user_name', selectedUser.name);
+            localStorage.setItem('acc_current_user_id', selectedUser.id);
+            localStorage.setItem('acc_current_user_role', selectedUser.role || 'staff');
+            
+            const overlay = document.getElementById('team-login-overlay');
+            if (overlay) overlay.remove();
+            document.getElementById('app').style.display = 'block';
+            updateHeaderName();
+            if (typeof startRealtimeSync === 'function') startRealtimeSync();
+            return;
+        }
+        
+        const user = selectedUser;
         if (user && String(user.pass).trim() === pass) {
             // Save Session
             localStorage.setItem('acc_current_user_name', user.name);
@@ -15428,7 +15662,8 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
         document.getElementById('newUserName').value = '';
         document.getElementById('newUserPass').value = '';
         document.getElementById('newUserRole').value = 'staff';
-        
+        const emCode = document.getElementById('newUserEmergencyCode');
+        if (emCode) emCode.value = '';
         const btn = document.getElementById('addUserMainBtn');
         if (btn) {
             btn.textContent = '➕ إضافة عضو جديد لمؤسستك';
@@ -15442,10 +15677,12 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
         const nameInput = document.getElementById('newUserName');
         const passInput = document.getElementById('newUserPass');
         const roleSelect = document.getElementById('newUserRole');
+        const emergencyInput = document.getElementById('newUserEmergencyCode');
         
         const name = nameInput.value.trim();
         const pass = passInput.value.trim();
         const role = roleSelect ? roleSelect.value : 'staff';
+        const emergencyCode = emergencyInput ? emergencyInput.value.trim() : '';
 
         if (!name || !pass) {
             if (window.showToast) window.showToast('⚠️ يرجى إدخال جميع البيانات', 'warning');
@@ -15459,10 +15696,18 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
             users[currentEditIdx].name = name;
             users[currentEditIdx].pass = pass;
             users[currentEditIdx].role = role;
+            users[currentEditIdx].emergencyCode = emergencyCode;
             if (window.showToast) window.showToast('✅ تم تحديث بيانات العضو', 'success');
         } else {
             // Add new
-            users.push({ id: Date.now(), name, pass, role, date: new Date().toISOString() });
+            users.push({ 
+                id: Date.now(), 
+                name, 
+                pass, 
+                role, 
+                emergencyCode,
+                date: new Date().toISOString() 
+            });
             if (window.showToast) window.showToast('✅ تم إضافة العضو الجديد بنجاح', 'success');
         }
 
@@ -15470,7 +15715,6 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
         window.resetUserForm();
         window.renderUsersList();
         
-        // مزامنة التعديلات سحابياً فوراً (لضمان حفظ الباسورد الجديد 11)
         if (typeof window.saveToCloud === 'function') window.saveToCloud();
     };
 
@@ -15894,6 +16138,91 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
 
     // app security is now handled by the Serial Auth Sync block above
     updateDeviceIdDisplay();
+    // --- نظام باقات الاشتراك (Subscription System) ---
+    window.showSubscriptionModal = function() {
+        if (document.getElementById('subscription-modal')) return;
+        const modalHTML = `
+            <div id="subscription-modal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999999; display:flex; justify-content:center; align-items:center; backdrop-filter:blur(10px); color:#fff; font-family:'El Messiri', sans-serif; direction:rtl; padding:20px;">
+                <div style="background:#1e293b; width:100%; max-width:900px; padding:30px; border-radius:30px; border:1px solid rgba(255,255,255,0.1); box-shadow:0 10px 50px rgba(0,0,0,0.5); text-align:center; position:relative; overflow-y:auto; max-height:90vh;">
+                    
+                    <button onclick="document.getElementById('subscription-modal').remove()" style="position:absolute; top:20px; left:20px; background:rgba(255,255,255,0.05); border:none; color:#fff; width:35px; height:35px; border-radius:50%; cursor:pointer; font-size:20px; display:flex; align-items:center; justify-content:center;">✕</button>
+
+                    <h2 style="color:#d4af37; margin-bottom:10px; font-size:28px;">💎 اختر باقة اشتراكك</h2>
+                    <p style="color:#94a3b8; font-size:14px; margin-bottom:40px;">استخدم ميزات برنامج بيان POS الكاملة بأسعار تنافسية وادعم نمو مشروعك</p>
+                    
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:25px; margin-bottom:30px;">
+                        <!-- باقة شهري -->
+                        <div style="background:rgba(255,255,255,0.03); padding:30px; border-radius:25px; border:1px solid rgba(255,255,255,0.08); transition:0.3s; display:flex; flex-direction:column; justify-content:space-between;">
+                            <div>
+                                <div style="font-size:45px; margin-bottom:15px;">📅</div>
+                                <h4 style="margin:0; font-size:22px;">باقة (شهري)</h4>
+                                <div style="font-size:35px; font-weight:900; color:#a78bfa; margin:20px 0;">100 <span style="font-size:16px;">ج.م</span></div>
+                                <ul style="list-style:none; padding:0; font-size:13px; color:#cbd5e1; line-height:2.5; text-align:right;">
+                                    <li>✅ مزامنة سحابية كاملة</li>
+                                    <li>✅ دعم فني عبر الواتساب</li>
+                                    <li>✅ تقارير يومية مفصلة</li>
+                                    <li>✅ إدارة مخازن متقدمة</li>
+                                </ul>
+                            </div>
+                            <button onclick="window.selectPlan('monthly')" style="margin-top:25px; width:100%; padding:12px; border-radius:15px; border:none; background:linear-gradient(45deg, #7c3aed, #a78bfa); color:#fff; font-weight:bold; cursor:pointer; box-shadow:0 5px 15px rgba(124, 58, 237, 0.3);">اختيار الباقة</button>
+                        </div>
+
+                        <!-- باقة سنوي -->
+                        <div style="background:linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(30, 41, 59, 0.4)); padding:30px; border-radius:25px; border:2px solid #d4af37; transform:scale(1.05); box-shadow:0 0 30px rgba(212, 175, 55, 0.15); position:relative; display:flex; flex-direction:column; justify-content:space-between;">
+                            <div style="position:absolute; top:-15px; right:50%; transform:translateX(50%); background:#d4af37; color:#1e293b; font-size:11px; font-weight:900; padding:5px 15px; border-radius:20px; box-shadow:0 5px 15px rgba(212, 175, 55, 0.4); white-space:nowrap;">الأكثر توفيراً 🔥</div>
+                            <div>
+                                <div style="font-size:45px; margin-bottom:15px;">🌟</div>
+                                <h4 style="margin:0; font-size:22px; color:#d4af37;">باقة (سنوي)</h4>
+                                <div style="font-size:35px; font-weight:900; color:#d4af37; margin:20px 0;">700 <span style="font-size:16px;">ج.م</span></div>
+                                <ul style="list-style:none; padding:0; font-size:13px; color:#cbd5e1; line-height:2.5; text-align:right;">
+                                    <li>✅ جميع ميزات الباقة الشهرية</li>
+                                    <li>✅ خصم خاص (احصل على 5 أشهر مجاناً)</li>
+                                    <li>✅ أولوية في التحديثات</li>
+                                    <li>✅ تدريب مباشر للفريق</li>
+                                </ul>
+                            </div>
+                            <button onclick="window.selectPlan('yearly')" style="margin-top:25px; width:100%; padding:12px; border-radius:15px; border:none; background:linear-gradient(45deg, #d4af37, #f59e0b); color:#1e293b; font-weight:bold; cursor:pointer; box-shadow:0 5px 15px rgba(212, 175, 55, 0.3);">اختيار الباقة</button>
+                        </div>
+
+                        <!-- باقة دائم -->
+                        <div style="background:rgba(255,255,255,0.03); padding:30px; border-radius:25px; border:1px solid rgba(255,255,255,0.08); transition:0.3s; display:flex; flex-direction:column; justify-content:space-between;">
+                            <div>
+                                <div style="font-size:45px; margin-bottom:15px;">💎</div>
+                                <h4 style="margin:0; font-size:22px;">باقة (دائم)</h4>
+                                <div style="font-size:35px; font-weight:900; color:#22c55e; margin:20px 0;">1500 <span style="font-size:16px;">ج.م</span></div>
+                                <ul style="list-style:none; padding:0; font-size:13px; color:#cbd5e1; line-height:2.5; text-align:right;">
+                                    <li>✅ تملك البرنامج للأبد</li>
+                                    <li>✅ بدون أي اشتراكات شهرية</li>
+                                    <li>✅ ربط مفتوح للأجهزة</li>
+                                    <li>✅ ملكية كاملة لقاعدة البيانات</li>
+                                </ul>
+                            </div>
+                            <button onclick="window.selectPlan('permanent')" style="margin-top:25px; width:100%; padding:12px; border-radius:15px; border:none; background:linear-gradient(45deg, #16a34a, #22c55e); color:#fff; font-weight:bold; cursor:pointer; box-shadow:0 5px 15px rgba(34, 197, 94, 0.3);">امتلكه الآن</button>
+                        </div>
+                    </div>
+
+                    <p style="color:#64748b; font-size:12px; margin-top:10px;">* جميع الأسعار تشمل التحديثات الفنية المستمرة.</p>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+    };
+
+    window.selectPlan = function(plan) {
+        let name = '';
+        if(plan === 'monthly') name = 'الباقة الشهرية (100ج)';
+        if(plan === 'yearly') name = 'الباقة السنوية (700ج)';
+        if(plan === 'permanent') name = 'الباقة الدائمة (1500ج)';
+        
+        showModernAlert(`📦 شكرًا لاختيارك ${name}<br><br>يرجى إرسال لقطة شاشة لهذه الرسالة للدعم الفني لتفعيل اشتراكك فوراً.`, 'success');
+        
+        setTimeout(() => {
+            const m = document.getElementById('subscription-modal');
+            if(m) m.remove();
+        }, 3500);
+    };
+
 </script>
+<input type="file" id="restoreFile" style="display:none">
 </body>
 </html>
