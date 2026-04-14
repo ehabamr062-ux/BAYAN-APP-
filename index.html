@@ -31,6 +31,46 @@
 
     <!-- 🛡️ درع الأمان وتشفير الوصول (Code Protection Shield) -->
     <script>
+        // Global Modern Alert / Toast System (Must be at top)
+        window.showToast = function(message, type = 'info') {
+            let container = document.getElementById('modern-toast-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'modern-toast-container';
+                container.className = 'modern-toast-container';
+                document.body.appendChild(container);
+            }
+
+            const toast = document.createElement('div');
+            toast.className = `modern-toast ${type}`;
+            
+            const icons = {
+                success: '✅',
+                error: '❌',
+                warning: '⚠️',
+                info: '🔔'
+            };
+
+            toast.innerHTML = `
+                <div class="modern-toast-icon">${icons[type] || icons.info}</div>
+                <div class="modern-toast-content">${message}</div>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('fade-out');
+                setTimeout(() => { if(toast.parentNode) toast.parentNode.removeChild(toast); }, 400);
+            }, 4500);
+        };
+
+        window.alert = function(msg) {
+            let type = 'info';
+            if (msg.includes('خطأ') || msg.includes('عذراً') || msg.includes('لا يمكن')) type = 'warning';
+            if (msg.includes('موفق') || msg.includes('تم')) type = 'success';
+            window.showToast(msg, type);
+        };
+
         (function() {
             // 1. منع النقر الأيمن
             document.addEventListener('contextmenu', event => event.preventDefault());
@@ -1428,116 +1468,109 @@
 
         .summary {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            grid-template-columns: 1fr 1fr;
             gap: 12px;
-            margin-top: 12px;
+            margin-top: 5px;
             width: 100%;
         }
 
         .stat {
-            flex: 1;
-            background: var(--glass);
-            padding: 14px;
-            border-radius: 12px;
-            text-align: center;
-            transition: all .2s ease;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.03);
+            padding: 15px 12px;
+            border-radius: 16px;
+            text-align: right;
+            transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .footer-box {
-            margin: 24px auto;
-            width: fit-content;
-            padding: 12px 24px;
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.1));
-            border-radius: 50px;
-            text-align: center;
-            color: var(--gold2);
-            font-weight: bold;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            gap: 5px;
             position: relative;
             overflow: hidden;
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
         }
 
-        .footer-box:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
-            border-color: var(--gold2);
-        }
-
-        .footer-box::after {
+        .stat::before {
             content: '';
             position: absolute;
-            bottom: 0;
+            top: 0;
             left: 0;
             width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, transparent, var(--gold2), transparent);
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), transparent);
+            pointer-events: none;
         }
 
         .stat:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            transform: translateY(-4px) scale(1.02);
+            border-color: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.06);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 2px;
+        }
+
+        .stat-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .stat h4 {
-            margin: 0 0 8px;
-            font-size: 14px;
-            color: var(--neu-text);
+            margin: 0;
+            font-size: 12px;
+            color: #94a3b8;
             font-weight: 600;
-        }
-
-        body.dark .stat h4 {
-            color: #ffffff;
+            letter-spacing: 0.5px;
         }
 
         .stat p {
             margin: 0;
-            font-weight: 800;
-            font-size: 20px;
-            background: linear-gradient(135deg, var(--gold2), var(--gold3));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-weight: 850;
+            font-size: 22px;
+            font-family: 'Consolas', monospace;
+            color: #f8fafc;
+            letter-spacing: 1px;
         }
 
-        .stat.positive p {
-            background: linear-gradient(135deg, #16a34a, #22c55e);
-            -webkit-background-clip: text;
-            background-clip: text;
-        }
+        /* Specific Colors */
+        .stat-above .stat-icon { color: #fbbf24; background: rgba(251, 191, 36, 0.1); }
+        .stat-below .stat-icon { color: #f87171; background: rgba(248, 113, 113, 0.1); }
+        .stat-sales .stat-icon { color: #34d399; background: rgba(52, 211, 153, 0.1); }
+        .stat-diff .stat-icon { color: #38bdf8; background: rgba(56, 189, 248, 0.1); }
 
-        .stat.negative p {
-            background: linear-gradient(135deg, #ef4444, #f87171);
-            -webkit-background-clip: text;
-            background-clip: text;
-        }
+        .stat-sales p { color: #10b981; text-shadow: 0 0 15px rgba(16, 185, 129, 0.3); }
+        .stat-above p { color: #fbbf24; }
+        .stat-below p { color: #f87171; }
+
+        .stat.positive p { color: #10b981; }
+        .stat.negative p { color: #ef4444; }
 
         #summaryCard {
-            background: linear-gradient(145deg, #232526 0%, #414345 100%);
-            border: 2px solid transparent;
-            box-shadow: 0 0 8px rgba(255, 107, 0, 0.6), 0 0 12px rgba(255, 140, 0, 0.5), inset 0 0 6px rgba(255, 165, 0, 0.5);
-            animation: fire-flicker-dark 5s infinite alternate;
+            background: linear-gradient(165deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            padding: 20px 15px;
         }
 
-        #summaryCard .stat {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.1);
+        .right.collapsed .summary {
+            grid-template-columns: 1fr;
         }
 
-        #summaryCard .stat h4 {
-            color: #ccc;
+        .right.collapsed .stat {
+            padding: 10px;
         }
 
-        #summaryCard .stat p {
-            text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+        .right.collapsed .stat p {
+            font-size: 16px;
         }
 
         @keyframes fire-flicker-dark {
@@ -2820,6 +2853,71 @@
             box-shadow: 0 0 20px rgba(34, 197, 94, 0.4), inset 0 0 10px rgba(34, 197, 94, 0.1);
         }
 
+        /* Animated Purple Border Class (Rotating Neon Style) */
+        .animated-border-purple {
+            position: relative;
+            z-index: 1;
+            overflow: hidden !important;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: none !important;
+            padding: 2px;
+        }
+
+        .animated-border-purple::before {
+            content: '';
+            position: absolute;
+            width: 500%;
+            height: 500%;
+            background: linear-gradient(0deg, transparent, transparent, #a855f7, #6366f1, #d946ef);
+            z-index: -2;
+            animation: neon-animate 4s linear infinite;
+        }
+
+        .animated-border-purple::after {
+            content: '';
+            position: absolute;
+            inset: 3px;
+            border-radius: inherit;
+            z-index: -1;
+        }
+
+        /* Specific Button Backgrounds (Inner Mask) */
+        #clearBtn.animated-border-purple::after { background: linear-gradient(145deg, #ef4444, #b91c1c); }
+        #addBtn.animated-border-purple::after { background: linear-gradient(145deg, #16a34a, #15803d); }
+
+        /* Gold/Success Animated Border for Save Buttons */
+        .animated-border-gold {
+            position: relative;
+            z-index: 1;
+            overflow: hidden !important;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: none !important;
+            padding: 2px;
+        }
+
+        .animated-border-gold::before {
+            content: '';
+            position: absolute;
+            width: 400%;
+            height: 400%;
+            background: linear-gradient(0deg, transparent, transparent, #fbbf24, #f59e0b, #fbbf24);
+            z-index: -2;
+            animation: neon-animate 4s linear infinite;
+        }
+
+        .animated-border-gold::after {
+            content: '';
+            position: absolute;
+            inset: 3px;
+            background: linear-gradient(145deg, #10b981, #059669);
+            border-radius: inherit;
+            z-index: -1;
+        }
+
         /* Electric Border Animation for Egg Balance */
         @property --angle {
             syntax: '<angle>';
@@ -2871,6 +2969,70 @@
         }
 
         /* Specific scrollbar styles removed */
+        /* Modern Premium Toast Notifications */
+        .modern-toast-container {
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            pointer-events: none;
+        }
+
+        .modern-toast {
+            min-width: 300px;
+            max-width: 450px;
+            padding: 16px 24px;
+            border-radius: 20px;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            direction: rtl;
+            pointer-events: auto;
+            animation: modernToastIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes modernToastIn {
+            from { opacity: 0; transform: translateY(-40px) scale(0.8); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .modern-toast.fade-out {
+            animation: modernToastOut 0.4s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
+        }
+
+        @keyframes modernToastOut {
+            to { opacity: 0; transform: translateY(-30px) scale(0.9); }
+        }
+
+        .modern-toast-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .modern-toast.success .modern-toast-icon { color: #10b981; background: rgba(16, 185, 129, 0.15); }
+        .modern-toast.error .modern-toast-icon { color: #ef4444; background: rgba(239, 68, 68, 0.15); }
+        .modern-toast.warning .modern-toast-icon { color: #f59e0b; background: rgba(245, 158, 11, 0.15); }
+        .modern-toast.info .modern-toast-icon { color: #3b82f6; background: rgba(59, 130, 246, 0.15); }
+
         #usersListContainer {
             scrollbar-width: thin;
         }
@@ -3000,6 +3162,9 @@
                     <div class="header-controls" style="width:100%;">
                         <!-- Dynamic Inventories Button -->
                         <div style="display:flex; gap:8px; width: 100%; justify-content: center; flex-wrap: wrap;">
+                            <button class="btn" id="headerCalcBtnAction"
+                                 style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; padding:10px 18px; font-size:15px; border:none; display:flex; align-items:center; gap:8px; flex: 1; min-width: 100px; justify-content: center; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4); transition: all 0.3s; border-radius: 12px;"
+                                 title="الآلة الحاسبة">🧮 الحاسبة</button>
                             <button class="btn" id="balancesBtn"
                                 style="background:var(--gold4);color:var(--gold1);padding:10px 18px;font-size:15px;border:1px solid var(--gold2); display:flex; align-items:center; gap:8px; flex: 1; min-width: 120px; justify-content: center; transition: all 0.3s;"
                                 onclick="openInventoriesSideMenu()" title="المخزون والأرصدة">📦 الأرصدة</button>
@@ -3225,6 +3390,7 @@
                                             class="input-icon">⬆️</span> المبلغ (فوق)</label>
                                     <input type="text" inputmode="decimal" id="amtTop" placeholder="0.00"
                                         class="custom-input" onblur="evaluateMathInput(this)"
+                                        onkeydown="if(event.key==='Enter'){ event.preventDefault(); window.addTransaction(); }"
                                         style="font-size: 20px; color: #4ade80; font-weight: 700;">
                                 </div>
                                 <!-- Amount Bottom -->
@@ -3233,26 +3399,27 @@
                                             class="input-icon">⬇️</span> المبلغ (تحت)</label>
                                     <input type="text" inputmode="decimal" id="amtBottom" placeholder="0.00"
                                         class="custom-input" onblur="evaluateMathInput(this)"
+                                        onkeydown="if(event.key==='Enter'){ event.preventDefault(); window.addTransaction(); }"
                                         style="font-size: 20px; color: #f87171; font-weight: 700;">
                                 </div>
                             </div>
 
                             <div class="actions-row" style="display: flex; gap: 10px; justify-content: flex-end;">
-                                <button class="btn" id="clearBtn"
-                                    style="width: 44px; height: 44px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.1); color: #ffffff; display: flex; align-items: center; justify-content: center; background: linear-gradient(145deg, #ef4444, #b91c1c); box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4); transition: all 0.2s ease;"
+                                <button class="btn animated-border-purple" id="clearBtn"
+                                    style="width: 44px; height: 44px; border-radius: 10px; color: #ffffff; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4); transition: all 0.2s ease;"
                                     title="تفريغ (Ctrl+L)"
                                     onmousedown="this.style.boxShadow='inset 4px 4px 8px rgba(0,0,0,0.3)'; this.style.transform='translateY(2px)';"
                                     onmouseup="this.style.boxShadow='0 4px 12px rgba(220, 38, 38, 0.4)'; this.style.transform='translateY(0)';">
-                                    <span style="font-size: 20px;">🗑️</span>
+                                    <span style="font-size: 20px; z-index: 2;">🗑️</span>
                                 </button>
 
-                                <button class="btn green" id="addBtn"
-                                    style="min-width: 150px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px; font-weight: 700; background: linear-gradient(145deg, #16a34a, #15803d); box-shadow: 6px 6px 12px rgba(0, 0, 0, 0.4), -3px -3px 8px rgba(34, 197, 94, 0.1); border: 1px solid rgba(255, 255, 255, 0.05); transition: all 0.2s ease;"
+                                <button class="btn green animated-border-purple" id="addBtn"
+                                    style="min-width: 150px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px; font-weight: 700; box-shadow: 6px 6px 12px rgba(0, 0, 0, 0.4), -3px -3px 8px rgba(34, 197, 94, 0.1); transition: all 0.2s ease;"
                                     title="إضافة العملية (Enter)"
                                     onmousedown="this.style.boxShadow='inset 4px 4px 8px rgba(0,0,0,0.4), inset -2px -2px 6px rgba(255,255,255,0.02)'; this.style.transform='translateY(2px)';"
                                     onmouseup="this.style.boxShadow='6px 6px 12px rgba(0,0,0,0.4), -3px -3px 8px rgba(34,197,94,0.1)'; this.style.transform='translateY(0)';">
-                                    <span style="font-size: 18px;">➕</span>
-                                    إضافة العملية
+                                    <span style="font-size: 18px; z-index: 2;">➕</span>
+                                    <span style="z-index: 2;">إضافة العملية</span>
                                 </button>
                             </div>
 
@@ -3278,21 +3445,11 @@
                                     <h3 style="margin:0;">سجل العمليات اليوم</h3>
                                 </div>
                                 <div style="display:flex; gap:6px;">
-                                    <button class="btn" id="sortTableBtn" onclick="toggleSort()"
-                                        style="font-size:13px; font-weight:bold; padding:8px 14px; background: linear-gradient(135deg, #1d4ed8, #3b82f6); border: 1px solid #93c5fd; color: #fff; border-radius: 8px; box-shadow: 0 4px 10px rgba(59,130,246,0.3); transition: all 0.3s;">
-                                        🔄 ترتيب الجدول
+                                    <button class="btn animated-border-gold" onclick="showTableOptionsMenu()"
+                                        style="font-size:13px; font-weight:800; padding:10px 16px; background: linear-gradient(135deg, #1e293b, #334155); color: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: all 0.3s; display: flex; align-items: center; gap: 8px;">
+                                        🛠️ خيارات الجدول
                                     </button>
-                                    <button class="btn" id="exportTableBtn" onclick="exportTableData()"
-                                        style="font-size:13px; font-weight:bold; padding:8px 14px; background: linear-gradient(135deg, #047857, #10b981); border: 1px solid #6ee7b7; color: #fff; border-radius: 8px; box-shadow: 0 4px 10px rgba(16,185,129,0.3); transition: all 0.3s; margin-right: 5px;"
-                                        title="تصدير السجل إلى ملف إكسيل">
-                                        📥 تصدير إكسيل
-                                    </button>
-
-                                    <button class="btn" id="customizeColumnsBtn" onclick="toggleColumnModal()"
-                                        style="font-size:13px; font-weight:bold; padding:8px 14px; background: linear-gradient(135deg, #4b5563, #6b7280); border: 1px solid #9ca3af; color: #fff; border-radius: 8px; box-shadow: 0 4px 10px rgba(75,85,99,0.3); transition: all 0.3s; margin-right: 5px;"
-                                        title="تخصيص أعمدة الجدول">
-                                        ⚙️ تخصيص الأعمدة
-                                    </button>
+                                    <input type="file" id="importExcelInput" accept=".xlsx, .xls, .csv" style="display:none" onchange="importExcelData(event)">
                                 </div>
                             </div>
 
@@ -3392,21 +3549,36 @@
                             <span id="toggleIcon">◀</span>
                         </button>
                         <div class="card" id="summaryCard" style="margin-bottom:16px;">
+                            <h3 style="margin:0 0 15px; font-size:16px; color:var(--gold2); display:flex; align-items:center; gap:8px;">
+                                📊 ملخص مالي سريع
+                            </h3>
                             <div class="summary">
-                                <div class="stat">
-                                    <h4>إجمالي (فوق)</h4>
+                                <div class="stat stat-above">
+                                    <div class="stat-header">
+                                        <div class="stat-icon">🔼</div>
+                                        <h4>إجمالي (فوق)</h4>
+                                    </div>
                                     <p id="sumTop">0</p>
                                 </div>
-                                <div class="stat">
-                                    <h4>إجمالي (تحت)</h4>
+                                <div class="stat stat-below">
+                                    <div class="stat-header">
+                                        <div class="stat-icon">🔽</div>
+                                        <h4>إجمالي (تحت)</h4>
+                                    </div>
                                     <p id="sumBottom">0</p>
                                 </div>
-                                <div class="stat">
-                                    <h4>إجمالي المبيعات</h4>
+                                <div class="stat stat-sales">
+                                    <div class="stat-header">
+                                        <div class="stat-icon">💰</div>
+                                        <h4>إجمالي المبيعات</h4>
+                                    </div>
                                     <p id="salesTotal">0</p>
                                 </div>
-                                <div class="stat" id="diffStat">
-                                    <h4>فرق اليوم (مبيعات − تحت)</h4>
+                                <div class="stat stat-diff" id="diffStat">
+                                    <div class="stat-header">
+                                        <div class="stat-icon">⚖️</div>
+                                        <h4>فرق اليوم</h4>
+                                    </div>
                                     <p id="diffTotal">0</p>
                                 </div>
                             </div>
@@ -3890,8 +4062,8 @@
             if (dateInput) dateInput.value = `${year}-${month}-${day}`;
 
             // تفعيل ميزة العودة التلقائية لتاريخ اليوم (يمكن تعطيلها من الإعدادات)
-            if (!localStorage.getItem('acc_auto_return_today')) {
-                localStorage.setItem('acc_auto_return_today', 'true');
+            if (localStorage.getItem('acc_auto_return_today') === null) {
+                localStorage.setItem('acc_auto_return_today', 'false');
             }
 
             if (typeof loadForDate === 'function') loadForDate();
@@ -4051,31 +4223,33 @@
                 const isCashSpecial = ['كاش', 'فودافون كاش', 'انستا باي', 'انستا'].includes(category.value);
                 if (isCashSpecial && typeof runCashCalc === 'function') runCashCalc();
             });
-            addBtn.addEventListener('click', addTransaction);
-            clearBtn.addEventListener('click', clearInputs);
-            dateInput.addEventListener('change', loadForDate);
-            $('restoreFile').addEventListener('change', importAllData);
-            sortTableBtn.addEventListener('click', toggleSort);
+            // Safe binding helper
+            const safeBind = (id, event, fn) => {
+                const el = $(id);
+                if (el) el.addEventListener(event, fn);
+            };
+
+            safeBind('addBtn', 'click', addTransaction);
+            safeBind('clearBtn', 'click', clearInputs);
+            safeBind('dateInput', 'change', loadForDate);
+            safeBind('restoreFile', 'change', importAllData);
+            if (typeof sortTableBtn !== 'undefined') safeBind('sortTableBtn', 'click', toggleSort);
+            
             const eggBalanceEl = $('eggBalance');
             if (eggBalanceEl) eggBalanceEl.addEventListener('change', saveToStorage);
-            $('calculatorBtn').addEventListener('click', toggleCalculator);
+            
+            safeBind('calculatorBtn', 'click', toggleCalculator);
+            safeBind('headerCalcBtnAction', 'click', toggleCalculator);
+            safeBind('headerCalcBtnSmall', 'click', toggleCalculator);
 
-            // Safe binding for potential missing buttons
-            const notifBtn = $('notificationsBtn');
-            if (notifBtn) notifBtn.addEventListener('click', showNotificationsModal);
-
-            $('searchBtn').addEventListener('click', showSearchModal);
-            exportTableBtn.addEventListener('click', exportTableData);
-            settingsBtn.addEventListener('click', showSettingsModal);
-
-            const syncBtn = $('syncBtn');
-            if (syncBtn) syncBtn.addEventListener('click', manualSync);
-
-            $('screenshotBtn').addEventListener('click', takeScreenshot);
-            $('sidebarToggle').addEventListener('click', toggleSidebar);
-
-            const cloudSyncBtn = $('cloudSyncBtn');
-            if (cloudSyncBtn) cloudSyncBtn.addEventListener('click', showCloudSyncModal);
+            safeBind('notificationsBtn', 'click', showNotificationsModal);
+            safeBind('searchBtn', 'click', showSearchModal);
+            safeBind('exportTableBtn', 'click', exportTableData);
+            safeBind('settingsBtn', 'click', showSettingsModal);
+            safeBind('syncBtn', 'click', manualSync);
+            safeBind('screenshotBtn', 'click', takeScreenshot);
+            safeBind('sidebarToggle', 'click', toggleSidebar);
+            safeBind('cloudSyncBtn', 'click', showCloudSyncModal);
 
             // Quick date filters
             document.querySelectorAll('.quick-date-filters button').forEach(button => {
@@ -4282,8 +4456,8 @@
 
             clearInputs();
 
-            // إعادة التاريخ تلقائياً إلى اليوم بعد الإضافة
-            resetToToday();
+            // التعليق لمنع العودة التلقائية لتاريخ اليوم بعد الإضافة لتمكين إدخال عمليات متعددة لنفس التاريخ
+            // resetToToday();
 
             // Show success message with device info
             const deviceLabel = selectedDevice === 'mobile' ? '📱' : '💻';
@@ -4348,56 +4522,78 @@
             const overlay = document.createElement('div');
             overlay.className = 'modal-overlay';
             overlay.style.zIndex = '1000000';
+            overlay.style.backdropFilter = 'blur(10px)';
 
             const catLower = (op.category || '').toLowerCase();
-            const isCashOrInsta = catLower === 'كاش' || catLower === 'انستا باى' || catLower === 'فودافون كاش' || catLower === 'انستا باي' || catLower === 'انستا';
-            const categoryIcon = op.category === 'مبيعات' ? '💰' : (op.category === 'كاش' ? '💵' : (op.category === 'انستا باى' ? '💜' : '📂'));
+            const isCashOrInsta = ['كاش', 'انستا باى', 'فودافون كاش', 'انستا باي', 'انستا'].includes(catLower);
+            const categoryIcon = op.category === 'مبيعات' ? '💰' : (op.category === 'كاش' ? '💵' : (op.category === 'انستا باى' || op.category === 'انستا' ? '💜' : '📂'));
             
-            // Custom labels based on category
             const topLabel = isCashOrInsta ? '🔼 خدت كام / وارد (فوق)' : '🔼 المبلغ (فوق)';
             const bottomLabel = isCashOrInsta ? '🔽 خد كام / مصروف (تحت)' : '🔽 المبلغ (تحت)';
 
             overlay.innerHTML = `
-        <div class="modal-box edit-mode-active" style="border-radius:24px; border:1px solid #fbbf24; box-shadow: 0 20px 50px rgba(0,0,0,0.6); max-width:450px; direction:rtl; background: #0f172a;">
-            <div style="text-align:center; margin-bottom:20px;">
-                <div style="font-size:40px; margin-bottom:10px;">${categoryIcon}</div>
-                <h3 style="margin:0; color:#fbbf24;">تعديل عملية: ${escapeHtml(op.category)}</h3>
-            </div>
+                <div class="modal-box edit-mode-active" style="border-radius:28px; border:1px solid rgba(251, 191, 36, 0.3); background: linear-gradient(165deg, #0f172a 0%, #1e293b 100%); width:95%; max-width:480px; padding:30px; position:relative; overflow:hidden;">
+                    
+                    <div style="position:absolute; top:-50px; left:-50px; width:150px; height:150px; background:rgba(251, 191, 36, 0.05); filter:blur(40px); border-radius:50%;"></div>
+                    
+                    <div style="text-align:center; margin-bottom:25px; position:relative; z-index:1;">
+                        <div style="width:70px; height:70px; background:rgba(251, 191, 36, 0.1); border-radius:20px; display:flex; align-items:center; justify-content:center; margin:0 auto 15px; font-size:35px;">
+                            ${categoryIcon}
+                        </div>
+                        <h2 style="margin:0; color:#fbbf24; font-size:20px; font-weight:800;">تعديل العملية المالية</h2>
+                        <p style="margin:5px 0 0; color:#94a3b8; font-size:14px;">تعديل بيانات عملية: ${escapeHtml(op.category)}</p>
+                    </div>
 
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                <div class="field" style="grid-column: 1 / -1; text-align:right;">
-                    <label style="color:#94a3b8; font-size:12px; font-weight:bold; display:block; margin-bottom:5px;">🏷️ الفئة / البند</label>
-                    <input type="text" id="editCategory" value="${escapeHtml(op.category)}" class="custom-input" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); width:100%; color:#fff;">
-                </div>
-                
-                ${isCashOrInsta ? `
-                <div class="field" style="grid-column: 1 / -1; text-align:right;">
-                    <label style="color:#fbbf24; font-size:12px; font-weight:bold; display:block; margin-bottom:5px;">💹 بعت كام (إجمالي المبيعات)</label>
-                    <input type="text" inputmode="decimal" id="editCashSold" value="${op.cashSold || ''}" onblur="evaluateMathInput(this)" class="custom-input" style="background:rgba(245, 158, 11, 0.05); border:1px solid rgba(245, 158, 11, 0.3); width:100%; color:#fbbf24; font-weight:bold;" placeholder="0.00">
-                </div>
-                ` : ''}
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px; position:relative; z-index:1;">
+                        <div class="field" style="grid-column: 1 / -1;">
+                            <label style="color:#94a3b8; font-size:12px; font-weight:700; display:block; margin-bottom:8px; margin-right:5px;">🏷️ الفئة / البند</label>
+                            <input type="text" id="editCategory" value="${escapeHtml(op.category)}" class="custom-input" style="width:100%; border-radius:12px; background:rgba(255,255,255,0.03);">
+                        </div>
+                        
+                        ${isCashOrInsta ? `
+                        <div class="field" style="grid-column: 1 / -1;">
+                            <label style="color:#fbbf24; font-size:12px; font-weight:700; display:block; margin-bottom:8px; margin-right:5px;">💹 إجمالي المبيعات (بعت كام)</label>
+                            <input type="text" inputmode="decimal" id="editCashSold" value="${op.cashSold || ''}" onblur="evaluateMathInput(this)" class="custom-input" style="width:100%; border-radius:12px; background:rgba(245, 158, 11, 0.05); color:#fbbf24; font-weight:800;">
+                        </div>
+                        ` : ''}
 
-                <div class="field" style="text-align:right;">
-                    <label style="color:#4ade80; font-size:12px; font-weight:bold; display:block; margin-bottom:5px;">${topLabel}</label>
-                    <input type="text" inputmode="decimal" id="editAmtTop" value="${op.top || ''}" onblur="evaluateMathInput(this)" class="custom-input" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); width:100%; color:#4ade80; font-weight:bold;" ${op.category === 'مبيعات' ? 'disabled placeholder="غير مسموح"' : ''}>
-                </div>
-                <div class="field" style="text-align:right;">
-                    <label style="color:#f87171; font-size:12px; font-weight:bold; display:block; margin-bottom:5px;">${bottomLabel}</label>
-                    <input type="text" inputmode="decimal" id="editAmtBottom" value="${op.bottom || ''}" onblur="evaluateMathInput(this)" class="custom-input" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); width:100%; color:#f87171; font-weight:bold;">
-                </div>
-                <div class="field" style="grid-column: 1 / -1; text-align:right;">
-                    <label style="color:#94a3b8; font-size:12px; font-weight:bold; display:block; margin-bottom:5px;">📝 الملاحظات التفصيلية</label>
-                    <input type="text" id="editNotes" value="${escapeHtml(op.notes)}" class="custom-input" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); width:100%; color:#fff;" placeholder="اضف ملاحظة هنا...">
-                </div>
-            </div>
+                        <div class="field">
+                            <label style="color:#4ade80; font-size:12px; font-weight:700; display:block; margin-bottom:8px; margin-right:5px;">${topLabel}</label>
+                            <input type="text" inputmode="decimal" id="editAmtTop" value="${op.top || ''}" onblur="evaluateMathInput(this)" class="custom-input" style="width:100%; border-radius:12px; background:rgba(255,255,255,0.03); color:#4ade80; font-weight:800;" ${op.category === 'مبيعات' ? 'disabled placeholder="-"' : ''}>
+                        </div>
+                        <div class="field">
+                            <label style="color:#f87171; font-size:12px; font-weight:700; display:block; margin-bottom:8px; margin-right:5px;">${bottomLabel}</label>
+                            <input type="text" inputmode="decimal" id="editAmtBottom" value="${op.bottom || ''}" onblur="evaluateMathInput(this)" class="custom-input" style="width:100%; border-radius:12px; background:rgba(255,255,255,0.03); color:#f87171; font-weight:800;">
+                        </div>
+                        
+                        <div class="field" style="grid-column: 1 / -1;">
+                            <label style="color:#94a3b8; font-size:12px; font-weight:700; display:block; margin-bottom:8px; margin-right:5px;">📝 الملاحظات</label>
+                            <input type="text" id="editNotes" value="${escapeHtml(op.notes)}" class="custom-input" style="width:100%; border-radius:12px; background:rgba(255,255,255,0.03);">
+                        </div>
+                    </div>
 
-            <div style="margin-top:25px; display:flex; gap:12px;">
-                <button class="btn" id="saveEditBtn" style="flex:2; background:linear-gradient(90deg, #10b981, #059669); color:#fff; font-weight:900; padding:12px; border-radius:12px; border:none; cursor:pointer; box-shadow:0 4px 15px rgba(16, 185, 129, 0.3);">💾 حفظ التعديلات</button>
-                <button class="btn" id="cancelEditBtn" style="flex:1; background:rgba(255,255,255,0.05); color:#fff; padding:12px; border:1px solid rgba(255,255,255,0.1); border-radius:12px; cursor:pointer; font-weight: bold;">إلغاء</button>
-            </div>
-        </div>
-    `;
+                    <div style="margin-top:30px; display:flex; gap:12px; position:relative; z-index:1;">
+                        <button class="btn animated-border-gold" id="saveEditBtn" style="flex:2; height:50px; border-radius:15px; border:none; color:#fff; font-weight:800; cursor:pointer;">
+                            💾 حفظ التعديلات
+                        </button>
+                        <button class="btn" id="cancelEditBtn" style="flex:1; height:50px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:15px; color:#94a3b8; font-weight:700; cursor:pointer;">
+                            إلغاء
+                        </button>
+                    </div>
+                </div>
+            `;
             document.body.appendChild(overlay);
+
+            // Add Enter to save listener inside modal
+            overlay.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    $("saveEditBtn").click();
+                }
+                if (e.key === 'Escape') {
+                    $("cancelEditBtn").click();
+                }
+            });
 
             $("editCategory").oninput = (e) => {
                 const isSales = e.target.value.trim() === 'مبيعات';
@@ -4405,7 +4601,7 @@
                 if (isSales) {
                     topInput.value = '';
                     topInput.disabled = true;
-                    topInput.placeholder = "غير مسموح";
+                    topInput.placeholder = "-";
                 } else {
                     topInput.disabled = false;
                     topInput.placeholder = "";
@@ -6318,9 +6514,152 @@
                 if (typeof beep === 'function') beep(1200, 0.05, 0.08);
             } catch (err) {
                 console.error('Export Error:', err);
-                alert('خطأ في التصدير: ' + err.message);
+                showToast('❌ خطأ أثناء التصدير', 'error');
             }
-        }
+        };
+
+        window.importExcelData = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            showToast('⏳ جاري تحليل ملف البيانات...', 'info');
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    let workbook;
+                    try {
+                        workbook = XLSX.read(data, { type: 'array', codepage: 1256 }); // Try Arabic codepage
+                    } catch (readErr) {
+                        workbook = XLSX.read(data, { type: 'array' });
+                    }
+
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false });
+
+                    if (!jsonData || jsonData.length < 1) {
+                        showToast('❌ الملف لا يحتوي على أي صفوف صالحة', 'error');
+                        return;
+                    }
+
+                    // 1. Extreme Robust Header Search (Scan up to 50 rows)
+                    const categoryKeywords = ['الفئة', 'بند', 'البند', 'الصنف', 'النوع', 'نوع', 'العملية', 'category', 'item', 'name', 'desc', 'بيان', 'البيان', 'مبيعات'];
+                    const topKeywords = ['فوق', 'وارد', 'داخل', 'ايداع', 'مقبوضات', 'إيراد', 'top', 'in', 'received', 'plus', 'إجمالي فوق'];
+                    const bottomKeywords = ['تحت', 'صرف', 'خارج', 'سحب', 'مدفوعات', 'مصروف', 'bottom', 'out', 'spent', 'minus', 'خد كام', 'إجمالي تحت'];
+                    const notesKeywords = ['ملاحظة', 'ملاحظات', 'التفاصيل', 'بيان التفاصيل', 'notes', 'details', 'comment'];
+                    const amountKeywords = ['المبلغ', 'القيمة', 'سعر', 'اجمالي', 'amount', 'total', 'price', 'value'];
+
+                    let headerRowIndex = -1;
+                    let headers = [];
+                    let idxCategory = -1, idxTop = -1, idxBottom = -1, idxNotes = -1, idxAmount = -1;
+
+                    // Scan up to 50 rows to find the headers
+                    for (let r = 0; r < Math.min(jsonData.length, 50); r++) {
+                        let row = jsonData[r];
+                        if (!row || row.length === 0) continue;
+
+                        // Support for files where XLSX might import a CSV as a single cell (handle semicolon/comma)
+                        if (row.length === 1 && String(row[0]).includes(';')) {
+                            row = String(row[0]).split(';');
+                        } else if (row.length === 1 && String(row[0]).includes(',') && !String(row[0]).includes('/')) {
+                            row = String(row[0]).split(',');
+                        }
+
+                        const cleanRow = row.map(h => String(h || '').trim().toLowerCase());
+                        
+                        const foundCat = cleanRow.findIndex(h => categoryKeywords.some(k => h.includes(k)));
+                        const foundTop = cleanRow.findIndex(h => topKeywords.some(k => h.includes(k)));
+                        const foundBottom = cleanRow.findIndex(h => bottomKeywords.some(k => h.includes(k)));
+                        const foundAmt = cleanRow.findIndex(h => amountKeywords.some(k => h.includes(k)));
+
+                        // If we find category and at least one money-related column, this is our header row
+                        if (foundCat !== -1 && (foundTop !== -1 || foundBottom !== -1 || foundAmt !== -1)) {
+                            headerRowIndex = r;
+                            headers = row.map(h => String(h || '').trim());
+                            idxCategory = foundCat;
+                            idxTop = foundTop;
+                            idxBottom = foundBottom;
+                            idxAmount = foundAmt;
+                            idxNotes = cleanRow.findIndex(h => notesKeywords.some(k => h.includes(k)));
+                            break;
+                        }
+                    }
+
+                    if (headerRowIndex === -1) {
+                        const firstThree = (jsonData[0] || []).slice(0, 3).map(h => String(h || '').trim());
+                        const foundHeadersText = firstThree.join(' | ');
+                        showToast(`❌ لم نتمكن من العثور على عناوين واضحة. وجدنا في البداية: (${foundHeadersText || 'فراغ'}).`, 'warning');
+                        console.log('Fuzzy Search failed after 50 rows. jsonData[0]:', jsonData[0]);
+                        return;
+                    }
+
+                    let importedCount = 0;
+                    const timestamp = new Date().toISOString();
+                    const nowMillis = Date.now();
+                    const newRecords = [];
+
+                    for (let i = headerRowIndex + 1; i < jsonData.length; i++) {
+                        const row = jsonData[i];
+                        if (!row || row.length === 0) continue;
+
+                        const categoryValue = String(row[idxCategory] || '').trim();
+                        if (!categoryValue || categoryValue === 'م' || categoryValue === 'الفئة') continue;
+
+                        let topValue = 0, bottomValue = 0;
+                        if (idxTop !== -1) topValue = parseFloat(String(row[idxTop]).replace(/[^0-9.]/g, '')) || 0;
+                        if (idxBottom !== -1) bottomValue = parseFloat(String(row[idxBottom]).replace(/[^0-9.]/g, '')) || 0;
+                        
+                        // If only "Amount" column exists, put it in Bottom or check sign
+                        if (idxAmount !== -1 && topValue === 0 && bottomValue === 0) {
+                            const amt = parseFloat(String(row[idxAmount]).replace(/[^0-9.]/g, '')) || 0;
+                            bottomValue = amt;
+                        }
+
+                        const notesValue = idxNotes !== -1 ? String(row[idxNotes] || '').trim() : '';
+
+                        newRecords.push({
+                            id: 'op-' + (nowMillis + i) + '-' + Math.random().toString(16).slice(2),
+                            timestamp: timestamp,
+                            category: categoryValue,
+                            top: topValue,
+                            bottom: bottomValue,
+                            notes: notesValue,
+                            device: 'استيراد إكسيل',
+                            user: localStorage.getItem('acc_current_user_name') || 'نظام',
+                            lastEditTime: null
+                        });
+                        importedCount++;
+                    }
+
+                    if (newRecords.length > 0) {
+                        if (confirm(`📦 تم العثور على ${importedCount} عملية. هل تريد إضافتها لسجل اليوم؟`)) {
+                            // Using window.records to ensure global access if needed
+                            if (typeof records !== 'undefined') {
+                                records.push(...newRecords);
+                                saveToStorage();
+                                if (window.saveToCloud) window.saveToCloud();
+                                render();
+                                showToast(`✅ تم استيراد ${importedCount} عملية بنجاح`, 'success');
+                                if (typeof beep === 'function') beep(800, 0.05, 0.08);
+                            } else {
+                                showToast('❌ خطأ في النظام: لم يتم العثور على قاعدة البيانات الحالية', 'error');
+                            }
+                        }
+                    } else {
+                        showToast('ℹ️ لم يتم العثور على بيانات صالحة للاستيراد في هذا الملف', 'info');
+                    }
+                    
+                    event.target.value = ''; 
+                } catch (err) {
+                    console.error('Import Error:', err);
+                    showToast('❌ فشل الاستيراد: يرجى التأكد من أن الملف هو إكسيل صحيح', 'error');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        };
+
 
         /* ---------- Sharing ---------- */
         function shareToWhatsApp() {
@@ -10644,61 +10983,224 @@ ${records.length < 3 ? '• زد من عدد العمليات اليومية' : 
 
         function toggleCalculator() {
             createCalculatorHTML(); // Ensure it exists
-            const calculatorCard = $('calculatorCard');
+            const calculatorCard = document.getElementById('calculatorCard');
+            if (!calculatorCard) return;
+
             const isVisible = calculatorCard.style.display !== 'none';
-            calculatorCard.style.display = isVisible ? 'none' : 'block';
-            beep(1200, 0.04, 0.06);
+            
+            if (isVisible) {
+                // Hide
+                calculatorCard.style.transform = 'translateY(20px)';
+                calculatorCard.style.opacity = '0';
+                setTimeout(() => {
+                    calculatorCard.style.display = 'none';
+                }, 300);
+            } else {
+                // Show
+                calculatorCard.style.display = 'block';
+                setTimeout(() => {
+                    calculatorCard.style.transform = 'translateY(0)';
+                    calculatorCard.style.opacity = '1';
+                }, 10);
+                if (typeof beep === 'function') beep(1200, 0.04, 0.06);
+            }
         }
 
         function createCalculatorHTML() {
             if (document.getElementById('calculatorCard')) return;
 
             const calcHTML = `
-            <div id="calculatorCard" style="display:none; position: fixed; bottom: 80px; left: 20px; z-index: 999; 
-                background: #1e1e1e; border: 1px solid #333; border-radius: 16px; padding: 15px; 
-                box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 260px; font-family: sans-serif;">
-                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                    <div style="color:#fff; font-weight:bold;">🧮 الآلة الحاسبة</div>
-                    <button onclick="toggleCalculator()" style="background:none; border:none; color:#aaa; cursor:pointer; font-size:18px;">✖</button>
+            <div id="calculatorCard" style="display:none; position: fixed; bottom: 85px; left: 25px; z-index: 9999; 
+                background: rgba(30, 30, 38, 0.85); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); 
+                border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 20px; 
+                box-shadow: 0 25px 60px rgba(0,0,0,0.6); width: 300px; font-family: 'Inter', sans-serif;
+                transform: translateY(20px); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; cursor: move;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 20px;">🧮</span>
+                        <div style="color:#fff; font-weight:800; font-size:16px;">الآلة الحاسبة</div>
+                    </div>
+                    <button onclick="toggleCalculator()" style="background:rgba(255,255,255,0.05); border:none; color:#ef4444; cursor:pointer; font-size:16px; width:30px; height:30px; border-radius:10px; display:flex; align-items:center; justify-content:center; transition:0.2s;">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
-                <input type="text" id="calcDisplay" readonly style="width:100%; background:#000; color:#0f0; border:none; padding:10px; font-family:monospace; font-size:20px; text-align:right; margin-bottom:10px; border-radius:8px; box-sizing: border-box;">
-                <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:8px;">
-                    <button onclick="calcClear()" class="btn-calc" style="background:#dc2626;">C</button>
-                    <button onclick="pressCalc('(')" class="btn-calc" style="background:#4b5563;">(</button>
-                    <button onclick="pressCalc(')')" class="btn-calc" style="background:#4b5563;">)</button>
-                    <button onclick="pressCalc('/')" class="btn-calc" style="background:#f59e0b;">÷</button>
+
+                <div style="position: relative; margin-bottom: 20px;">
+                    <input type="text" id="calcDisplay" readonly placeholder="0" 
+                        style="width:100%; height:70px; background:rgba(0,0,0,0.35); color:#ffffff; border:1px solid rgba(255,255,255,0.05); padding:15px; font-family:'Courier New', monospace; font-size:28px; text-align:right; border-radius:18px; box-sizing: border-box; outline:none; font-weight:700; box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);">
+                </div>
+
+                <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px;">
+                    <button onclick="calcClear()" class="btn-calc btn-calc-danger">AC</button>
+                    <button onclick="pressCalc('(')" class="btn-calc btn-calc-op">(</button>
+                    <button onclick="pressCalc(')')" class="btn-calc btn-calc-op">)</button>
+                    <button onclick="pressCalc('/')" class="btn-calc btn-calc-op">÷</button>
                     
                     <button onclick="pressCalc('7')" class="btn-calc">7</button>
                     <button onclick="pressCalc('8')" class="btn-calc">8</button>
                     <button onclick="pressCalc('9')" class="btn-calc">9</button>
-                    <button onclick="pressCalc('*')" class="btn-calc" style="background:#f59e0b;">×</button>
+                    <button onclick="pressCalc('*')" class="btn-calc btn-calc-op">×</button>
                     
                     <button onclick="pressCalc('4')" class="btn-calc">4</button>
                     <button onclick="pressCalc('5')" class="btn-calc">5</button>
                     <button onclick="pressCalc('6')" class="btn-calc">6</button>
-                    <button onclick="pressCalc('-')" class="btn-calc" style="background:#f59e0b;">-</button>
+                    <button onclick="pressCalc('-')" class="btn-calc btn-calc-op">-</button>
                     
                     <button onclick="pressCalc('1')" class="btn-calc">1</button>
                     <button onclick="pressCalc('2')" class="btn-calc">2</button>
                     <button onclick="pressCalc('3')" class="btn-calc">3</button>
-                    <button onclick="pressCalc('+')" class="btn-calc" style="background:#f59e0b;">+</button>
+                    <button onclick="pressCalc('+')" class="btn-calc btn-calc-op">+</button>
                     
-                    <button onclick="pressCalc('0')" class="btn-calc" style="grid-column: span 2;">0</button>
+                    <button onclick="pressCalc('0')" class="btn-calc btn-calc-zero">0</button>
                     <button onclick="pressCalc('.')" class="btn-calc">.</button>
-                    <button onclick="calcResult()" class="btn-calc" style="background:#22c55e;">=</button>
+                    <button onclick="calcResult()" class="btn-calc btn-calc-success">=</button>
                 </div>
+
+                <div style="margin-top: 15px; text-align: center; font-size: 11px; color: rgba(255,255,255,0.3); letter-spacing: 0.5px;">
+                    <i class="fas fa-keyboard" style="margin-left: 5px;"></i> تفاعلية بالكامل عبر لوحة المفاتيح
+                </div>
+
                 <style>
-                    .btn-calc { padding: 10px; border: none; border-radius: 8px; background: #374151; color: white; font-size: 16px; cursor: pointer; transition: 0.2s; }
-                    .btn-calc:active { transform: scale(0.95); }
+                    .btn-calc { 
+                        height: 52px; border: none; border-radius: 14px; 
+                        background: rgba(255,255,255,0.06); color: white; 
+                        font-size: 18px; font-weight: 700; cursor: pointer; 
+                        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                        border: 1px solid rgba(255,255,255,0.05);
+                        user-select: none;
+                    }
+                    .btn-calc:hover { background: rgba(255,255,255,0.12); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+                    .btn-calc:active { transform: scale(0.92); }
+                    
+                    .btn-calc-op { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.2); }
+                    .btn-calc-op:hover { background: rgba(245, 158, 11, 0.25); }
+                    
+                    .btn-calc-danger { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); }
+                    .btn-calc-danger:hover { background: rgba(239, 68, 68, 0.25); }
+                    
+                    .btn-calc-success { background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; box-shadow: 0 4px 15px rgba(16,185,129,0.3); }
+                    .btn-calc-success:hover { box-shadow: 0 6px 20px rgba(16,185,129,0.4); }
+                    
+                    .btn-calc-zero { grid-column: span 1; }
                 </style>
             </div>
             `;
             document.body.insertAdjacentHTML('beforeend', calcHTML);
+
+            // Add Keyboard Support for Calculator
+            window.addEventListener('keydown', (e) => {
+                const calc = document.getElementById('calculatorCard');
+                if (!calc || calc.style.display === 'none') return;
+
+                // Numbers
+                if (/[0-9]/.test(e.key)) {
+                    pressCalc(e.key);
+                    return;
+                }
+                // Operators
+                if (['+', '-', '*', '/', '(', ')', '.'].includes(e.key)) {
+                    pressCalc(e.key);
+                    return;
+                }
+                // Actions
+                if (e.key === 'Enter' || e.key === '=') {
+                    e.preventDefault();
+                    calcResult();
+                } else if (e.key === 'Backspace') {
+                    e.preventDefault();
+                    if (calcStr.length > 0) {
+                        calcStr = calcStr.slice(0, -1);
+                        $('calcDisplay').value = calcStr;
+                    }
+                } else if (e.key === 'Escape') {
+                    toggleCalculator();
+                } else if (e.key === 'Delete' || e.key === 'c' || e.key === 'C') {
+                    calcClear();
+                }
+            });
         }
 
         function calcClear() {
             calcStr = '';
             if ($('calcDisplay')) $('calcDisplay').value = '';
+        }
+
+        function showTableOptionsMenu() {
+            const modal = document.createElement('div');
+            modal.className = 'ai-modal-overlay';
+            modal.style.zIndex = '10001';
+            modal.innerHTML = `
+                <div class="ai-modal-box" style="max-width: 450px; background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(255,215,0,0.3);">
+                    <div class="ai-modal-header">
+                        <div class="ai-modal-title">🛠️ خيارات إعدادات الجدول</div>
+                        <button class="ai-modal-close" onclick="this.closest('.ai-modal-overlay').remove()">×</button>
+                    </div>
+                    <div style="padding: 20px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        
+                        <button class="opt-card" onclick="this.closest('.ai-modal-overlay').remove(); toggleSort();">
+                            <div class="opt-icon" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6;">🔄</div>
+                            <div class="opt-label">ترتيب الجدول</div>
+                            <div class="opt-sub">فرز تصاعدي/تنازلي</div>
+                        </button>
+                        
+                        <button class="opt-card" onclick="this.closest('.ai-modal-overlay').remove(); exportTableData();">
+                            <div class="opt-icon" style="background: rgba(16, 185, 129, 0.2); color: #10b981;">📥</div>
+                            <div class="opt-label">تصدير إكسيل</div>
+                            <div class="opt-sub">حفظ البيانات كملف</div>
+                        </button>
+                        
+                        <button class="opt-card" onclick="this.closest('.ai-modal-overlay').remove(); document.getElementById('importExcelInput').click();">
+                            <div class="opt-icon" style="background: rgba(139, 92, 246, 0.2); color: #8b5cf6;">📤</div>
+                            <div class="opt-label">استيراد بيانات</div>
+                            <div class="opt-sub">رفع من ملف خارجي</div>
+                        </button>
+                        
+                        <button class="opt-card" onclick="this.closest('.ai-modal-overlay').remove(); toggleColumnModal();">
+                            <div class="opt-icon" style="background: rgba(107, 114, 128, 0.2); color: #9ca3af;">⚙️</div>
+                            <div class="opt-label">تخصيص الأعمدة</div>
+                            <div class="opt-sub">إظهار/إخفاء الحقول</div>
+                        </button>
+
+                    </div>
+                    <style>
+                        .opt-card {
+                            background: rgba(255,255,255,0.05);
+                            border: 1px solid rgba(255,255,255,0.1);
+                            border-radius: 16px;
+                            padding: 15px;
+                            text-align: center;
+                            cursor: pointer;
+                            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            gap: 8px;
+                            color: white;
+                        }
+                        .opt-card:hover {
+                            background: rgba(255,255,255,0.1);
+                            transform: translateY(-5px);
+                            border-color: rgba(255,215,0,0.5);
+                            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+                        }
+                        .opt-icon {
+                            width: 45px;
+                            height: 45px;
+                            border-radius: 12px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 22px;
+                            margin-bottom: 5px;
+                        }
+                        .opt-label { font-weight: bold; font-size: 14px; }
+                        .opt-sub { font-size: 11px; opacity: 0.6; }
+                    </style>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            if (typeof beep === 'function') beep(1000, 0.05, 0.08);
         }
 
         function toggleSidebar() {
@@ -12611,51 +13113,6 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
             if (errorDiv) errorDiv.style.display = 'none';
         }
         function flashStage() { const el = document.querySelector('.stage'); el.classList.add('pulse'); setTimeout(() => el.classList.remove('pulse'), 350); }
-
-        // Show toast notification (Robust Global Version)
-        window.showToast = function(message, type = 'info') {
-            try {
-                const toast = document.createElement('div');
-                toast.style.cssText = `
-                    position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    padding: 12px 20px;
-                    border-radius: 10px;
-                    color: white;
-                    font-weight: bold;
-                    z-index: 999999;
-                    max-width: 320px;
-                    word-wrap: break-word;
-                    animation: slideInRight 0.3s ease-out;
-                    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-                    font-family: 'El Messiri', sans-serif;
-                    direction: rtl;
-                `;
-
-                const colors = {
-                    success: '#10b981',
-                    error: '#ef4444',
-                    warning: '#f59e0b',
-                    info: '#3b82f6'
-                };
-
-                toast.style.backgroundColor = colors[type] || colors.info;
-                toast.innerHTML = (type === 'success' ? '✅ ' : (type === 'error' ? '❌ ' : '🔔 ')) + message;
-
-                document.body.appendChild(toast);
-
-                setTimeout(() => {
-                    toast.style.animation = 'slideOutRight 0.3s ease-in forwards';
-                    setTimeout(() => {
-                        if (toast.parentNode) toast.parentNode.removeChild(toast);
-                    }, 300);
-                }, 4000);
-            } catch (e) {
-                console.error('showToast Error:', e);
-                alert(message);
-            }
-        };
 
         // Export everything else to window
         window.showFormMessage = showFormMessage;
@@ -15047,10 +15504,28 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
     }
 </style>
 
-<button id="calculatorBtn" onclick="toggleCalculator()"
-    style="position: fixed; bottom: 20px; left: 20px; z-index: 1000; padding: 12px 20px; background: #0045da; color: white; border-radius: 30px; border: none; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: transform 0.2s; font-size: 14px; display: flex; align-items: center; gap: 8px;">
-    <span>🧮</span> الآلة الحاسبة المطورة
+<button id="calculatorBtn"
+    style="position: fixed; bottom: 25px; left: 25px; z-index: 9999; padding: 15px 25px; background: linear-gradient(135deg, #0045da, #1e3a8a); color: white; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); font-weight: 800; box-shadow: 0 10px 30px rgba(0,69,218,0.4); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); font-size: 16px; display: flex; align-items: center; gap: 10px; cursor: pointer; animation: calc-float 3s ease-in-out infinite;">
+    <span style="font-size: 22px;">🧮</span> الآلة الحاسبة
 </button>
+
+<style>
+    @keyframes calc-float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+    }
+    #calculatorBtn:hover { transform: scale(1.05) translateY(-5px); box-shadow: 0 15px 40px rgba(0,69,218,0.6); }
+</style>
+
+<script>
+    // Global Shortcut for Calculator
+    window.addEventListener('keydown', (e) => {
+        if (e.altKey && (e.key === 'c' || e.key === 'C' || e.key === 'ؤ' || e.key === 'ء')) {
+            e.preventDefault();
+            toggleCalculator();
+        }
+    });
+</script>
 
 <script>
     // Layout Mode Toggle Script
