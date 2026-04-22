@@ -3,7 +3,7 @@ const DB_NAME = 'BayanLocalDB';
 const DB_VERSION = 1;
 const STORE_NAME = 'transactions';
 
-let db;
+let localIndexedDB;
 const request = indexedDB.open(DB_NAME, DB_VERSION);
 
 request.onupgradeneeded = (event) => {
@@ -14,7 +14,7 @@ request.onupgradeneeded = (event) => {
 };
 
 request.onsuccess = (event) => {
-    db = event.target.result;
+    localIndexedDB = event.target.result;
     console.log('✅ IndexedDB Initialized');
 };
 
@@ -23,11 +23,28 @@ const DB_API = {
     baseURL: window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : 'https://your-api-domain.com/api',
     isConnected: false,
 
+    // جلب السريال من الجهاز
+    getSerial() {
+        return localStorage.getItem('app_auth_serial') || 'NO_SERIAL';
+    },
+
+    // إعداد الهيدرز مع السريال
+    getHeaders() {
+        return {
+            'Content-Type': 'application/json',
+            'X-App-Serial': this.getSerial()
+        };
+    },
+
     async checkConnection() {
         try {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 3000);
-            const response = await fetch(`${this.baseURL}/status`, { signal: controller.signal });
+            const response = await fetch(`${this.baseURL}/status`, { 
+                method: 'GET',
+                headers: this.getHeaders(),
+                signal: controller.signal 
+            });
             clearTimeout(timeoutId);
             const data = await response.json();
             this.isConnected = data.online;
@@ -41,8 +58,8 @@ const DB_API = {
 
     // حفظ في IndexedDB
     async saveLocal(transaction) {
-        if (!db) return;
-        const tx = db.transaction(STORE_NAME, 'readwrite');
+        if (!localIndexedDB) return;
+        const tx = localIndexedDB.transaction(STORE_NAME, 'readwrite');
         const store = tx.objectStore(STORE_NAME);
         store.put(transaction);
         return tx.complete;
@@ -51,8 +68,8 @@ const DB_API = {
     // جلب من IndexedDB
     async getLocalAll() {
         return new Promise((resolve) => {
-            if (!db) return resolve([]);
-            const tx = db.transaction(STORE_NAME, 'readonly');
+            if (!localIndexedDB) return resolve([]);
+            const tx = localIndexedDB.transaction(STORE_NAME, 'readonly');
             const store = tx.objectStore(STORE_NAME);
             const request = store.getAll();
             request.onsuccess = () => resolve(request.result);
@@ -68,7 +85,7 @@ const DB_API = {
         try {
             const response = await fetch(`${this.baseURL}/transactions`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: this.getHeaders(),
                 body: JSON.stringify(transaction)
             });
             return await response.json();
@@ -81,7 +98,10 @@ const DB_API = {
         // إذا كان هناك إنترنت، اجلب من السيرفر، وإلا فمن IndexedDB
         if (this.isConnected) {
             try {
-                const response = await fetch(`${this.baseURL}/transactions`, { cache: 'no-store' });
+                const response = await fetch(`${this.baseURL}/transactions`, { 
+                    headers: this.getHeaders(),
+                    cache: 'no-store' 
+                });
                 const data = await response.json();
                 // حدث المخزن المحلي بالبيانات الجديدة
                 for (const item of data) await this.saveLocal(item);
@@ -95,15 +115,18 @@ const DB_API = {
 
     async deleteTransaction(id) {
         // حذف محلي
-        if (db) {
-            const tx = db.transaction(STORE_NAME, 'readwrite');
+        if (localIndexedDB) {
+            const tx = localIndexedDB.transaction(STORE_NAME, 'readwrite');
             tx.objectStore(STORE_NAME).delete(id);
         }
 
         if (!this.isConnected) return { success: true, local: true };
 
         try {
-            await fetch(`${this.baseURL}/transactions/${id}`, { method: 'DELETE' });
+            await fetch(`${this.baseURL}/transactions/${id}`, { 
+                method: 'DELETE',
+                headers: this.getHeaders()
+            });
             return { success: true };
         } catch (error) {
             return { success: false };
@@ -114,7 +137,10 @@ const DB_API = {
     async getAllUsers() {
         if (!this.isConnected) return null;
         try {
-            const response = await fetch(`${this.baseURL}/users`, { cache: 'no-store' });
+            const response = await fetch(`${this.baseURL}/users`, { 
+                headers: this.getHeaders(),
+                cache: 'no-store' 
+            });
             return await response.json();
         } catch (error) {
             console.error('❌ خطأ في جلب المستخدمين:', error);
@@ -127,7 +153,7 @@ const DB_API = {
         try {
             const response = await fetch(`${this.baseURL}/users`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: this.getHeaders(),
                 body: JSON.stringify(user)
             });
             return await response.json();
@@ -140,7 +166,10 @@ const DB_API = {
     async deleteUser(id) {
         if (!this.isConnected) return { success: true, local: true };
         try {
-            const response = await fetch(`${this.baseURL}/users/${id}`, { method: 'DELETE' });
+            const response = await fetch(`${this.baseURL}/users/${id}`, { 
+                method: 'DELETE',
+                headers: this.getHeaders()
+            });
             return await response.json();
         } catch (error) {
             console.error('❌ خطأ في حذف المستخدم:', error);
@@ -152,7 +181,10 @@ const DB_API = {
     async getAllInventory() {
         if (!this.isConnected) return null;
         try {
-            const response = await fetch(`${this.baseURL}/inventory`, { cache: 'no-store' });
+            const response = await fetch(`${this.baseURL}/inventory`, { 
+                headers: this.getHeaders(),
+                cache: 'no-store' 
+            });
             return await response.json();
         } catch (error) {
             console.error('❌ خطأ في جلب المخزون:', error);
@@ -165,7 +197,7 @@ const DB_API = {
         try {
             const response = await fetch(`${this.baseURL}/inventory`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: this.getHeaders(),
                 body: JSON.stringify(item)
             });
             return await response.json();
@@ -228,7 +260,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // 2. مزامنة المستخدمين
         const dbUsers = await DB_API.getAllUsers();
         if (dbUsers && dbUsers.length > 0) {
-            localStorage.setItem('acc_users', JSON.stringify(dbUsers));
+            localStorage.setItem('acc_bayan_users', JSON.stringify(dbUsers));
             window.currentUserList = dbUsers;
         }
 
