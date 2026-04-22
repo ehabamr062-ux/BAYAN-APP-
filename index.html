@@ -644,36 +644,38 @@
             flex-shrink: 0;
         }
 
-        /* --- Premium Slim Gold Scrollbar --- */
-        *::-webkit-scrollbar {
-            width: 10px !important;
-            height: 10px !important;
+        /* --- Premium Fast & Sleek Scrollbar --- */
+        ::-webkit-scrollbar {
+            width: 6px !important;
+            height: 6px !important;
             display: block !important;
         }
 
-        *::-webkit-scrollbar-track {
-            background: #0f172a !important;
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.1) !important;
             border-radius: 10px !important;
         }
 
-        *::-webkit-scrollbar-thumb {
-            background: #fbbf24 !important;
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #fbbf24, #f59e0b) !important;
             border-radius: 10px !important;
-            border: 2px solid #0f172a !important;
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.5) !important;
+            border: 1px solid rgba(255,255,255,0.1) !important;
         }
 
-        *::-webkit-scrollbar-thumb:hover {
-            background: #d4af37 !important;
-        }
-
-        *::-webkit-scrollbar-button {
-            display: none !important;
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ffffff !important;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.8) !important;
         }
 
         /* Firefox Support */
         * {
             scrollbar-width: thin;
-            scrollbar-color: #fbbf24 #0f172a;
+            scrollbar-color: #fbbf24 rgba(15, 23, 42, 0.1);
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
 
         .header-avatar {
@@ -1673,11 +1675,13 @@
         }
 
         thead th {
-            background: #000000;
+            background: #064e3b; /* أخضر غامق فخم */
             color: #fff;
-            padding: 12px;
+            padding: 14px 10px;
             text-align: center;
-            font-weight: 600;
+            font-weight: 700;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            font-size: 13px;
         }
 
         tbody td {
@@ -3286,8 +3290,8 @@
                             <i class="fa-solid fa-gem" style="font-size: 12px;"></i>
                             <span>ترخيص فعال (Enterprise)</span>
                         </div>
-                        <div id="networkStatus" class="status-pill" style="background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.3); color: #4ade80; display: flex; align-items: center; gap: 8px;">
-                            <i class="fa-solid fa-wifi" style="font-size: 11px; animation: pulse 2s infinite;"></i>
+                        <div id="networkStatus" class="status-pill" style="background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.3); color: #4ade80; display: flex; align-items: center; gap: 8px; transition: all 0.4s ease;">
+                            <i id="networkStatusIcon" class="fa-solid fa-wifi" style="font-size: 11px; animation: pulse 2s infinite;"></i>
                             <span id="networkStatusText">متصل</span>
                         </div>
                     </div>
@@ -3466,6 +3470,60 @@
                                     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
                                     font-weight: 700;
                                 }
+
+                                /* Horizontal Category Bar Styles */
+                                .horizontal-category-bar {
+                                    display: flex;
+                                    gap: 12px;
+                                    overflow-x: auto;
+                                    padding: 10px 5px;
+                                    margin-top: 5px;
+                                    scrollbar-width: thin;
+                                    scrollbar-color: rgba(251, 191, 36, 0.5) transparent;
+                                }
+                                .horizontal-category-bar::-webkit-scrollbar {
+                                    height: 4px;
+                                }
+                                .horizontal-category-bar::-webkit-scrollbar-thumb {
+                                    background: rgba(251, 191, 36, 0.5);
+                                    border-radius: 10px;
+                                }
+                                .category-btn {
+                                    flex: 0 0 auto;
+                                    padding: 12px 20px;
+                                    border-radius: 14px;
+                                    background: rgba(255, 255, 255, 0.05);
+                                    border: 1px solid rgba(255, 255, 255, 0.1);
+                                    color: #fff;
+                                    cursor: pointer;
+                                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                                    white-space: nowrap;
+                                    display: flex;
+                                    flex-direction: column;
+                                    align-items: center;
+                                    gap: 6px;
+                                    min-width: 90px;
+                                    text-align: center;
+                                }
+                                .category-btn:hover {
+                                    background: rgba(255, 255, 255, 0.1);
+                                    border-color: rgba(251, 191, 36, 0.5);
+                                    transform: translateY(-3px);
+                                    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                                }
+                                .category-btn.active {
+                                    background: linear-gradient(135deg, #fbbf24, #d97706);
+                                    color: #0f172a;
+                                    font-weight: 800;
+                                    border-color: #fff;
+                                    box-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
+                                }
+                                .category-btn i {
+                                    font-size: 20px;
+                                }
+                                .category-btn span {
+                                    font-size: 13px;
+                                }
                             </style>
 
                             <div
@@ -3481,7 +3539,7 @@
                             <!-- Quick Date Navigation -->
 
                             <div class="input-grid"
-                                style="display: grid; grid-template-columns: 1fr 1fr 1fr 1.2fr; gap: 10px; margin-bottom: 15px;">
+                                style="display: grid; grid-template-columns: 0.7fr 0.7fr 1fr 1.3fr; gap: 20px; margin-bottom: 15px;">
                                 <!-- Date -->
                                 <div class="input-box-wrapper">
                                     <label class="input-label"><span class="input-icon">📅</span> التاريخ</label>
@@ -3502,43 +3560,40 @@
                                     </select>
                                 </div>
 
-                                <!-- Category -->
+                                <!-- Category (Restored as Box) -->
                                 <div class="input-box-wrapper">
                                     <label class="input-label"><span class="input-icon">📂</span> البند</label>
-                                    <select id="category" class="custom-input" style="cursor: pointer;">
-                                        <option value="" style="color: #333;">اختر البند...</option>
-                                        <option value="مبيعات" style="color: #333;">💰 مبيعات</option>
-                                        <option value="كاش" style="color: #333;">💵 كاش</option>
-                                        <option value="فودافون كاش" style="color: #333;">📱 فودافون كاش</option>
-                                        <option value="انستا باي" style="color: #333;">🟣 انستا باي</option>
-                                        <option value="انستا" style="color: #333;">🟣 انستا</option>
-                                        <option value="باقي فلوس اليوم" style="color: #333;">📅 باقي فلوس اليوم</option>
-                                        <option value="custom" style="color: #333;">✏️ إدخال بند مخصص</option>
-                                    </select>
-                                    <input type="text" id="customName" placeholder="اسم البند المخصص"
+                                    <div id="categoryTrigger" class="custom-input" 
+                                         style="cursor: pointer; display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 10px 15px; border-bottom: 2px solid #fbbf24;" 
+                                         onclick="showHorizontalCategoryModal()">
+                                         <span id="selectedCategoryText" style="font-weight: bold; color: #fbbf24;">اختر البند...</span>
+                                         <span style="font-size: 10px; opacity: 0.5;">▼</span>
+                                     </div>
+                                     <input type="hidden" id="category" value="مبيعات">
+                                    <input type="text" id="customName" placeholder="✍️ اسم البند المخصص"
                                         class="custom-input"
-                                        style="display:none; margin-top:8px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px;">
+                                        style="display:none; margin-top:8px; border: 1px solid rgba(251, 191, 36, 0.4); border-radius: 10px; padding: 8px; background: rgba(0,0,0,0.2);">
                                 </div>
 
                                 <!-- Notes -->
                                 <div class="input-box-wrapper">
                                     <label id="mainFormNotesLabel" class="input-label"><span class="input-icon">📝</span> ملاحظات</label>
-                                    <input type="text" id="note" placeholder="ملاحظة قصيرة (اختياري)"
+                                    <input type="text" id="note" placeholder="ملاحظة..."
                                         class="custom-input">
                                 </div>
                             </div>
 
-                            <!-- Cash Calculation Fields (Hidden by default) -->
-                            <div id="cashCalcRow" style="display: none; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; background: rgba(245, 158, 11, 0.05); padding: 12px; border-radius: 14px; border: 1px dashed rgba(245, 158, 11, 0.4);">
-                                <div class="input-box-wrapper">
-                                    <label class="input-label" style="color: #fbbf24;"><span class="input-icon">💹</span> بعت كام</label>
-                                    <input type="text" inputmode="decimal" id="cashSoldAmount" placeholder="0.00" class="custom-input" oninput="runCashCalc()">
-                                </div>
-                                <div class="input-box-wrapper">
-                                    <label class="input-label" style="color: #fbbf24;"><span class="input-icon">🧧</span> الباقي للزبون</label>
-                                    <input type="text" id="cashChangeResult" placeholder="0.00" class="custom-input" readonly style="color: #fbbf24; font-weight: bold;">
-                                </div>
-                            </div>
+                             <!-- Cash Calculation Fields (Smart Assistant) -->
+                             <div id="cashCalcRow" style="display: none; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; background: rgba(251, 191, 36, 0.05); padding: 12px; border-radius: 14px; border: 1px solid rgba(251, 191, 36, 0.2); animation: fadeIn 0.3s ease;">
+                                 <div class="input-box-wrapper">
+                                     <label class="input-label" style="color: #fbbf24;"><span class="input-icon">💹</span> قيمة المبيعة (بعت بكام؟)</label>
+                                     <input type="text" inputmode="decimal" id="cashSoldAmount" placeholder="0.00" class="custom-input" oninput="runCashCalc()" style="border-color: rgba(251, 191, 36, 0.3);">
+                                 </div>
+                                 <div class="input-box-wrapper">
+                                     <label class="input-label" style="color: #4ade80;"><span class="input-icon">🧧</span> الباقي للزبون</label>
+                                     <input type="text" id="cashChangeResult" placeholder="0.00" class="custom-input" readonly style="color: #4ade80; font-weight: 900; font-size: 18px; background: rgba(34, 197, 94, 0.05); border-color: rgba(34, 197, 94, 0.2);">
+                                 </div>
+                             </div>
 
                             <div class="amounts-section"
                                 style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
@@ -3810,7 +3865,252 @@
     </div>
 
     <script>
-        /* ---------- Utilities & sounds ---------- */
+        /* ---------- UI Helpers & Global Logic ---------- */
+        window.UI = {
+            // Generic modern modal system to replace redundant hardcoded modals
+            showModal: function(options = {}) {
+                const {
+                    title = "تنبيه",
+                    content = "",
+                    icon = "🔔",
+                    className = "ai-modal-box",
+                    overlayClass = "ai-modal-overlay",
+                    onClose = null,
+                    maxWidth = "500px"
+                } = options;
+
+                // Remove existing if any
+                const existing = document.querySelector(`.${overlayClass}`);
+                if (existing) existing.remove();
+
+                const overlay = document.createElement('div');
+                overlay.className = overlayClass;
+                // Add default animation styles if not present (handled by CSS, but good to ensure)
+                
+                overlay.innerHTML = `
+                    <div class="${className}" style="max-width: ${maxWidth}; max-height: 90vh; overflow-y: auto;">
+                        <div class="ai-modal-header">
+                            <div class="ai-modal-title">
+                                <span>${icon}</span> ${title}
+                            </div>
+                            <button class="ai-modal-close" onclick="this.closest('.${overlayClass}').remove()">×</button>
+                        </div>
+                        <div class="ai-result-content">
+                            ${content}
+                        </div>
+                    </div>
+                `;
+
+                if (onClose) {
+                    const closeBtn = overlay.querySelector('.ai-modal-close');
+                    closeBtn.addEventListener('click', onClose);
+                }
+
+                document.body.appendChild(overlay);
+                if (window.beep) window.beep(1000, 0.04, 0.06);
+                return overlay;
+            }
+        };
+
+        // --- 📂 Horizontal Category Modal Logic (Improved with Custom Items) ---
+        function saveCustomCategory(name) {
+            if (!name) return;
+            let customCats = JSON.parse(localStorage.getItem('acc_custom_categories') || '[]');
+            if (!customCats.includes(name)) {
+                customCats.push(name);
+                localStorage.setItem('acc_custom_categories', JSON.stringify(customCats));
+                
+                // إضافة المزامنة السحابية فوراً لضمان عدم ضياع البند عند التحديث
+                if (typeof persistCustomCategories === 'function') {
+                    persistCustomCategories();
+                }
+            }
+        }
+
+        function showHorizontalCategoryModal() {
+            const baseCategories = [
+                { id: 'مبيعات', name: 'مبيعات', icon: '💰', color: '#22c55e' },
+                { id: 'كاش', name: 'كاش', icon: '💵', color: '#fbbf24' },
+                { id: 'فودافون كاش', name: 'فودافون كاش', icon: '📱', color: '#ef4444' },
+                { id: 'انستا باي', name: 'انستا باي', icon: '🟣', color: '#a855f7' },
+                { id: 'انستا', name: 'انستا', icon: '🟣', color: '#d946ef' },
+                { id: 'باقي فلوس اليوم', name: 'باقي فلوس اليوم', icon: '📅', color: '#0ea5e9' }
+            ];
+
+            // Get saved custom categories
+            const savedCustoms = JSON.parse(localStorage.getItem('acc_custom_categories') || '[]');
+            const customCategories = savedCustoms.map(name => ({
+                id: name,
+                name: name,
+                icon: '📝',
+                color: '#94a3b8',
+                isSavedCustom: true
+            }));
+
+            const allCategories = [...baseCategories, ...customCategories, { id: 'custom', name: 'بند مخصص جديد', icon: '✏️', color: '#94a3b8' }];
+            const currentId = document.getElementById('category').value;
+
+            let content = `
+                <div class="horizontal-modal-content" style="display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 5px; justify-content: center; align-items: center;">
+                    ${allCategories.map(cat => `
+                        <div class="category-tile-horizontal ${cat.id === currentId ? 'active' : ''}" 
+                             onclick="selectCategory('${cat.id}', '${cat.icon} ${cat.name}')" 
+                             style="flex: 0 1 calc(16.6% - 8px); min-width: 75px; height: 85px; background: rgba(255,255,255,0.05); border: 1px solid ${cat.id === currentId ? '#fbbf24' : 'rgba(255,255,255,0.1)'}; padding: 8px 4px; border-radius: 12px; text-align: center; cursor: pointer; transition: all 0.2s ease; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative;">
+                            ${cat.isSavedCustom ? `<span onclick="event.stopPropagation(); deleteCustomCategory('${cat.id}')" style="position: absolute; top: 3px; right: 3px; font-size: 10px; opacity: 0.5; color: #ef4444;">✕</span>` : ''}
+                            <div style="font-size: 22px; margin-bottom: 4px;">${cat.icon}</div>
+                            <div style="font-weight: bold; color: ${cat.id === currentId ? '#fbbf24' : '#fff'}; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; line-height: 1.2;">${cat.name}</div>
+                        </div>
+                    `).join('')}
+                </div>
+                <style>
+                    .category-tile-horizontal:hover { transform: scale(1.02); background: rgba(255,255,255,0.08) !important; }
+                    /* العنصر المختار سابقاً - خلفية هادئة فقط */
+                    .category-tile-horizontal.active { background: rgba(251, 191, 36, 0.1) !important; border: 1px solid rgba(251, 191, 36, 0.3) !important; }
+                    /* مؤشر الكيبورد - بارز جداً مع توهج */
+                    .category-tile-horizontal.kbd-focus { 
+                        outline: none !important;
+                        border: 2px solid #fbbf24 !important;
+                        box-shadow: 0 0 20px rgba(251, 191, 36, 0.4), inset 0 0 10px rgba(251, 191, 36, 0.2);
+                        transform: scale(1.08); 
+                        background: rgba(255,255,255,0.15) !important; 
+                        z-index: 10; 
+                    }
+                </style>
+            `;
+
+            window.UI.showModal({
+                title: 'اختر البند المطلوب',
+                icon: '📂',
+                content: content,
+                maxWidth: '900px'
+            });
+
+            // --- ⌨️ Keyboard Navigation Logic ---
+            setTimeout(() => {
+                const tiles = Array.from(document.querySelectorAll('.category-tile-horizontal'));
+                if (tiles.length === 0) return;
+
+                let focusIdx = tiles.findIndex(t => t.classList.contains('active'));
+                if (focusIdx === -1) focusIdx = 0;
+
+                const updateKbdFocus = () => {
+                    tiles.forEach((t, i) => {
+                        if (i === focusIdx) {
+                            t.classList.add('kbd-focus');
+                            t.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        } else {
+                            t.classList.remove('kbd-focus');
+                        }
+                    });
+                };
+
+                updateKbdFocus();
+
+                const handleKbdNav = (e) => {
+                    const itemsCount = tiles.length;
+                    
+                    // حساب عدد الأعمدة ديناميكياً بناءً على مكان أول عنصرين
+                    let columns = 6; 
+                    if (itemsCount > 1) {
+                        const firstRect = tiles[0].getBoundingClientRect();
+                        const secondRect = tiles[1].getBoundingClientRect();
+                        // إذا كان الفرق في الارتفاع صفر، فهما في نفس الصف
+                        if (Math.abs(firstRect.top - secondRect.top) < 5) {
+                            // نحسب كم عنصر في الصف الأول
+                            let count = 0;
+                            const top = tiles[0].offsetTop;
+                            for(let t of tiles) {
+                                if (Math.abs(t.offsetTop - top) < 5) count++;
+                                else break;
+                            }
+                            columns = count || 6;
+                        } else {
+                            columns = 1; // صف واحد عمودي
+                        }
+                    }
+
+                    if (e.key === 'ArrowLeft') { // في العربي اليسار يذهب للعنصر التالي (Index + 1)
+                        e.preventDefault();
+                        focusIdx = (focusIdx + 1) % itemsCount;
+                        updateKbdFocus();
+                    } else if (e.key === 'ArrowRight') { // في العربي اليمين يذهب للعنصر السابق (Index - 1)
+                        e.preventDefault();
+                        focusIdx = (focusIdx - 1 + itemsCount) % itemsCount;
+                        updateKbdFocus();
+                    } else if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        if (focusIdx + columns < itemsCount) focusIdx += columns;
+                        updateKbdFocus();
+                    } else if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        if (focusIdx - columns >= 0) focusIdx -= columns;
+                        updateKbdFocus();
+                    } else if (e.key === 'Enter') {
+                        e.preventDefault();
+                        tiles[focusIdx].click();
+                        document.removeEventListener('keydown', handleKbdNav);
+                    } else if (e.key === 'Escape') {
+                        document.removeEventListener('keydown', handleKbdNav);
+                    }
+                };
+
+                document.addEventListener('keydown', handleKbdNav);
+
+                // Cleanup if clicked outside
+                const overlay = document.querySelector('.ai-modal-overlay');
+                if (overlay) {
+                    overlay.addEventListener('click', (e) => {
+                        if (e.target === overlay) document.removeEventListener('keydown', handleKbdNav);
+                    }, { once: true });
+                }
+            }, 100);
+        }
+
+        window.deleteCustomCategory = function(name) {
+            if (!confirm(`هل تريد حذف البند "${name}" من القائمة السريعة؟`)) return;
+            let customCats = JSON.parse(localStorage.getItem('acc_custom_categories') || '[]');
+            customCats = customCats.filter(c => c !== name);
+            localStorage.setItem('acc_custom_categories', JSON.stringify(customCats));
+            showHorizontalCategoryModal(); // Refresh
+        };
+
+        function selectCategory(id, displayName) {
+            const hiddenInput = document.getElementById('category');
+            const displayText = document.getElementById('selectedCategoryText');
+            const customInput = document.getElementById('customName');
+            const cashCalcRow = document.getElementById('cashCalcRow');
+
+            hiddenInput.value = id;
+            if (displayText) {
+                displayText.innerHTML = displayName;
+                displayText.style.color = '#fbbf24';
+            }
+
+            // Show calculation row for Cash or Insta
+            const cashCats = ['كاش', 'انستا باي', 'انستا', 'فودافون كاش'];
+            if (cashCats.includes(id)) {
+                if (cashCalcRow) cashCalcRow.style.display = 'grid';
+            } else {
+                if (cashCalcRow) cashCalcRow.style.display = 'none';
+            }
+
+            // Show custom name field if "custom" is selected
+            if (id === 'custom') {
+                if (customInput) {
+                    customInput.style.display = 'block';
+                    customInput.focus();
+                }
+            } else {
+                if (customInput) customInput.style.display = 'none';
+            }
+
+            // Close the modal
+            const modal = document.querySelector('.ai-modal-overlay');
+            if (modal) modal.remove();
+            
+            if (window.beep) window.beep(1200, 0.05, 0.05);
+        }
+
         const $ = id => document.getElementById(id);
         let soundsEnabled = true;
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -4275,6 +4575,19 @@
 
             setTimeout(() => { if (typeof beep === 'function') beep(880, 0.04, 0.06); }, 130);
             console.log('🚀 Bayan POS Fully Initialized');
+
+            // --- 🚀 FAST SCROLL BOOSTER ---
+            // هذا الكود يجعل التمرير ببكرة الماوس أسرع بمرتين لجعل الواجهة تبدو خفيفة جداً
+            window.addEventListener('wheel', function(e) {
+                if (e.deltaY !== 0) {
+                    const scrollSpeed = 1.8; // عامل التسريع (1.8x)
+                    window.scrollBy({
+                        top: e.deltaY * scrollSpeed,
+                        behavior: 'auto' // 'auto' للسرعة القصوى، 'smooth' للانسيابية
+                    });
+                    e.preventDefault();
+                }
+            }, { passive: false });
         });
 
         /* ---------- Elements ---------- */
@@ -4561,8 +4874,10 @@
             let cat = category.value === 'custom' ? (customName.value.trim() || '') : category.value;
             if (!cat) { alert('ادخل اسم البند'); return; }
 
-            // Auto-addition of custom categories is now disabled per user request
-            // (Only manual addition from settings allowed)
+            // Auto-addition of custom categories is now ENABLED as requested
+            if (category.value === 'custom' && customName.value.trim()) {
+                if (typeof saveCustomCategory === 'function') saveCustomCategory(customName.value.trim());
+            }
 
             let top = Number(amtTop.value) || 0;
             let bottom = Number(amtBottom.value) || 0;
@@ -7584,6 +7899,16 @@
             updateCategorySelect();
         }
 
+        function persistCustomCategories() {
+            const data = localStorage.getItem('acc_custom_categories');
+            if (typeof DB_API !== 'undefined' && DB_API.isConnected) {
+                DB_API.saveSetting('acc_custom_categories', data);
+            }
+            if (typeof syncDataToServer === 'function') {
+                syncDataToServer();
+            }
+        }
+
         function addCustomCategory() {
             const input = $('newCustomCategoryInput');
             const newCat = input.value.trim();
@@ -7593,11 +7918,6 @@
             }
 
             const categories = JSON.parse(localStorage.getItem('acc_custom_categories') || '[]');
-            if (categories.length >= 8) {
-                alert('عذراً، يمكنك إضافة حتى 8 بنود مفضلة فقط.');
-                return;
-            }
-
             if (categories.includes(newCat)) {
                 alert('هذا البند موجود بالفعل');
                 return;
@@ -7607,6 +7927,7 @@
             localStorage.setItem('acc_custom_categories', JSON.stringify(categories));
             input.value = '';
             loadCustomCategories();
+            persistCustomCategories(); // Sync to Cloud
             beep(1200, 0.04, 0.06);
         }
 
@@ -7617,6 +7938,7 @@
             categories.splice(index, 1);
             localStorage.setItem('acc_custom_categories', JSON.stringify(categories));
             loadCustomCategories();
+            persistCustomCategories(); // Sync to Cloud
             beep(300, 0.05, 0.06);
         }
 
@@ -7631,44 +7953,57 @@
                 // Update all records with the old category name
                 updateCategoryInRecords(oldName, newName.trim());
                 loadCustomCategories();
+                persistCustomCategories(); // Sync to Cloud
                 beep(1200, 0.04, 0.06);
             }
         }
 
-        function updateCategoryInRecords(oldName, newName) {
+        async function updateCategoryInRecords(oldName, newName) {
             const keys = Object.keys(localStorage).filter(key => key.startsWith('acc_') && key !== 'acc_custom_categories' && key !== 'acc_lock_pass' && key !== 'acc_app_theme' && key !== 'acc_dark_mode');
 
-            keys.forEach(key => {
+            for (const key of keys) {
                 try {
-                    const data = JSON.parse(localStorage.getItem(key));
-                    let records = Array.isArray(data) ? data : data.records || [];
+                    const raw = localStorage.getItem(key);
+                    if (!raw) continue;
+                    const data = JSON.parse(raw);
+                    let dayRecords = Array.isArray(data) ? data : data.records || [];
                     let changed = false;
-                    records.forEach(record => {
+                    
+                    dayRecords.forEach(record => {
                         if (record.category === oldName) {
                             record.category = newName;
                             changed = true;
                         }
                     });
+
                     if (changed) {
                         if (Array.isArray(data)) {
-                            localStorage.setItem(key, JSON.stringify(records));
+                            localStorage.setItem(key, JSON.stringify(dayRecords));
                         } else {
-                            data.records = records;
+                            data.records = dayRecords;
                             localStorage.setItem(key, JSON.stringify(data));
+                        }
+
+                        // Sync this day's records to DB if it's the current date
+                        if (key === 'acc_' + dateInput.value) {
+                            records = dayRecords; // update global records
+                            if (typeof saveToStorage === 'function') await saveToStorage();
+                        } else {
+                            // For historical days, if DB is connected, we should ideally sync them too
+                            if (typeof DB_API !== 'undefined' && DB_API.isConnected) {
+                                // Bulk sync this day
+                                await DB_API.syncAll(dayRecords);
+                            }
                         }
                     }
                 } catch (e) {
-                    // ignore
+                    console.error('Error updating records for key:', key, e);
                 }
-            });
+            }
 
-            // Also update current records if loaded
-            records.forEach(record => {
-                if (record.category === oldName) {
-                    record.category = newName;
-                }
-            });
+            // Also update UI if needed
             render();
+            if (typeof syncDataToServer === 'function') syncDataToServer();
         }
 
         function updateCategorySelect() {
@@ -8337,7 +8672,7 @@
                         </div>
                         <h2 style="margin: 0 0 10px; font-size: 28px; font-weight: 900; color: #fff;">سجل تطور "بـيـان POS"</h2>
                         <div style="display: inline-block; background: rgba(212, 175, 55, 0.1); border: 1px solid rgba(212, 175, 55, 0.3); padding: 5px 20px; border-radius: 40px; font-size: 12px; color: #d4af37; font-weight: bold;">
-                            الإصدار الحالي: <span id="about-app-version">1.7.0 (Smart Reporting)</span>
+                            الإصدار الحالي: <span id="about-app-version">1.8.0 (IndexedDB & Keyboard Support)</span>
                         </div>
                     </div>
 
@@ -11285,27 +11620,33 @@ ${records.length < 3 ? '• زد من عدد العمليات اليومية' : 
             if (typeof beep === 'function') beep(1000, 0.05, 0.08);
         }
 
-        function toggleSidebar() {
-            const rightSidebar = document.querySelector('.right');
-            const toggleBtn = $('sidebarToggle');
-            const toggleIcon = $('toggleIcon');
-
-            const isCollapsed = rightSidebar.classList.contains('collapsed');
-
-            if (isCollapsed) {
-                rightSidebar.classList.remove('collapsed');
-                toggleBtn.classList.remove('collapsed');
-                toggleIcon.textContent = '◀';
-                toggleBtn.title = 'إخفاء الشريط الجانبي';
-            } else {
-                rightSidebar.classList.add('collapsed');
-                toggleBtn.classList.add('collapsed');
-                toggleIcon.textContent = '▶';
-                toggleBtn.title = 'إظهار الشريط الجانبي';
+        window.toggleSidebar = function() {
+            const sidebar = document.querySelector('.right');
+            const toggleIcon = document.getElementById('toggleIcon');
+            const toggleBtn = document.getElementById('sidebarToggle');
+            
+            if (!sidebar) {
+                console.error('Sidebar element (.right) not found');
+                return;
             }
-
-            beep(800, 0.03, 0.04);
-        }
+            
+            sidebar.classList.toggle('collapsed');
+            const isCollapsed = sidebar.classList.contains('collapsed');
+            
+            if (isCollapsed) {
+                if (toggleIcon) toggleIcon.textContent = '▶';
+                if (toggleBtn) toggleBtn.title = 'إظهار الشريط الجانبي';
+            } else {
+                if (toggleIcon) toggleIcon.textContent = '◀';
+                if (toggleBtn) toggleBtn.title = 'إخفاء الشريط الجانبي';
+            }
+            
+            // إضافة اهتزاز صوتي وتنبيه بسيط للتأكد من العمل
+            if (typeof beep === 'function') beep(800, 0.03, 0.04);
+            if (typeof showToast === 'function') {
+                showToast(isCollapsed ? '⬅️ تم تصغير الشريط' : '➡️ تم إظهار الشريط', 'info');
+            }
+        };
 
         // Cloud Sync Functions
         function showCloudSyncModal() {
@@ -11724,6 +12065,7 @@ ${records.length < 3 ? '• زد من عدد العمليات اليومية' : 
             const currentData = {
                 records,
                 date: dateInput.value,
+                customCategories: JSON.parse(localStorage.getItem('acc_custom_categories') || '[]'),
                 timestamp: new Date().toISOString()
             };
 
@@ -11757,6 +12099,11 @@ ${records.length < 3 ? '• زد من عدد العمليات اليومية' : 
                 if (newRecordCount > oldRecordCount) {
                     showToast(`✅ تم إضافة ${newRecordCount - oldRecordCount} عملية جديدة`, 'success');
                 }
+            }
+
+            if (data.customCategories) {
+                localStorage.setItem('acc_custom_categories', JSON.stringify(data.customCategories));
+                if (typeof loadCustomCategories === 'function') loadCustomCategories();
             }
 
             // Update last sync time
@@ -11873,38 +12220,28 @@ ${records.length < 3 ? '• زد من عدد العمليات اليومية' : 
             startAutoSync();
         }
 
-        function toggleSidebar() {
-            const sidebar = document.querySelector('.right');
-            const toggleIcon = document.getElementById('toggleIcon');
-            const toggleBtn = document.getElementById('sidebarToggle');
-            
-            if (!sidebar) return;
-            
-            sidebar.classList.toggle('collapsed');
-            
-            if (sidebar.classList.contains('collapsed')) {
-                if (toggleIcon) toggleIcon.textContent = '▶';
-                if (toggleBtn) toggleBtn.title = 'إظهار الشريط الجانبي';
-            } else {
-                if (toggleIcon) toggleIcon.textContent = '◀';
-                if (toggleBtn) toggleBtn.title = 'إخفاء الشريط الجانبي';
-            }
-            
-            if (typeof beep === 'function') beep(600, 0.03, 0.04);
-        }
+        // Sidebar logic unified above
 
         function logout() {
-            if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
-                // مسح مفتاح الدخول الرئيسي
-                localStorage.removeItem('app_auth_serial');
+            if (confirm('هل أنت متأكد من تسجيل الخروج؟ سيتم مسح كافة البيانات المحلية لضمان أمن الحساب.')) {
+                // 1. تحديد المفاتيح التي يجب الحفاظ عليها (مثل معرف الجهاز)
+                const keysToKeep = ['acc_device_id', 'acc_registered_serials'];
                 
-                // مسح بيانات الموظف المسجل (إن وجدت)
-                localStorage.removeItem('acc_team_member');
+                // 2. مسح كل شيء آخر يبدأ بـ acc_ أو app_
+                const keys = Object.keys(localStorage);
+                keys.forEach(key => {
+                    if (!keysToKeep.includes(key) && (key.startsWith('acc_') || key.startsWith('app_'))) {
+                        localStorage.removeItem(key);
+                    }
+                });
+
+                // 3. تصفير المصفوفة العامة للعمليات في الذاكرة
+                if (window.records) window.records = [];
                 
-                // إظهار رسالة تأكيد سريعة
-                if (typeof showToast === 'function') showToast('👋 تم تسجيل الخروج بنجاح', 'success');
+                // إظهار رسالة تأكيد
+                if (typeof showToast === 'function') showToast('👋 تم تسجيل الخروج وتنظيف البيانات بنجاح', 'success');
                 
-                // إعادة تحميل التطبيق للعودة لشاشة البداية
+                // 4. إعادة تحميل التطبيق للبدء من جديد تماماً
                 setTimeout(() => {
                     location.reload();
                 }, 800);
@@ -14659,11 +14996,16 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                         return;
                     }
 
-                    // توليد سيريال مميز مثل 12345-ACC
-                    const chars = '0123456789';
-                    let randomPart = '';
-                    for (let i = 0; i < 5; i++) randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
-                    const newSerial = randomPart + '-ACC';
+                    // توليد سيريال قوي واحترافي (Alphanumeric)
+                    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // استبعاد الحروف المتشابهة مثل 0 و O و 1 و I
+                    const generatePart = (len) => {
+                        let part = '';
+                        for (let i = 0; i < len; i++) part += chars.charAt(Math.floor(Math.random() * chars.length));
+                        return part;
+                    };
+                    
+                    // التنسيق الجديد: BYN-XXXX-XXXX (أكثر قوة وصعوبة في التخمين)
+                    const newSerial = `BYN-${generatePart(4)}-${generatePart(4)}`;
 
                     // حفظ البيانات محلياً فوراً لتعكس في التطبيق
                     localStorage.setItem('acc_user_name', name);
@@ -16430,21 +16772,21 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
         
         if (!statusBox || !statusIcon || !statusText) return;
 
-        const onlineSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="animation: syncPulse 2s infinite;"><path d="M12 20h.01"/><path d="M2 8.82a15 15 0 0 1 20 0"/><path d="M5 12.859a10 10 0 0 1 14 0"/><path d="M8.5 16.429a5 5 0 0 1 7 0"/></svg>`;
-        const offlineSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="2" x2="22" y2="22"/><path d="M8.5 16.429a5 5 0 0 1 7 0"/><path d="M5 12.859a10 10 0 0 1 5.17 0"/><path d="M16 12.859a10 10 0 0 1 3 0"/><path d="M2 8.82a15 15 0 0 1 4.17 0"/><path d="M10.66 5a15 15 0 0 1 11.92 3.82"/></svg>`;
-
         if (navigator.onLine) {
             statusBox.style.background = 'rgba(34, 197, 94, 0.15)';
             statusBox.style.borderColor = 'rgba(34, 197, 94, 0.4)';
             statusBox.style.color = '#4ade80';
-            statusIcon.innerHTML = onlineSVG;
-            statusText.textContent = 'أونلاين ✅';
+            statusIcon.className = 'fa-solid fa-wifi'; // تعيين الأيقونة كفئة مباشرة
+            statusIcon.innerHTML = ''; // مسح أي محتوى داخلي لمنع التكرار
+            statusText.textContent = 'متصل';
         } else {
             statusBox.style.background = 'rgba(239, 68, 68, 0.15)';
             statusBox.style.borderColor = 'rgba(239, 68, 68, 0.4)';
             statusBox.style.color = '#f87171';
-            statusIcon.innerHTML = offlineSVG;
-            statusText.textContent = 'أوفلاين ❌';
+            statusIcon.className = ''; // مسح الفئات القديمة
+            // وضع الرسم الرقمي المشطوب بداخل العنصر
+            statusIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="2" x2="22" y2="22"></line><path d="M12 20h.01"></path><path d="M8.5 16.429a5 5 0 0 1 7 0"></path><path d="M5 12.859a10 10 0 0 1 5.17 0"></path><path d="M19 12.859a10 10 0 0 1-1.34 0"></path><path d="M2 8.82a15 15 0 0 1 4.17 0"></path><path d="M10.66 5a15 15 0 0 1 11.92 3.82"></path></svg>';
+            statusText.textContent = 'غير متصل';
         }
     }
 

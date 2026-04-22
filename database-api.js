@@ -1,30 +1,69 @@
-// Database API Client
-// يتصل بالسيرفر المحلي لحفظ واسترجاع البيانات من قاعدة SQLite
+// --- IndexedDB Configuration ---
+const DB_NAME = 'BayanLocalDB';
+const DB_VERSION = 1;
+const STORE_NAME = 'transactions';
+
+let db;
+const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+request.onupgradeneeded = (event) => {
+    const db = event.target.result;
+    if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+    }
+};
+
+request.onsuccess = (event) => {
+    db = event.target.result;
+    console.log('✅ IndexedDB Initialized');
+};
 
 const DB_API = {
-    baseURL: 'http://localhost:3000/api',
+    // قم بتغيير هذا الرابط لرابط السيرفر الحقيقي عند الرفع
+    baseURL: window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : 'https://your-api-domain.com/api',
     isConnected: false,
 
-    // فحص الاتصال بالسيرفر
     async checkConnection() {
         try {
-            const response = await fetch(`${this.baseURL}/status`);
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000);
+            const response = await fetch(`${this.baseURL}/status`, { signal: controller.signal });
+            clearTimeout(timeoutId);
             const data = await response.json();
             this.isConnected = data.online;
             return this.isConnected;
         } catch (error) {
-            console.warn('⚠️ السيرفر المحلي غير متصل. سيتم استخدام localStorage فقط.');
+            console.warn('⚠️ السيرفر غير متصل. سيتم استخدام IndexedDB.');
             this.isConnected = false;
             return false;
         }
     },
 
-    // حفظ عملية جديدة
+    // حفظ في IndexedDB
+    async saveLocal(transaction) {
+        if (!db) return;
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        const store = tx.objectStore(STORE_NAME);
+        store.put(transaction);
+        return tx.complete;
+    },
+
+    // جلب من IndexedDB
+    async getLocalAll() {
+        return new Promise((resolve) => {
+            if (!db) return resolve([]);
+            const tx = db.transaction(STORE_NAME, 'readonly');
+            const store = tx.objectStore(STORE_NAME);
+            const request = store.getAll();
+            request.onsuccess = () => resolve(request.result);
+        });
+    },
+
     async saveTransaction(transaction) {
-        if (!this.isConnected) {
-            console.log('💾 حفظ محلي فقط (localStorage)');
-            return { success: true, local: true };
-        }
+        // دائماً احفظ محلياً أولاً للسرعة والأمان
+        await this.saveLocal(transaction);
+
+        if (!this.isConnected) return { success: true, local: true };
 
         try {
             const response = await fetch(`${this.baseURL}/transactions`, {
@@ -32,99 +71,42 @@ const DB_API = {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(transaction)
             });
-            const result = await response.json();
-            console.log('✅ تم الحفظ في قاعدة البيانات:', result);
-            return result;
+            return await response.json();
         } catch (error) {
-            console.error('❌ خطأ في الحفظ:', error);
             return { success: false, error: error.message };
         }
     },
 
-    // جلب جميع العمليات
     async getAllTransactions() {
-        if (!this.isConnected) {
-            return null; // سيستخدم localStorage
+        // إذا كان هناك إنترنت، اجلب من السيرفر، وإلا فمن IndexedDB
+        if (this.isConnected) {
+            try {
+                const response = await fetch(`${this.baseURL}/transactions`, { cache: 'no-store' });
+                const data = await response.json();
+                // حدث المخزن المحلي بالبيانات الجديدة
+                for (const item of data) await this.saveLocal(item);
+                return data;
+            } catch (e) {
+                return await this.getLocalAll();
+            }
         }
-
-        try {
-            const response = await fetch(`${this.baseURL}/transactions`, { cache: 'no-store' });
-            const data = await response.json();
-            console.log(`📥 تم جلب ${data.length} عملية من قاعدة البيانات`);
-            return data;
-        } catch (error) {
-            console.error('❌ خطأ في جلب البيانات:', error);
-            return null;
-        }
+        return await this.getLocalAll();
     },
 
-    // حذف عملية (soft delete)
     async deleteTransaction(id) {
-        if (!this.isConnected) {
-            return { success: true, local: true };
+        // حذف محلي
+        if (db) {
+            const tx = db.transaction(STORE_NAME, 'readwrite');
+            tx.objectStore(STORE_NAME).delete(id);
         }
 
-        try {
-            const response = await fetch(`${this.baseURL}/transactions/${id}`, {
-                method: 'DELETE'
-            });
-            const result = await response.json();
-            console.log('🗑️ تم الحذف من قاعدة البيانات');
-            return result;
-        } catch (error) {
-            console.error('❌ خطأ في الحذف:', error);
-            return { success: false, error: error.message };
-        }
-    },
-
-    // مزامنة شاملة (إرسال جميع البيانات المحلية)
-    async syncAll(transactions) {
-        if (!this.isConnected) {
-            console.log('⚠️ المزامنة غير متاحة - السيرفر غير متصل');
-            return { success: false };
-        }
-
-        try {
-            const response = await fetch(`${this.baseURL}/sync`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ transactions })
-            });
-            const result = await response.json();
-            console.log('🔄 تمت المزامنة الشاملة:', result);
-            return result;
-        } catch (error) {
-            console.error('❌ خطأ في المزامنة:', error);
-            return { success: false, error: error.message };
-        }
-    },
-
-    // حفظ الإعدادات
-    async saveSetting(key, value) {
         if (!this.isConnected) return { success: true, local: true };
 
         try {
-            const response = await fetch(`${this.baseURL}/settings`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ key, value })
-            });
-            return await response.json();
+            await fetch(`${this.baseURL}/transactions/${id}`, { method: 'DELETE' });
+            return { success: true };
         } catch (error) {
-            console.error('❌ خطأ في حفظ الإعدادات:', error);
-            return { success: false, error: error.message };
-        }
-    },
-
-    async getSettings() {
-        if (!this.isConnected) return null;
-
-        try {
-            const response = await fetch(`${this.baseURL}/settings`, { cache: 'no-store' });
-            return await response.json();
-        } catch (error) {
-            console.error('❌ خطأ في جلب الإعدادات:', error);
-            return null;
+            return { success: false };
         }
     },
 
@@ -215,7 +197,7 @@ const DB_API = {
                 'acc_user_name', 'acc_user_phone', 'acc_user_notes', 'acc_app_theme', 
                 'acc_dark_mode', 'acc_font_family', 'acc_font_weight', 'acc_sounds_enabled',
                 'acc_auto_lock', 'acc_privacy_mode', 'acc_app_notes', 'acc_notes_box_name',
-                'acc_ext_tome', 'acc_ext_byme', 'acc_custom_items', 'acc_inventories_config'
+                'acc_ext_tome', 'acc_ext_byme', 'acc_custom_items', 'acc_custom_categories', 'acc_inventories_config'
             ];
 
             for (const key of syncKeys) {
