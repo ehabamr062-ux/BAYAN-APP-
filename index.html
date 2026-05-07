@@ -8527,7 +8527,7 @@
                              ${isAdmin ? `
                              <div style="display:flex; align-items:center; gap:8px;">
                                  <label style="font-size:11px; color:#64748b;">الحد الأقصى للأجهزة:</label>
-                                 <input type="number" id="maxDevicesLimitInput" value="${localStorage.getItem('acc_max_devices_limit') || 5}" 
+                                 <input type="number" id="maxDevicesLimitInput" value="${localStorage.getItem('acc_max_devices_limit') || 15}" 
                                      onchange="window.updateMaxDevicesLimit(this.value)"
                                      style="width:50px; background:rgba(0,0,0,0.3); border:1px solid #22c55e44; color:#fff; border-radius:6px; padding:2px 5px; font-size:12px; text-align:center;">
                              </div>
@@ -15576,7 +15576,7 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                 db.collection("users").doc(globalUserId).collection("devices").onSnapshot(snap => {
                     const countEl = document.getElementById('connected-devices-count');
                     const isMaster = window.currentDeviceRole === 'master' || localStorage.getItem('acc_device_role') === 'master';
-                    const maxLimit = parseInt(localStorage.getItem('acc_max_devices_limit')) || 5;
+                    const maxLimit = parseInt(localStorage.getItem('acc_max_devices_limit')) || 15;
                     
                     if (countEl) {
                         if (isMaster) {
@@ -15642,7 +15642,7 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                                 if (typeof beep === 'function') beep(600, 0.1, 0.3); // صوت تنبيه
                                 
                                 const currentCount = container.querySelectorAll('.inventory-card, .user-item, div[style*="background:rgba(255,255,255,0.02)"]').length; // Rough estimate or use last snap
-                                const maxLimit = parseInt(localStorage.getItem('acc_max_devices_limit')) || 5;
+                                const maxLimit = parseInt(localStorage.getItem('acc_max_devices_limit')) || 15;
                                 const limitWarning = snap.size >= maxLimit ? `\n\n⚠️ تنبيه: لقد وصلت للحد الأقصى للأجهزة (${maxLimit}). يرجى ترقية ترخيصك أو حذف جهاز قديم لتتمكن من تفعيل هذا الجهاز.` : '';
 
                                 showModernAlert({
