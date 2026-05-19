@@ -280,7 +280,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         showToast('✅ تم مزامنة البيانات بنجاح', 'success');
     } else {
         console.log('⚠️ العمل في وضع localStorage فقط');
-        showToast('⚠️ قاعدة البيانات غير متصلة - استخدام التخزين المحلي', 'warning');
+        if (!navigator.onLine) {
+            showToast('ℹ️ أنت تعمل الآن في وضع الأوفلاين (بدون إنترنت)', 'info');
+        } else {
+            showToast('⚠️ قاعدة البيانات غير متصلة - استخدام التخزين المحلي', 'warning');
+        }
     }
 });
 

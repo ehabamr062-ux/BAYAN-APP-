@@ -3,9 +3,9 @@
 //  النسخة: 1.1.0 (تحديث الأيقونات)
 // ============================================================
 
-const CACHE_NAME = 'mohassaba-v2';
-const STATIC_CACHE = 'mohassaba-static-v2';
-const DYNAMIC_CACHE = 'mohassaba-dynamic-v2';
+const CACHE_NAME = 'mohassaba-v5';
+const STATIC_CACHE = 'mohassaba-static-v5';
+const DYNAMIC_CACHE = 'mohassaba-dynamic-v5';
 
 // الملفات الأساسية التي يجب تخزينها مسبقاً
 const STATIC_FILES = [
@@ -13,6 +13,8 @@ const STATIC_FILES = [
     './index.html',
     './manifest.json',
     './database-api.js',
+    './style.css',
+    './app.js',
     './icons/icon-72x72.png',
     './icons/icon-96x96.png',
     './icons/icon-128x128.png',
@@ -34,7 +36,9 @@ const CDN_FILES = [
     'https://unpkg.com/dexie@latest/dist/dexie.js',
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
     'https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;600;700&display=swap',
-    'https://fonts.gstatic.com/s/elmessiri/v11/K617W2tS-By_hxYVzHk7U66_S20.woff2'
+    'https://fonts.gstatic.com/s/elmessiri/v11/K617W2tS-By_hxYVzHk7U66_S20.woff2',
+    'https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js',
+    'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js'
 ];
 
 // ============================================================
