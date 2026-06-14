@@ -32,7 +32,7 @@
     <!-- 🛡️ درع الأمان وتشفير الوصول (Code Protection Shield) -->
     <script>
         // تعريف إصدار التطبيق (يجب أن يتطابق مع version.txt)
-        const APP_VERSION = '1.8.0';
+        const APP_VERSION = '1.9.0';
 
         // Global Modern Alert / Toast System (Must be at top)
         window.showToast = function(message, type = 'info') {
@@ -75,20 +75,47 @@
         };
 
         (function() {
-            // 1. منع النقر الأيمن
-            document.addEventListener('contextmenu', event => event.preventDefault());
-
-            // 2. منع الاختصارات الحساسة
-            document.onkeydown = function (e) {
-                if (e.keyCode === 123 || // F12
-                    (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || // Ctrl+Shift+I/J/C
-                    (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83 || e.keyCode === 80 || e.keyCode === 72))) { // Ctrl+U/S/P/H
-                    
-                    if (window.showToast) window.showToast('🛡️ تم حظر الوصول لأدوات المطورين لحماية النظام', 'error');
+            // 1. منع النقر الأيمن بأقصى حماية ممكنة (شاملة الماوس والأجهزة المحمولة واللمس أوفلاين وأونلاين)
+            const preventRightClick = event => {
+                event.preventDefault();
+                event.stopPropagation();
+                return false;
+            };
+            document.addEventListener('contextmenu', preventRightClick, true);
+            window.addEventListener('contextmenu', preventRightClick, true);
+            
+            // حظر النقر بزر الماوس الأيمن في mousedown و mouseup كخط دفاع إضافي
+            const blockRightMouse = e => {
+                if (e.button === 2 || e.which === 3) {
                     e.preventDefault();
+                    e.stopPropagation();
                     return false;
                 }
             };
+            document.addEventListener('mousedown', blockRightMouse, true);
+            document.addEventListener('mouseup', blockRightMouse, true);
+            window.addEventListener('mousedown', blockRightMouse, true);
+            window.addEventListener('mouseup', blockRightMouse, true);
+
+            // 2. منع الاختصارات الحساسة للويندوز والماك (بما فيها فتح المصدر وحفظ الصفحة)
+            document.addEventListener('keydown', function (e) {
+                const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+                const cmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
+                const cmdOrAlt = isMac ? e.altKey : e.altKey;
+                
+                if (
+                    e.keyCode === 123 || // F12
+                    (e.shiftKey && e.ctrlKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || // Ctrl+Shift+I/J/C
+                    (e.shiftKey && e.metaKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || // Cmd+Shift+I/J/C على الماك
+                    (cmdOrCtrl && (e.keyCode === 85 || e.keyCode === 83 || e.keyCode === 80 || e.keyCode === 72 || e.keyCode === 78)) || // Ctrl+U/S/P/H/N
+                    (cmdOrCtrl && cmdOrAlt && (e.keyCode === 85 || e.keyCode === 73 || e.keyCode === 74)) // Ctrl+Alt+U/I/J
+                ) {
+                    if (window.showToast) window.showToast('🛡️ تم حظر الوصول لأدوات المطورين وحفظ الصفحة لحماية النظام', 'error');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+            }, true);
 
             // 3. فخ المصحح (Debugger Trap) - يقوم بتجميد الصفحة إذا فُتحت أدوات المطورين
             setInterval(function() {
@@ -490,10 +517,10 @@
 
         /* animated golden background */
         body {
-            background: linear-gradient(135deg, #ffffff 0%, #fae6b1 40%, #cca038 75%, #181510 100%);
+            background: linear-gradient(135deg, #ffffff 0%, #fffbeb 40%, #fef3c7 75%, #fde68a 100%);
             background-size: 400% 400%;
             animation: bgMove 20s ease infinite;
-            color: #1a1a1a;
+            color: #0f172a;
             /* Dark text for bright light mode readability */
             transition: background .4s, color .25s;
         }
@@ -506,7 +533,7 @@
 
         /* Themes */
         body.theme-gold {
-            background: linear-gradient(135deg, #fdf8e7 0%, #e0bc4e 40%, #b8861d 70%, #120e06 100%);
+            background: linear-gradient(135deg, #ffffff 0%, #fffbeb 40%, #fef3c7 75%, #fde68a 100%);
         }
 
         body.dark.theme-gold {
@@ -515,7 +542,7 @@
         }
 
         body.theme-ocean {
-            background: linear-gradient(120deg, #00c6ff 0%, #0072ff 100%);
+            background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 40%, #e0f2fe 75%, #bae6fd 100%);
         }
 
         body.dark.theme-ocean {
@@ -524,7 +551,7 @@
         }
 
         body.theme-forest {
-            background: linear-gradient(120deg, #add100 0%, #7b920a 100%);
+            background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 40%, #dcfce7 75%, #bbf7d0 100%);
         }
 
         body.dark.theme-forest {
@@ -533,7 +560,7 @@
         }
 
         body.theme-dusk {
-            background: linear-gradient(120deg, #2c3e50 0%, #fd746c 100%);
+            background: linear-gradient(135deg, #ffffff 0%, #fafaf9 40%, #f5f5f4 75%, #e7e5e4 100%);
         }
 
         body.dark.theme-dusk {
@@ -542,7 +569,7 @@
         }
 
         body.theme-rose {
-            background: linear-gradient(120deg, #e55d87 0%, #5fc3e4 100%);
+            background: linear-gradient(135deg, #ffffff 0%, #fff1f2 40%, #ffe4e6 75%, #fecdd3 100%);
         }
 
         body.dark.theme-rose {
@@ -551,7 +578,7 @@
         }
 
         body.theme-ruby {
-            background: linear-gradient(120deg, #f43f5e 0%, #be123c 100%);
+            background: linear-gradient(135deg, #ffffff 0%, #fff5f5 40%, #fed7d7 75%, #feb2b2 100%);
         }
 
         body.dark.theme-ruby {
@@ -560,7 +587,7 @@
         }
 
         body.theme-emerald {
-            background: linear-gradient(120deg, #34d399 0%, #059669 100%);
+            background: linear-gradient(135deg, #ffffff 0%, #ecfdf5 40%, #d1fae5 75%, #a7f3d0 100%);
         }
 
         body.dark.theme-emerald {
@@ -569,14 +596,12 @@
         }
 
         body.theme-galaxy {
-            background-color: #0d1117;
+            background-color: #f8fafc;
             background-image:
-                radial-gradient(at 20% 25%, hsla(212, 100%, 39%, 0.3) 0px, transparent 50%),
-                radial-gradient(at 80% 40%, hsla(280, 35%, 50%, 0.2) 0px, transparent 50%),
-                radial-gradient(at 45% 85%, hsla(320, 45%, 55%, 0.25) 0px, transparent 50%);
+                radial-gradient(at 20% 25%, hsla(212, 100%, 95%, 0.8) 0px, transparent 50%),
+                radial-gradient(at 80% 40%, hsla(280, 100%, 95%, 0.8) 0px, transparent 50%);
         }
 
-        /* Galaxy is already dark, no change needed usually, but lets ensure deep space feel */
         body.dark.theme-galaxy {
             background-color: #050505;
             background-image:
@@ -585,7 +610,7 @@
         }
 
         body.theme-sunset {
-            background: linear-gradient(120deg, #ff9a9e 0%, #fecfef 25%, #fecfef 50%, #fecfef 75%, #ff9a9e 100%);
+            background: linear-gradient(135deg, #ffffff 0%, #fff7ed 40%, #ffedd5 75%, #fed7aa 100%);
         }
 
         body.dark.theme-sunset {
@@ -980,97 +1005,198 @@
 
         /* Chic Premium Card Variations */
         .card-orange { 
-            background: linear-gradient(135deg, #b45309 0%, #78350f 100%); 
-            color: #fef3c7; 
-            box-shadow: 0 10px 25px rgba(120, 53, 15, 0.4); 
-            border: 1px solid rgba(251, 191, 36, 0.2); 
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); 
+            color: #0f172a; 
+            box-shadow: 0 10px 25px rgba(245, 158, 11, 0.25); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            transition: all 0.3s ease;
         }
-        .card-green { 
-            background: linear-gradient(135deg, #065f46 0%, #064e3b 100%); 
-            color: #d1fae5; 
-            box-shadow: 0 10px 25px rgba(6, 78, 59, 0.4); 
-            border: 1px solid rgba(52, 211, 153, 0.2); 
-        }
-        .card-blue { 
-            background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%); 
-            color: #dbeafe; 
-            box-shadow: 0 10px 25px rgba(30, 58, 138, 0.4); 
-            border: 1px solid rgba(96, 165, 250, 0.2); 
-        }
-        .card-red { 
-            background: linear-gradient(135deg, #9f1239 0%, #881337 100%); 
-            color: #ffe4e6; 
-            box-shadow: 0 10px 25px rgba(157, 23, 77, 0.4); 
-            border: 1px solid rgba(251, 113, 133, 0.2); 
-        }
-        .card-purple { 
-            background: linear-gradient(135deg, #5b21b6 0%, #4c1d95 100%); 
-            color: #ede9fe; 
-            box-shadow: 0 10px 25px rgba(91, 33, 182, 0.4); 
-            border: 1px solid rgba(167, 139, 250, 0.2); 
-        }
-        .card-teal { 
-            background: linear-gradient(135deg, #0f766e 0%, #134e4a 100%); 
-            color: #ccfbf1; 
-            box-shadow: 0 10px 25px rgba(15, 118, 110, 0.4); 
-            border: 1px solid rgba(45, 212, 191, 0.2); 
+        .card-orange:hover {
+            box-shadow: 0 15px 35px rgba(245, 158, 11, 0.5);
+            transform: translateY(-8px) scale(1.03);
         }
 
-        /* Emerald Slim Premium Stats Bar */
+        .card-green { 
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%); 
+            color: #ffffff; 
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.25); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            transition: all 0.3s ease;
+        }
+        .card-green:hover {
+            box-shadow: 0 15px 35px rgba(16, 185, 129, 0.5);
+            transform: translateY(-8px) scale(1.03);
+        }
+
+        .card-blue { 
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); 
+            color: #ffffff; 
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.25); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            transition: all 0.3s ease;
+        }
+        .card-blue:hover {
+            box-shadow: 0 15px 35px rgba(59, 130, 246, 0.5);
+            transform: translateY(-8px) scale(1.03);
+        }
+
+        .card-red { 
+            background: linear-gradient(135deg, #f43f5e 0%, #be123c 100%); 
+            color: #ffffff; 
+            box-shadow: 0 10px 25px rgba(244, 63, 94, 0.25); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            transition: all 0.3s ease;
+        }
+        .card-red:hover {
+            box-shadow: 0 15px 35px rgba(244, 63, 94, 0.5);
+            transform: translateY(-8px) scale(1.03);
+        }
+
+        .card-purple { 
+            background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); 
+            color: #ffffff; 
+            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.25); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            transition: all 0.3s ease;
+        }
+        .card-purple:hover {
+            box-shadow: 0 15px 35px rgba(139, 92, 246, 0.5);
+            transform: translateY(-8px) scale(1.03);
+        }
+
+        .card-teal { 
+            background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%); 
+            color: #ffffff; 
+            box-shadow: 0 10px 25px rgba(20, 184, 166, 0.25); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            transition: all 0.3s ease;
+        }
+        .card-teal:hover {
+            box-shadow: 0 15px 35px rgba(20, 184, 166, 0.5);
+            transform: translateY(-8px) scale(1.03);
+        }
+        /* Ultra-Premium Glassmorphic Stats Bar */
         .premium-stats-bar {
-            margin: 15px 0;
-            padding: 8px 30px;
-            background: linear-gradient(90deg, rgba(6, 78, 59, 0.9), rgba(16, 185, 129, 0.6));
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(16, 185, 129, 0.4);
-            border-radius: 16px;
+            margin: 25px 0;
+            padding: 20px 50px;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.95));
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(251, 191, 36, 0.4);
+            border-radius: 25px;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 4px 20px rgba(0, 50, 0, 0.4);
-            gap: 40px;
-            transition: all 0.3s ease;
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.6), inset 0 2px 20px rgba(251, 191, 36, 0.1);
+            gap: 60px;
+            transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Shine effect */
+        .premium-stats-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.15), transparent);
+            transform: skewX(-20deg);
+            transition: 0.7s;
+        }
+
+        .premium-stats-bar:hover::before {
+            left: 150%;
+            transition: 0.7s;
         }
 
         .premium-stats-bar:hover {
-            border-color: #34d399;
-            background: linear-gradient(90deg, rgba(6, 78, 59, 1), rgba(16, 185, 129, 0.8));
-            transform: scale(1.01);
+            border-color: #fbbf24;
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px rgba(251, 191, 36, 0.2), 0 15px 40px rgba(0, 0, 0, 0.7);
         }
 
         .stat-item {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 18px;
+            transition: all 0.4s ease;
+            position: relative;
+            z-index: 1;
         }
 
         .stat-icon-wrapper {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 8px;
-            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(217, 119, 6, 0.15));
+            padding: 15px;
+            border-radius: 16px;
             display: flex;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 0 15px rgba(217, 119, 6, 0.1);
         }
 
-        .stat-details { text-align: right; }
-        .stat-label { 
-            color: #d1fae5; 
-            font-size: 10px; 
-            font-weight: 600; 
-            margin-bottom: 0;
+        .stat-item:hover .stat-icon-wrapper {
+            transform: scale(1.2) rotate(8deg);
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.25), rgba(217, 119, 6, 0.3));
+            border-color: #fbbf24;
+            box-shadow: 0 0 25px rgba(251, 191, 36, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.2);
         }
+
+        .stat-details {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .stat-label { 
+            color: #cbd5e1; 
+            font-size: 13px; 
+            font-weight: 700; 
+            margin-bottom: 0;
+            letter-spacing: 0.5px;
+            transition: color 0.3s;
+            text-transform: uppercase;
+        }
+
+        .stat-item:hover .stat-label {
+            color: #fbbf24;
+            text-shadow: 0 0 8px rgba(251, 191, 36, 0.3);
+        }
+
         .stat-number { 
-            color: #ffffff; 
-            font-weight: 800; 
-            font-size: 22px; 
+            color: #fff; 
+            font-weight: 900; 
+            font-size: 32px; 
             line-height: 1;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+            transition: all 0.4s;
+            font-family: 'Poppins', 'El Messiri', sans-serif;
+        }
+
+        .stat-item:hover .stat-number {
+            color: #fbbf24;
+            text-shadow: 0 0 25px rgba(251, 191, 36, 0.9), 0 0 10px rgba(217, 119, 6, 0.6);
+            transform: scale(1.08) translateX(-5px);
         }
 
         .stat-divider {
-            width: 1px;
-            height: 30px;
-            background: rgba(255, 255, 255, 0.3);
+            width: 2px;
+            height: 55px;
+            background: linear-gradient(180deg, transparent, rgba(251, 191, 36, 0.6), transparent);
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
+            transition: all 0.3s;
+        }
+        
+        .premium-stats-bar:hover .stat-divider {
+            height: 65px;
+            background: linear-gradient(180deg, transparent, rgba(251, 191, 36, 0.9), transparent);
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.6);
         }
 
         /* Refined Purple Neon Search Bar (Coding Stella Style) */
@@ -1299,6 +1425,79 @@
                 transform: rotate(360deg);
             }
         }
+
+        /* Modern Premium Action Buttons for Transactions */
+        .btn-modern-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 10px; /* Modern rounded square */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #ffffff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+
+        .btn-modern-action::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-modern-action:hover::before {
+            left: 100%;
+        }
+
+        .btn-modern-action:hover {
+            transform: translateY(-2px) scale(1.1);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-modern-action:active {
+            transform: translateY(1px) scale(0.95);
+        }
+
+        .btn-modern-action.edit {
+            background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+            box-shadow: 0 4px 10px rgba(217, 119, 6, 0.3);
+        }
+
+        .btn-modern-action.edit:hover {
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.6);
+            border-color: rgba(251, 191, 36, 0.5);
+        }
+
+        .btn-modern-action.delete {
+            background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+            box-shadow: 0 4px 10px rgba(185, 28, 28, 0.3);
+        }
+
+        .btn-modern-action.delete:hover {
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.6);
+            border-color: rgba(239, 68, 68, 0.5);
+        }
+
+        .btn-modern-action i {
+            font-size: 14px;
+            transition: transform 0.3s;
+        }
+
+        .btn-modern-action:hover i {
+            transform: scale(1.15);
+        }
+
 
         .layout {
             display: flex;
@@ -1912,9 +2111,9 @@
         }
 
         .modal-box {
-            width: 90%;
-            max-width: 720px;
-            max-height: 85vh;
+            width: 95%;
+            max-width: 960px;
+            max-height: 92vh;
             overflow-y: auto;
             overflow-x: hidden;
             background: var(--card);
@@ -3003,17 +3202,83 @@
 
         /* Fix table colors in light mode */
         body:not(.dark) table {
-            background: #fff !important;
-            color: #1e293b !important;
+            background: #ffffff !important;
+            color: #0f172a !important;
+            border: 1px solid #e2e8f0 !important;
         }
 
         body:not(.dark) th {
-            background: #f1f5f9 !important;
+            background: #f8fafc !important;
             color: #0f172a !important;
+            font-weight: 800 !important;
+            border-bottom: 2px solid #cbd5e1 !important;
         }
 
         body:not(.dark) td {
-            border-bottom: 1px solid #f1f5f9 !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+            color: #1e293b !important;
+            font-weight: 600 !important;
+        }
+
+        body:not(.dark) tbody tr:nth-child(even) {
+            background-color: #f8fafc !important;
+        }
+
+        body:not(.dark) tbody tr:hover {
+            background-color: #f1f5f9 !important;
+        }
+
+        /* Highly readable and premium metric cards in light mode */
+        body:not(.dark) .card-orange {
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%) !important;
+            color: #78350f !important;
+            box-shadow: 0 10px 25px rgba(251, 191, 36, 0.12) !important;
+            border: 1px solid rgba(251, 191, 36, 0.3) !important;
+        }
+        body:not(.dark) .card-green {
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%) !important;
+            color: #065f46 !important;
+            box-shadow: 0 10px 25px rgba(52, 211, 153, 0.12) !important;
+            border: 1px solid rgba(52, 211, 153, 0.3) !important;
+        }
+        body:not(.dark) .card-blue {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%) !important;
+            color: #1e40af !important;
+            box-shadow: 0 10px 25px rgba(96, 165, 250, 0.12) !important;
+            border: 1px solid rgba(96, 165, 250, 0.3) !important;
+        }
+        body:not(.dark) .card-red {
+            background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%) !important;
+            color: #9f1239 !important;
+            box-shadow: 0 10px 25px rgba(251, 113, 133, 0.12) !important;
+            border: 1px solid rgba(251, 113, 133, 0.3) !important;
+        }
+        body:not(.dark) .card-purple {
+            background: linear-gradient(135deg, #faf5ff 0%, #e9d5ff 100%) !important;
+            color: #5b21b6 !important;
+            box-shadow: 0 10px 25px rgba(167, 139, 250, 0.12) !important;
+            border: 1px solid rgba(167, 139, 250, 0.3) !important;
+        }
+        body:not(.dark) .card-teal {
+            background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%) !important;
+            color: #0f766e !important;
+            box-shadow: 0 10px 25px rgba(45, 212, 191, 0.12) !important;
+            border: 1px solid rgba(45, 212, 191, 0.3) !important;
+        }
+
+        /* Form inputs in light mode - higher contrast */
+        body:not(.dark) .custom-input {
+            color: #0f172a !important;
+            text-shadow: none !important;
+        }
+        body:not(.dark) .custom-input::placeholder {
+            color: #64748b !important;
+        }
+
+        /* Fix the white font issue on some labels in light mode */
+        body:not(.dark) label {
+            color: #1e293b !important;
+            font-weight: 700 !important;
         }
     </style>
     <style>
@@ -3299,6 +3564,20 @@
     <div class="stage">
         <div class="stage-inner">
             <div class="container" id="app" style="display: none;">
+                <style>
+                    @keyframes pulseGlow {
+                        0% { box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2); }
+                        50% { box-shadow: 0 4px 25px rgba(245, 158, 11, 0.45); }
+                        100% { box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2); }
+                    }
+                </style>
+                <!-- Announcement Bar for Version 1.9.0 -->
+                <div id="announcementBar" style="background: linear-gradient(90deg, #d4af37, #f59e0b, #d4af37); color: #0f172a; padding: 10px 20px; font-size: 13px; font-weight: 800; text-align: center; border-radius: 12px; margin-bottom: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2); animation: pulseGlow 2s infinite; direction: rtl;" onclick="window.showUpdateNotesModal()">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap;">
+                        📢 <span style="font-weight: 900;">ترقبوا تحديثاً جديداً وقريباً بداية من 20/6/2026! 🚀</span>
+                        <span style="background: rgba(0,0,0,0.15); padding: 2px 8px; border-radius: 6px; font-weight: 900; margin-right: 10px; color: #78350f;">اضغط هنا لمعاينة مميزات التحديث الحالي 1.9.0 ✨</span>
+                    </div>
+                </div>
 
                 <!-- 💎 Premium Floating Islands Header -->
                 <style>
@@ -3412,6 +3691,10 @@
                     <!-- الجزيرة 3: لوحة التحكم المتقدمة (Left) -->
                     <div class="header-island" style="flex: 1.5; justify-content: flex-end; gap: 12px;">
                         <div style="display: flex; gap: 8px; padding-left: 12px; border-left: 1px solid rgba(255,255,255,0.1);">
+                            <div class="action-tile" id="themeToggleTile" title="تبديل المظهر" onclick="toggleTheme()" style="position: relative;">
+                                <span style="position: absolute; top: -5px; right: -5px; background: #ef4444; color: #fff; font-size: 8px; font-weight: 950; padding: 2px 4px; border-radius: 6px; box-shadow: 0 0 5px #ef4444; text-transform: uppercase; line-height: 1; border: 1px solid rgba(255,255,255,0.2); font-family: 'Poppins', sans-serif;">NEW</span>
+                                <span id="themeToggleIcon"><i class="fa-solid fa-moon"></i></span>
+                            </div>
                             <div class="action-tile" title="حفظ البيانات" onclick="exportAllData()"><i class="fa-solid fa-floppy-disk"></i></div>
                             <div class="action-tile" title="لقطة شاشة" onclick="takeScreenshot()"><i class="fa-solid fa-camera"></i></div>
                             <div class="action-tile" title="واتساب" onclick="shareToWhatsApp()" style="color: #22c55e;"><i class="fa-solid fa-comment-dots"></i></div>
@@ -3492,13 +3775,13 @@
                         <div class="metric-icon">💳</div>
                         <div class="metric-label">حسابات خارجية</div>
                         <div style="display: flex; gap: 8px; width: 100%; margin-top: 5px;">
-                            <div style="flex:1; background:rgba(255,255,255,0.15); padding:6px; border-radius:12px; backdrop-filter: blur(4px);">
-                                <span style="font-size:10px; display:block; color:#ccfbf1; font-weight:bold;">له ⬆️</span>
-                                <span id="extOwedToMe" style="font-size:15px; font-weight:900;">0</span>
+                            <div style="flex:1; background: rgba(16, 185, 129, 0.15); border: 1.5px solid rgba(16, 185, 129, 0.3); padding:6px; border-radius:12px; backdrop-filter: blur(4px); transition: all 0.3s;">
+                                <span style="font-size:10px; display:block; color:#4ade80; font-weight:bold;">له ⬆️</span>
+                                <span id="extOwedToMe" style="font-size:15px; font-weight:900; color: #4ade80;">0</span>
                             </div>
-                            <div style="flex:1; background:rgba(255,255,255,0.15); padding:6px; border-radius:12px; backdrop-filter: blur(4px);">
-                                <span style="font-size:10px; display:block; color:#fecdd3; font-weight:bold;">عليه ⬇️</span>
-                                <span id="extOwedByMe" style="font-size:15px; font-weight:900;">0</span>
+                            <div style="flex:1; background: rgba(244, 63, 94, 0.15); border: 1.5px solid rgba(244, 63, 94, 0.3); padding:6px; border-radius:12px; backdrop-filter: blur(4px); transition: all 0.3s;">
+                                <span style="font-size:10px; display:block; color:#fb7185; font-weight:bold;">عليه ⬇️</span>
+                                <span id="extOwedByMe" style="font-size:15px; font-weight:900; color: #fb7185;">0</span>
                             </div>
                         </div>
                     </div>
@@ -3845,7 +4128,7 @@
                             <div id="tableStats" class="premium-stats-bar">
                                 <div class="stat-item">
                                     <div class="stat-icon-wrapper">
-                                        <span style="font-size: 24px;">📊</span>
+                                        <i class="fa-solid fa-chart-simple" style="color: #fbbf24; font-size: 22px;"></i>
                                     </div>
                                     <div class="stat-details">
                                         <div class="stat-label" id="lblTotalCategories">إجمالي الفئات اليوم</div>
@@ -3857,7 +4140,7 @@
 
                                 <div class="stat-item">
                                     <div class="stat-icon-wrapper">
-                                        <span style="font-size: 24px;">📜</span>
+                                        <i class="fa-solid fa-receipt" style="color: #fbbf24; font-size: 22px;"></i>
                                     </div>
                                     <div class="stat-details">
                                         <div class="stat-label" id="lblTotalOperations">إجمالي العمليات (العدد)</div>
@@ -3910,10 +4193,24 @@
                             </div>
                         </div>
 
-                        <div class="card" id="calculatorCard" style="display: none;">
+                        <div class="card" id="calculatorCard" style="display: block;">
                             <h3 style="margin:0 0 8px;">آلة حاسبة متقدمة</h3>
                             <div class="calculator">
-                                <input id="calcDisplay" class="calc-display" readonly="">
+                                <div id="calcFormula" style="font-size: 13px; color: #94a3b8; text-align: left; direction: ltr; min-height: 18px; margin-bottom: 4px; font-family: monospace; padding: 0 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></div>
+                                <div style="position: relative; margin-bottom: 12px;">
+                                    <input id="calcDisplay" class="calc-display" readonly="" style="padding-right: 45px; margin-bottom: 0;">
+                                    <button onclick="window.copyCalcResult()" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--gold2); cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; z-index: 10;" title="نسخ الناتج">
+                                        📋
+                                    </button>
+                                </div>
+                                <div style="display: flex; gap: 8px; margin-top: 15px; border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 12px; justify-content: center; direction: rtl;">
+                                    <button onclick="if(document.getElementById('cashSoldAmount')) { document.getElementById('cashSoldAmount').value = document.getElementById('calcDisplay').value; runCashCalc(); if(window.showToast) window.showToast('📋 تم نسخ الناتج لـ بعت كام', 'success'); }" style="flex: 1; height: 32px; background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.2); border-radius: 10px; color: #fbbf24; font-size: 11px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: all 0.2s;">
+                                        📥 في بعت كام
+                                    </button>
+                                    <button onclick="if(document.getElementById('amtBottom')) { document.getElementById('amtBottom').value = document.getElementById('calcDisplay').value; if(window.showToast) window.showToast('📋 تم نسخ الناتج لـ المبلغ', 'success'); }" style="flex: 1; height: 32px; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 10px; color: #38bdf8; font-size: 11px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: all 0.2s;">
+                                        📥 في المبلغ
+                                    </button>
+                                </div>
                                 <div
                                     style="display:flex; gap:4px; margin-bottom:8px; font-size:11px; color:var(--muted);">
                                     <span id="calcMemory" style="flex:1;">M: 0</span>
@@ -4692,6 +4989,8 @@
             } else if (isDarkMode === 'true' || isDarkMode === null) {
                 document.body.classList.add('dark');
             }
+            
+            if (typeof updateThemeToggleIcon === 'function') updateThemeToggleIcon();
 
             // Activate default settings if not already set
             if (!localStorage.getItem('acc_app_theme')) localStorage.setItem('acc_app_theme', 'galaxy');
@@ -4967,6 +5266,10 @@
                         case 'f1':
                             e.preventDefault();
                             if (typeof toggleCalculator === 'function') toggleCalculator();
+                            break;
+                        case 'f10':
+                            e.preventDefault();
+                            if (typeof window.showCenteredCalculatorModal === 'function') window.showCenteredCalculatorModal();
                             break;
                         case 'f2':
                             e.preventDefault();
@@ -5375,8 +5678,7 @@
             });
 
             // Update new dashboard cards
-            const headerCashTotal = document.getElementById('headerCashTotal');
-            if (headerCashTotal) headerCashTotal.textContent = formatNum(cashTotal);
+            const headerCashTotal = document.getElementById('headerCashTotal'); headerCashTotal.textContent = formatNum(cashTotal);
 
             const headerInstaPayTotal = document.getElementById('headerInstaPayTotal');
             if (headerInstaPayTotal) headerInstaPayTotal.textContent = formatNum(instaPayTotal);
@@ -5460,11 +5762,11 @@
                     if (item.id) row.id = 'row-' + item.id;
 
                     const actionsHtml = `
-            <button class="btn blue" style="padding: 6px 10px; font-size: 12px;" title="تعديل العملية" onclick="showEditModal('${item.id}')">
-                <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0ibHVjaWRlIGx1Y2lkZS1wZW4tc3F1YXJlIj48cGF0aCBkPSJNMjAgNi43TDExLjMgMTggNCAxNWw4LjctMTEuM0EyLjgzIDIuODMgMCAwIDEgMTggNWExLjQxIDEuNDEgMCAwIDEgMiAyaDIiLz48cGF0aCBkPSJtMTYgNSA1IDUiLz48L3N2Zz4=" class="icon" style="margin-left:4px;"> تعديل
+            <button class="btn-modern-action edit" title="تعديل العملية" onclick="showEditModal('${item.id}')">
+                <i class="fa-solid fa-pen-to-square"></i>
             </button>
-            <button class="btn red" style="padding: 6px 10px; font-size: 12px;" title="حذف العملية" onclick="onDeleteOp('${item.id}')">
-                <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0ibHVjaWRlIGx1Y2lkZS10cmFzaC0yIj48cGF0aCBkPSJNMwo2aDE4TTYgNnYxNGExIDIgMCAwIDAgMiAyaDEwYTIgMiAwIDAgMCAyLTJWNk04IDZWNGExLTIgMCAwIDEgMi0yaDRhMiAyIDAgMCAxIDIgMnYyIi8+PGxpbmUgeDE9IjEwIiB4Mj0iMTAiIHkxPSIxMSIgeTI9IjE3Ii8+PGxpbmUgeDE9IjE0IiB4Mj0iMTQiIHkxPSIxMSIgeTI9IjE3Ii8+PC9zdmc+" class="icon" style="margin-left:4px;"> حذف
+            <button class="btn-modern-action delete" title="حذف العملية" onclick="onDeleteOp('${item.id}')">
+                <i class="fa-solid fa-trash-can"></i>
             </button>
       `;
 
@@ -5475,7 +5777,7 @@
                     const isMobile = item.device && item.device.toLowerCase() === 'mobile';
                     const deviceIcon = isMobile ? '📱' : '💻';
 
-                    const editTimeStr = item.lastEditTime ? new Date(item.lastEditTime).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }) : '-';
+                    const editTimeStr = item.lastEditTime ? new Date(item.lastEditTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : '-';
 
                     row.innerHTML = `
                         <td class="col-m" style="font-weight:bold; color:var(--muted); font-size:12px;">${index + 1}</td>
@@ -5506,7 +5808,11 @@
                                 `;
                             })()}
                         </td>
-                        <td class="col-actions" style="display:flex; gap:4px; justify-content:center;">${actionsHtml}</td>
+                        <td class="col-actions" style="text-align:center; vertical-align:middle; padding:6px 10px;">
+                            <div style="display:inline-flex; gap:6px; justify-content:center; align-items:center; vertical-align:middle;">
+                                ${actionsHtml}
+                            </div>
+                        </td>
                     `;
                     aggTbody.appendChild(row);
                 });
@@ -6675,13 +6981,15 @@
             } else {
                 calcStr += v;
             }
-            $('calcDisplay').value = calcStr;
+            document.querySelectorAll('#calcDisplay').forEach(el => el.value = calcStr);
+            document.querySelectorAll('#calcFormula').forEach(el => el.textContent = calcStr);
             beep(900, 0.02, 0.04);
         }
 
         function calcClear() {
             calcStr = '';
-            $('calcDisplay').value = '0';
+            document.querySelectorAll('#calcDisplay').forEach(el => el.value = '0');
+            document.querySelectorAll('#calcFormula').forEach(el => el.textContent = '');
             isResultDisplayed = false;
             beep(800, 0.03, 0.04);
         }
@@ -6713,13 +7021,19 @@
                 
                 if (typeof updateCalcDisplay === 'function') updateCalcDisplay();
                 
+                document.querySelectorAll('#calcFormula').forEach(el => el.textContent = calcStr + ' =');
+                
                 calcStr = result.toString();
-                $('calcDisplay').value = calcStr;
+                document.querySelectorAll('#calcDisplay').forEach(el => el.value = calcStr);
                 isResultDisplayed = true;
                 beep(1100, 0.04, 0.06);
             } catch (e) {
-                $('calcDisplay').value = 'Error';
-                setTimeout(() => { if ($('calcDisplay').value === 'Error') $('calcDisplay').value = calcStr; }, 1000);
+                document.querySelectorAll('#calcDisplay').forEach(el => el.value = 'Error');
+                setTimeout(() => { 
+                    document.querySelectorAll('#calcDisplay').forEach(el => {
+                        if (el.value === 'Error') el.value = calcStr;
+                    });
+                }, 1000);
             }
         }
 
@@ -6930,6 +7244,19 @@
         /* Initialize calculator display */
         document.addEventListener('DOMContentLoaded', function () {
             updateCalcDisplay();
+            if (typeof createCalculatorHTML === 'function') createCalculatorHTML();
+            
+            // Control visibility of the announcement bar (show for a week until 2026-06-22)
+            const now = new Date();
+            const expiry = new Date('2026-06-22T00:00:00');
+            const announceBar = document.getElementById('announcementBar');
+            if (announceBar) {
+                if (now > expiry) {
+                    announceBar.style.display = 'none';
+                } else {
+                    announceBar.style.display = 'flex';
+                }
+            }
         });
 
         /* ---------- Screen Orientation ---------- */
@@ -6959,10 +7286,24 @@
         }
 
         /* ---------- Theme ---------- */
+        function updateThemeToggleIcon() {
+            const tile = document.getElementById('themeToggleTile');
+            const iconSpan = document.getElementById('themeToggleIcon');
+            if (!tile || !iconSpan) return;
+            const isDark = document.body.classList.contains('dark');
+            if (isDark) {
+                iconSpan.innerHTML = '<i class="fa-solid fa-sun" style="color: #fbbf24;"></i>';
+                tile.title = "تبديل إلى الوضع النهاري ☀️";
+            } else {
+                iconSpan.innerHTML = '<i class="fa-solid fa-moon" style="color: #64748b;"></i>';
+                tile.title = "تبديل إلى الوضع الليلي 🌙";
+            }
+        }
         function toggleTheme() {
             document.body.classList.toggle('dark');
             localStorage.setItem('acc_dark_mode', document.body.classList.contains('dark'));
             beep(600, 0.03, 0.04);
+            updateThemeToggleIcon();
             render(); // Re-render to update chart colors
         }
         function changeTheme(themeName) {
@@ -7728,7 +8069,7 @@
             const toast = document.createElement('div');
             toast.style.cssText = `
         position: fixed; top: 20px; right: 20px; background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : type === 'warning' ? '#f59e0b' : '#6b7280'};
-        color: white; padding: 12px 20px; border-radius: 8px; z-index: 10000;
+        color: white; padding: 12px 20px; border-radius: 8px; z-index: 99999999;
         box-shadow: 0 4px 12px rgba(0,0,0,0.3); animation: slideInRight 0.3s;
         font-weight: bold; max-width: 300px;
     `;
@@ -8409,14 +8750,8 @@
                     <span class="tab-link" data-tab="appearance">
                         🎨 الواجهة
                     </span>
-                    <span class="tab-link" data-tab="trash" onclick="loadTrashItems()">
-                        🗑️ المهملات
-                    </span>
                     <span class="tab-link" data-tab="share">
                         📤 المشاركة
-                    </span>
-                    <span class="tab-link" data-tab="cloud">
-                        ☁️ المزامنة
                     </span>
                     <span class="tab-link" data-tab="shortcuts">
                         ⌨️ الاختصارات
@@ -8712,6 +9047,17 @@
                         <!-- Users list renders here -->
                     </div>
 
+                    <div id="deletedUsersSection" style="margin-top: 20px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 15px; display: none;">
+                        <label style="display:block; margin-bottom:12px; font-weight: 800; color: #f87171;">🗑️ الموظفين المحذوفين</label>
+                        <div id="deletedUsersListContainer" style="max-height:200px; overflow-y:auto; display:grid; gap:12px; padding: 5px;">
+                            <!-- Deleted Users render here -->
+                        </div>
+                    </div>
+                    
+                    <button class="btn" id="toggleDeletedUsersBtn" onclick="window.toggleDeletedUsersList()" style="width: 100%; margin-top: 15px; background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px dashed rgba(239, 68, 68, 0.3); padding: 10px; font-size: 12px; font-weight: bold; border-radius: 10px; cursor: pointer;">
+                        👁️ عرض أرشيف الموظفين المحذوفين
+                    </button>
+
                     <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05);">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
                              <h4 style="color:#22c55e; border:none; padding:0; margin:0; display:flex; align-items:center; gap:8px;">⚖️ أجهزة الفريق المتصلة (Licensing) <span id="connected-devices-count" style="font-size: 11px; margin-right: 10px; background: rgba(34, 197, 94, 0.1); color: #4ade80; padding: 2px 8px; border-radius: 8px; border: 1px solid rgba(34, 197, 94, 0.2); font-weight: bold;">(جاري العد...)</span></h4>
@@ -8726,15 +9072,19 @@
                         </div>
                         <p style="font-size:11px; color:var(--muted); margin-bottom: 15px;">يمكنك تفعيل أو حظر وصول الأجهزة الفرعية للبيانات السحابية بشكل لحظي.</p>
                         
-                        <!-- Sub-tabs for Connected vs Blocked Devices -->
-                        <div style="display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px;">
+                        <!-- Sub-tabs for Connected, Blocked and Deleted Devices -->
+                        <div style="display: flex; gap: 8px; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; flex-wrap: wrap;">
                             <button id="subTabConnected" class="btn" onclick="if(window.switchDeviceSubTab) window.switchDeviceSubTab('connected')" 
-                                style="flex: 1; padding: 8px 12px; font-size: 12px; font-weight: bold; border-radius: 8px; border: 1px solid rgba(34, 197, 94, 0.3); background: rgba(34, 197, 94, 0.15); color: #4ade80; transition: all 0.3s; cursor: pointer;">
+                                style="flex: 1; min-width: 100px; padding: 8px 10px; font-size: 11px; font-weight: bold; border-radius: 8px; border: 1px solid rgba(34, 197, 94, 0.3); background: rgba(34, 197, 94, 0.15); color: #4ade80; transition: all 0.3s; cursor: pointer;">
                                 🟢 الأجهزة النشطة والانتظار
                             </button>
                             <button id="subTabBlocked" class="btn" onclick="if(window.switchDeviceSubTab) window.switchDeviceSubTab('blocked')" 
-                                style="flex: 1; padding: 8px 12px; font-size: 12px; font-weight: bold; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.02); color: #94a3b8; transition: all 0.3s; cursor: pointer;">
+                                style="flex: 1; min-width: 100px; padding: 8px 10px; font-size: 11px; font-weight: bold; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.02); color: #94a3b8; transition: all 0.3s; cursor: pointer;">
                                 🚫 الأجهزة المحظورة
+                            </button>
+                            <button id="subTabDeleted" class="btn" onclick="if(window.switchDeviceSubTab) window.switchDeviceSubTab('deleted')" 
+                                style="flex: 1; min-width: 100px; padding: 8px 10px; font-size: 11px; font-weight: bold; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.02); color: #94a3b8; transition: all 0.3s; cursor: pointer;">
+                                🗑️ الأجهزة المحذوفة
                             </button>
                         </div>
                         
@@ -8971,6 +9321,17 @@
                                 </div>
                             </div>
                             <kbd style="background: linear-gradient(180deg, #2d3748, #1a202c); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; box-shadow: 0 3px 0 rgba(0,0,0,0.4); padding: 5px 12px; font-weight: 800; font-family: monospace; font-size: 13px;">F1</kbd>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.25); padding: 15px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.05); transition: 0.2s;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <span style="font-size: 18px;">🖥️</span>
+                                <div>
+                                    <div style="font-weight: 800; color: #fff; font-size: 14px;">الآلة الحاسبة الوسطى (Modal)</div>
+                                    <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">تفتح حاسبة ممتازة في منتصف الشاشة بعرض 50% لسرعة الاستخدام.</div>
+                                </div>
+                            </div>
+                            <kbd style="background: linear-gradient(180deg, #2d3748, #1a202c); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; box-shadow: 0 3px 0 rgba(0,0,0,0.4); padding: 5px 12px; font-weight: 800; font-family: monospace; font-size: 13px;">F10</kbd>
                         </div>
                         
                         <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.25); padding: 15px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.05); transition: 0.2s;">
@@ -11111,49 +11472,50 @@ ${records.length < 3 ? '• زد من عدد العمليات اليومية' : 
         }
 
         function exportAISettings() {
-            const settings = {
-                ai_patterns: localStorage.getItem('ai_patterns'),
-                ai_voice_feedback: localStorage.getItem('ai_voice_feedback'),
-                ai_notifications: localStorage.getItem('ai_notifications'),
-                ai_auto_backup_interval: localStorage.getItem('ai_auto_backup_interval'),
-                exportDate: new Date().toISOString()
-            };
-
-            const dataStr = JSON.stringify(settings, null, 2);
-            const blob = new Blob([dataStr], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `ai_settings_${new Date().toISOString().slice(0, 10)}.json`;
-            a.click();
-            URL.createObjectURL(url);
-
-            alert('✅ تم تصدير إعدادات الذكاء الاصطناعي');
+            try {
+                const settings = {
+                    ai_patterns: localStorage.getItem('ai_patterns'),
+                    ai_voice_feedback: localStorage.getItem('ai_voice_feedback'),
+                    ai_notifications: localStorage.getItem('ai_notifications'),
+                    ai_auto_backup_interval: localStorage.getItem('ai_auto_backup_interval')
+                };
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(settings));
+                const downloadAnchor = document.createElement('a');
+                downloadAnchor.setAttribute("href", dataStr);
+                downloadAnchor.setAttribute("download", "bayan_ai_settings.json");
+                document.body.appendChild(downloadAnchor);
+                downloadAnchor.click();
+                downloadAnchor.remove();
+                if (typeof showToast === 'function') showToast('📤 تم تصدير إعدادات الذكاء الاصطناعي بنجاح', 'success');
+            } catch(e) {
+                console.error(e);
+                if (typeof showToast === 'function') showToast('❌ فشل تصدير الإعدادات', 'error');
+            }
         }
 
-        function aiThemeSettings() {
-            const modal = document.createElement('div');
-            modal.className = 'ai-modal-overlay';
-            modal.innerHTML = `
-        <div class="ai-modal-box">
-            <div class="ai-modal-header">
-                <div class="ai-modal-title">
-                    🎨 تخصيص مظهر الذكاء الاصطناعي
-                </div>
-                <button class="ai-modal-close" onclick="this.closest('.ai-modal-overlay').remove()">×</button>
-            </div>
-            <div class="ai-result-content">
-                <div class="ai-insight">
-                    <h3>🌈 اختر نمط الذكاء الاصطناعي</h3>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin: 15px 0;">
-                        <button class="btn" onclick="setAITheme('professional')" style="padding: 15px; font-size: 12px; height: auto;">
-                            💼 احترافي
-                        </button>
-                        <button class="btn" onclick="setAITheme('friendly')" style="padding: 15px; font-size: 12px; height: auto;">
-                            😊 ودود
-                        </button>
-                        <button class="btn" onclick="setAITheme('motivational')" style="padding: 15px; font-size: 12px; height: auto;">
-                            💪 تحفيزي
+        function createCalculatorHTML() {
+            if (document.getElementById('calculatorCard')) return;
+
+            const calcHTML = `
+            <div id="calculatorCard" style="display:block; position: fixed; bottom: 85px; left: 25px; z-index: 9999; 
+                background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+                border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 28px; padding: 24px; 
+                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1); 
+                width: 310px; font-family: 'Inter', sans-serif;
+                transform: translateY(0); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                direction: rtl; box-sizing: border-box;">
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; cursor: move; user-select: none;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--gold2); filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.5));">
+                            <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+                            <line x1="8" y1="6" x2="16" y2="6"></line>
+                            <line x1="16" y1="14" x2="16" y2="18"></line>
+                            <path d="M16 10h.01M12 10h.01M8 10h.01M12 14h.01M8 14h.01M12 18h.01M8 18h.01"></path>
+                        </svg>
+                        <div style="color:#fff; font-weight:800; font-size:16px; letter-spacing: 0.5px;">الآلة الحاسبة</div>
+                    </div>
+                </div>                       💪 تحفيزي
                         </button>
                         <button class="btn" onclick="setAITheme('educational')" style="padding: 15px; font-size: 12px; height: auto;">
                             🎓 تعليمي
@@ -11650,44 +12012,191 @@ ${records.length < 3 ? '• زد من عدد العمليات اليومية' : 
             }
         }
 
+        window.copyCalcResult = function() {
+            const displays = document.querySelectorAll('#calcDisplay');
+            if (displays.length > 0) {
+                const val = displays[0].value;
+                navigator.clipboard.writeText(val).then(() => {
+                    if (window.showToast) window.showToast('📋 تم نسخ ناتج الحاسبة للحافظة: ' + val, 'success');
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                });
+            }
+        };
+
+        let modalCalcStr = '';
+        let modalIsResultDisplayed = false;
+
+        window.pressModalCalc = function(v) {
+            const display = document.getElementById('modalCalcDisplay');
+            if (!display) return;
+            if (modalIsResultDisplayed) {
+                if (/[0-9.]/.test(v)) {
+                    modalCalcStr = v;
+                } else {
+                    modalCalcStr += v;
+                }
+                modalIsResultDisplayed = false;
+            } else {
+                modalCalcStr += v;
+            }
+            display.value = modalCalcStr;
+            const formula = document.getElementById('modalCalcFormula');
+            if (formula) formula.textContent = modalCalcStr;
+            beep(900, 0.02, 0.04);
+        };
+
+        window.modalCalcClear = function() {
+            modalCalcStr = '';
+            const display = document.getElementById('modalCalcDisplay');
+            if (display) display.value = '0';
+            const formula = document.getElementById('modalCalcFormula');
+            if (formula) formula.textContent = '';
+            modalIsResultDisplayed = false;
+            beep(800, 0.03, 0.04);
+        };
+
+        window.modalCalcResult = function() {
+            if (!modalCalcStr) return;
+            try {
+                let safeExpr = modalCalcStr.replace(/[^0-9+\-*/().%]/g, '');
+                if (safeExpr !== modalCalcStr) {
+                    throw new Error("Invalid expression");
+                }
+                safeExpr = safeExpr.replace(/\b0+(\d+)/g, '$1');
+                safeExpr = safeExpr.replace(/[+\-*/.]+$/, '');
+                if (!safeExpr) return;
+                
+                let result = eval(safeExpr);
+                if (!Number.isInteger(result)) {
+                    result = parseFloat(result.toFixed(8));
+                }
+                const formula = document.getElementById('modalCalcFormula');
+                if (formula) formula.textContent = modalCalcStr + ' =';
+                modalCalcStr = result.toString();
+                const display = document.getElementById('modalCalcDisplay');
+                if (display) display.value = modalCalcStr;
+                modalIsResultDisplayed = true;
+                beep(1100, 0.04, 0.06);
+            } catch(e) {
+                const display = document.getElementById('modalCalcDisplay');
+                if (display) {
+                    display.value = 'Error';
+                    setTimeout(() => { if (display.value === 'Error') display.value = modalCalcStr; }, 1000);
+                }
+            }
+        };
+
+        window.copyModalCalcResult = function() {
+            const display = document.getElementById('modalCalcDisplay');
+            if (display) {
+                const val = display.value;
+                navigator.clipboard.writeText(val).then(() => {
+                    if (window.showToast) window.showToast('📋 تم نسخ ناتج الحاسبة للحافظة: ' + val, 'success');
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                });
+            }
+        };
+
+        window.showCenteredCalculatorModal = function() {
+            if (document.getElementById('centeredCalcModal')) {
+                document.getElementById('centeredCalcModal').remove();
+                return;
+            }
+            modalCalcStr = '';
+            modalIsResultDisplayed = false;
+            const modal = document.createElement('div');
+            modal.id = 'centeredCalcModal';
+            modal.className = 'modal-overlay';
+            modal.style.zIndex = '99999';
+            modal.innerHTML = `
+                <div class="modal-box" style="width: 50vw; max-width: 450px; min-width: 320px; background: linear-gradient(145deg, #1e293b, #0f172a); border: 2px solid #fbbf24; box-shadow: 0 10px 40px rgba(0,0,0,0.6); color: #fff; border-radius: 24px; padding: 25px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px;">
+                        <h3 style="margin:0; font-size: 18px; display:flex; align-items:center; gap:8px;"><span style="font-size:22px;">🧮</span> الآلة الحاسبة الفورية</h3>
+                        <button class="btn ghost" style="color:#ef4444; background: rgba(239, 68, 68, 0.1); padding:8px; border-radius:50%; cursor:pointer;" onclick="document.getElementById('centeredCalcModal').remove()"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXgiPjxsaW5lIHgxPSIxOCIgeDI9IjYiIHkxPSI2IiB5Mj0iMTgiLz48bGluZSB4MT0iNiIgeDI9IjE4IiB5MT0iNiIgeTI9IjE4Ii8+PC9zdmc+" class="icon" style="margin:0;"></button>
+                    </div>
+                    
+                    <div style="position: relative; margin-bottom: 15px;">
+                        <div id="modalCalcFormula" style="font-size: 13px; color: #94a3b8; text-align: left; direction: ltr; min-height: 18px; margin-bottom: 4px; font-family: monospace; padding: 0 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></div>
+                        <div style="position: relative;">
+                            <input type="text" id="modalCalcDisplay" readonly placeholder="0" 
+                                style="width:100%; height:60px; background: rgba(0, 0, 0, 0.45); color: #fff; border: 1px solid rgba(255, 255, 255, 0.05); padding: 10px 45px 10px 15px; font-family: 'Consolas', 'Courier New', monospace; font-size: 26px; text-align: left; direction: ltr; border-radius: 16px; box-sizing: border-box; outline: none; font-weight: 700; box-shadow: inset 0 4px 15px rgba(0, 0, 0, 0.5);">
+                            <button onclick="window.copyModalCalcResult()" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--gold2); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; z-index: 10;" title="نسخ الناتج">
+                                📋
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; margin-bottom: 15px;">
+                        <button onclick="modalCalcClear()" class="btn-calc btn-calc-danger">AC</button>
+                        <button onclick="pressModalCalc('(')" class="btn-calc btn-calc-op">(</button>
+                        <button onclick="pressModalCalc(')')" class="btn-calc btn-calc-op">)</button>
+                        <button onclick="pressModalCalc('/')" class="btn-calc btn-calc-op">÷</button>
+                        
+                        <button onclick="pressModalCalc('7')" class="btn-calc">7</button>
+                        <button onclick="pressModalCalc('8')" class="btn-calc">8</button>
+                        <button onclick="pressModalCalc('9')" class="btn-calc">9</button>
+                        <button onclick="pressModalCalc('*')" class="btn-calc btn-calc-op">×</button>
+                        
+                        <button onclick="pressModalCalc('4')" class="btn-calc">4</button>
+                        <button onclick="pressModalCalc('5')" class="btn-calc">5</button>
+                        <button onclick="pressModalCalc('6')" class="btn-calc">6</button>
+                        <button onclick="pressModalCalc('-')" class="btn-calc btn-calc-op">-</button>
+                        
+                        <button onclick="pressModalCalc('1')" class="btn-calc">1</button>
+                        <button onclick="pressModalCalc('2')" class="btn-calc">2</button>
+                        <button onclick="pressModalCalc('3')" class="btn-calc">3</button>
+                        <button onclick="pressModalCalc('+')" class="btn-calc btn-calc-op">+</button>
+                        
+                        <button onclick="pressModalCalc('0')" class="btn-calc">0</button>
+                        <button onclick="pressModalCalc('.')" class="btn-calc">.</button>
+                        <button onclick="modalCalcResult()" class="btn-calc btn-calc-success" style="grid-column: span 2;">=</button>
+                    </div>
+
+                    <div style="display: flex; gap: 8px; margin-top: 15px; border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 12px; justify-content: center; direction: rtl;">
+                        <button onclick="if(document.getElementById('cashSoldAmount')) { document.getElementById('cashSoldAmount').value = document.getElementById('modalCalcDisplay').value; runCashCalc(); if(window.showToast) window.showToast('📋 تم نسخ الناتج لـ بعت كام', 'success'); document.getElementById('centeredCalcModal').remove(); }" style="flex: 1; height: 35px; background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.2); border-radius: 10px; color: #fbbf24; font-size: 11px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: all 0.2s;">
+                            📥 في بعت كام
+                        </button>
+                        <button onclick="if(document.getElementById('amtBottom')) { document.getElementById('amtBottom').value = document.getElementById('modalCalcDisplay').value; if(window.showToast) window.showToast('📋 تم نسخ الناتج لـ المبلغ', 'success'); document.getElementById('centeredCalcModal').remove(); }" style="flex: 1; height: 35px; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 10px; color: #38bdf8; font-size: 11px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: all 0.2s;">
+                            📥 في المبلغ
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            beep(600, 0.04, 0.06);
+        };
+
         function toggleCalculator() {
             createCalculatorHTML(); // Ensure it exists
             const calculatorCard = document.getElementById('calculatorCard');
             if (!calculatorCard) return;
 
-            const isVisible = calculatorCard.style.display !== 'none';
-            
-            if (isVisible) {
-                // Hide
-                calculatorCard.style.transform = 'translateY(20px)';
-                calculatorCard.style.opacity = '0';
-                setTimeout(() => {
-                    calculatorCard.style.display = 'none';
-                }, 300);
-            } else {
-                // Show
-                calculatorCard.style.display = 'block';
-                setTimeout(() => {
-                    calculatorCard.style.transform = 'translateY(0)';
-                    calculatorCard.style.opacity = '1';
-                }, 10);
-                if (typeof beep === 'function') beep(1200, 0.04, 0.06);
-            }
+            // Flash effect to highlight the permanently visible calculator
+            calculatorCard.style.display = 'block';
+            calculatorCard.style.transform = 'scale(1.05)';
+            calculatorCard.style.boxShadow = '0 0 30px #fbbf24';
+            setTimeout(() => {
+                calculatorCard.style.transform = 'scale(1)';
+                calculatorCard.style.boxShadow = '0 20px 50px rgba(0, 0, 0, 0.5)';
+            }, 300);
+            if (typeof beep === 'function') beep(1200, 0.04, 0.06);
         }
 
         function createCalculatorHTML() {
             if (document.getElementById('calculatorCard')) return;
 
             const calcHTML = `
-            <div id="calculatorCard" style="display:none; position: fixed; bottom: 85px; left: 25px; z-index: 9999; 
+            <div id="calculatorCard" style="display:block; position: fixed; bottom: 85px; left: 25px; z-index: 9999; 
                 background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
                 border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 28px; padding: 24px; 
                 box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1); 
                 width: 310px; font-family: 'Inter', sans-serif;
-                transform: translateY(20px); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                transform: translateY(0); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
                 direction: rtl; box-sizing: border-box;">
                 
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; cursor: move; user-select: none;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; cursor: move; user-select: none;">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--gold2); filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.5));">
                             <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
@@ -11697,14 +12206,17 @@ ${records.length < 3 ? '• زد من عدد العمليات اليومية' : 
                         </svg>
                         <div style="color:#fff; font-weight:800; font-size:16px; letter-spacing: 0.5px;">الآلة الحاسبة</div>
                     </div>
-                    <button onclick="toggleCalculator()" class="btn-close-calc" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #f87171; cursor: pointer; font-size: 14px; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">
-                        ✕
-                    </button>
                 </div>
 
-                <div style="position: relative; margin-bottom: 20px;">
-                    <input type="text" id="calcDisplay" readonly placeholder="0" 
-                        style="width:100%; height:75px; background: rgba(0, 0, 0, 0.45); color: #fff; border: 1px solid rgba(255, 255, 255, 0.05); padding: 15px 20px; font-family: 'Consolas', 'Courier New', monospace; font-size: 32px; text-align: left; direction: ltr; border-radius: 20px; box-sizing: border-box; outline: none; font-weight: 700; box-shadow: inset 0 4px 15px rgba(0, 0, 0, 0.5);">
+                <div style="position: relative; margin-bottom: 15px;">
+                    <div id="calcFormula" style="font-size: 13px; color: #94a3b8; text-align: left; direction: ltr; min-height: 18px; margin-bottom: 4px; font-family: monospace; padding: 0 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></div>
+                    <div style="position: relative;">
+                        <input type="text" id="calcDisplay" readonly placeholder="0" 
+                            style="width:100%; height:65px; background: rgba(0, 0, 0, 0.45); color: #fff; border: 1px solid rgba(255, 255, 255, 0.05); padding: 10px 45px 10px 15px; font-family: 'Consolas', 'Courier New', monospace; font-size: 28px; text-align: left; direction: ltr; border-radius: 16px; box-sizing: border-box; outline: none; font-weight: 700; box-shadow: inset 0 4px 15px rgba(0, 0, 0, 0.5);">
+                        <button onclick="window.copyCalcResult()" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--gold2); cursor: pointer; font-size: 18px; padding: 5px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; z-index: 10;" title="نسخ الناتج للحافظة">
+                            📋
+                        </button>
+                    </div>
                 </div>
 
                 <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:12px;">
@@ -11733,7 +12245,16 @@ ${records.length < 3 ? '• زد من عدد العمليات اليومية' : 
                     <button onclick="calcResult()" class="btn-calc btn-calc-success">=</button>
                 </div>
 
-                <div style="margin-top: 18px; text-align: center; font-size: 11px; color: #94a3b8; opacity: 0.8; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                <div style="display: flex; gap: 8px; margin-top: 15px; border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 12px; justify-content: center; direction: rtl;">
+                    <button onclick="if(document.getElementById('cashSoldAmount')) { document.getElementById('cashSoldAmount').value = document.getElementById('calcDisplay').value; runCashCalc(); if(window.showToast) window.showToast('📋 تم نسخ الناتج لـ بعت كام', 'success'); }" class="btn-calc-export" style="flex: 1; height: 32px; background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.2); border-radius: 10px; color: #fbbf24; font-size: 11px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: all 0.2s;">
+                        📥 في بعت كام
+                    </button>
+                    <button onclick="if(document.getElementById('amtBottom')) { document.getElementById('amtBottom').value = document.getElementById('calcDisplay').value; if(window.showToast) window.showToast('📋 تم نسخ الناتج لـ المبلغ', 'success'); }" class="btn-calc-export" style="flex: 1; height: 32px; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 10px; color: #38bdf8; font-size: 11px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: all 0.2s;">
+                        📥 في المبلغ
+                    </button>
+                </div>
+
+                <div style="margin-top: 12px; text-align: center; font-size: 11px; color: #94a3b8; opacity: 0.8; display: flex; align-items: center; justify-content: center; gap: 6px;">
                     <i class="fas fa-keyboard" style="color: var(--gold2);"></i> <span>تفاعلية بالكامل عبر لوحة المفاتيح</span>
                 </div>
 
@@ -11797,12 +12318,12 @@ ${records.length < 3 ? '• زد من عدد العمليات اليومية' : 
                     }
                     
                     .btn-calc-zero { grid-column: span 1; }
-
-                    .btn-close-calc:hover {
-                        background: rgba(239, 68, 68, 0.25) !important;
-                        border-color: #ef4444 !important;
-                        color: #fff !important;
-                        transform: rotate(90deg);
+                    .btn-calc-export:hover {
+                        background: rgba(255,255,255,0.15) !important;
+                        transform: translateY(-1px);
+                    }
+                    .btn-calc-export:active {
+                        transform: scale(0.95);
                     }
                 </style>
             </div>
@@ -11858,6 +12379,38 @@ ${records.length < 3 ? '• زد من عدد العمليات اليومية' : 
             // Add Keyboard Support for Calculator (Only once!)
             if (!window.calcKeydownHandler) {
                 window.calcKeydownHandler = function(e) {
+                    const modalCalc = document.getElementById('centeredCalcModal');
+                    if (modalCalc) {
+                        // Centered calculator modal is open
+                        if (/[0-9]/.test(e.key)) {
+                            pressModalCalc(e.key);
+                            return;
+                        }
+                        if (['+', '-', '*', '/', '(', ')', '.'].includes(e.key)) {
+                            pressModalCalc(e.key);
+                            return;
+                        }
+                        if (e.key === 'Enter' || e.key === '=') {
+                            e.preventDefault();
+                            modalCalcResult();
+                        } else if (e.key === 'Backspace') {
+                            e.preventDefault();
+                            if (modalCalcStr.length > 0) {
+                                modalCalcStr = modalCalcStr.slice(0, -1);
+                                const modalDisp = document.getElementById('modalCalcDisplay');
+                                if (modalDisp) modalDisp.value = modalCalcStr || '0';
+                                const modalForm = document.getElementById('modalCalcFormula');
+                                if (modalForm) modalForm.textContent = modalCalcStr;
+                            }
+                        } else if (e.key === 'Escape') {
+                            e.preventDefault();
+                            modalCalc.remove();
+                        } else if (e.key === 'Delete' || e.key === 'c' || e.key === 'C') {
+                            modalCalcClear();
+                        }
+                        return;
+                    }
+
                     const calc = document.getElementById('calculatorCard');
                     if (!calc || calc.style.display === 'none') return;
 
@@ -11879,7 +12432,8 @@ ${records.length < 3 ? '• زد من عدد العمليات اليومية' : 
                         e.preventDefault();
                         if (calcStr.length > 0) {
                             calcStr = calcStr.slice(0, -1);
-                            $('calcDisplay').value = calcStr;
+                            document.querySelectorAll('#calcDisplay').forEach(el => el.value = calcStr || '0');
+                            document.querySelectorAll('#calcFormula').forEach(el => el.textContent = calcStr);
                         }
                     } else if (e.key === 'Escape') {
                         toggleCalculator();
@@ -16153,6 +16707,9 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                         if (deviceData.status === 'blocked') {
                         showModernAlert('🚫 عذراً، تم حظر هذا الجهاز من قبل المسؤول. يرجى التواصل مع الإدارة لاستعادة الوصول.', 'error');
                         localStorage.removeItem('app_auth_serial');
+                    } else if (deviceData.expiryDate && new Date(deviceData.expiryDate) < new Date()) {
+                        showModernAlert('🚫 عذراً، انتهت صلاحية هذا الجهاز. يرجى التواصل مع الإدارة لتمديد الصلاحية.', 'error');
+                        localStorage.removeItem('app_auth_serial');
                     } else if (deviceData.status === 'pending') {
                         let countdown = 10;
                         const loginMsg = `⏳ يرجى الانتظار لتفعيل الحساب من الجهاز الرئيسي...\n\nسيتم الفحص التلقائي خلال: ${countdown} ثانية`;
@@ -16294,6 +16851,20 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                             return;
                         }
 
+                        // تحقق من صلاحية الجهاز
+                        if (data.expiryDate && new Date(data.expiryDate) < new Date()) {
+                            if (typeof showModernAlert === 'function') {
+                                showModernAlert('🔴 تم إنهاء جلستك: انتهت صلاحية هذا الجهاز.', 'error');
+                            } else {
+                                alert('⚠️ انتهت صلاحية هذا الجهاز.');
+                            }
+                            localStorage.removeItem('app_auth_serial');
+                            localStorage.removeItem('acc_device_id');
+                            localStorage.removeItem('acc_device_role');
+                            setTimeout(() => window.location.reload(), 3000);
+                            return;
+                        }
+
                         // تحديث الاسم إذا قام المدير بتغييره
                         if (data.name && data.name !== localStorage.getItem('acc_current_user_name')) {
                             console.log('🔄 تم تحديث اسم الجهاز من قبل المدير إلى:', data.name);
@@ -16318,28 +16889,214 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                 window.currentDeviceSubTab = tab;
                 const tabConnected = document.getElementById('subTabConnected');
                 const tabBlocked = document.getElementById('subTabBlocked');
+                const tabDeleted = document.getElementById('subTabDeleted');
                 
-                if (tabConnected && tabBlocked) {
+                if (tabConnected && tabBlocked && tabDeleted) {
+                    [tabConnected, tabBlocked, tabDeleted].forEach(btn => {
+                        btn.style.background = 'rgba(255,255,255,0.02)';
+                        btn.style.borderColor = 'rgba(255,255,255,0.05)';
+                        btn.style.color = '#94a3b8';
+                    });
+
                     if (tab === 'connected') {
                         tabConnected.style.background = 'rgba(34, 197, 94, 0.15)';
                         tabConnected.style.borderColor = 'rgba(34, 197, 94, 0.4)';
                         tabConnected.style.color = '#4ade80';
-                        
-                        tabBlocked.style.background = 'rgba(255,255,255,0.02)';
-                        tabBlocked.style.borderColor = 'rgba(255,255,255,0.05)';
-                        tabBlocked.style.color = '#94a3b8';
-                    } else {
+                    } else if (tab === 'blocked') {
                         tabBlocked.style.background = 'rgba(239, 68, 68, 0.15)';
                         tabBlocked.style.borderColor = 'rgba(239, 68, 68, 0.4)';
                         tabBlocked.style.color = '#f87171';
-                        
-                        tabConnected.style.background = 'rgba(255,255,255,0.02)';
-                        tabConnected.style.borderColor = 'rgba(255,255,255,0.05)';
-                        tabConnected.style.color = '#94a3b8';
+                    } else if (tab === 'deleted') {
+                        tabDeleted.style.background = 'rgba(100, 116, 139, 0.2)';
+                        tabDeleted.style.borderColor = 'rgba(100, 116, 139, 0.4)';
+                        tabDeleted.style.color = '#cbd5e1';
                     }
                 }
                 
                 fetchConnectedDevices();
+            };
+            // دوال التحكم بالأجهزة وتحديث حالتها (تفعيل / حظر / حذف)
+            window.updateDeviceStatus = function(devId, newStatus) {
+                if (!globalUserId || !db) return;
+                
+                const actionAr = newStatus === 'authorized' ? 'تفعيل' : 'حظر';
+                if (window.showToast) window.showToast(`⏳ جاري ${actionAr} الجهاز...`, 'info');
+                
+                db.collection("users").doc(globalUserId).collection("devices").doc(devId).update({
+                    status: newStatus,
+                    updatedAt: new Date().toISOString()
+                }).then(() => {
+                    if (window.showToast) window.showToast(`✅ تم ${actionAr} الجهاز بنجاح`, 'success');
+                }).catch(err => {
+                    console.error("Error updating device:", err);
+                    if (window.showToast) window.showToast(`❌ حدث خطأ أثناء ${actionAr} الجهاز`, 'error');
+                });
+            };
+
+            window.deleteDeviceRecord = function(devId) {
+                if (!globalUserId || !db) return;
+                
+                if (confirm('هل أنت متأكد من نقل هذا الجهاز إلى الأرشيف المحذوف؟')) {
+                    if (window.showToast) window.showToast('⏳ جاري النقل للمحذوفات...', 'info');
+                    db.collection("users").doc(globalUserId).collection("devices").doc(devId).update({
+                        status: 'deleted',
+                        updatedAt: new Date().toISOString()
+                    }).then(() => {
+                        if (window.showToast) window.showToast('🗑️ تم نقل الجهاز للمحذوفات بنجاح', 'success');
+                    }).catch(err => {
+                        console.error("Error soft-deleting device:", err);
+                        if (window.showToast) window.showToast('❌ حدث خطأ أثناء النقل للمحذوفات', 'error');
+                    });
+                }
+            };
+
+            window.permanentlyDeleteDevice = function(devId) {
+                if (!globalUserId || !db) return;
+                
+                if (confirm('⚠️ تنبيه: هل أنت متأكد من حذف هذا الجهاز نهائياً؟ لا يمكن استرجاعه بعد ذلك.')) {
+                    if (window.showToast) window.showToast('⏳ جاري الحذف النهائي...', 'info');
+                    db.collection("users").doc(globalUserId).collection("devices").doc(devId).delete().then(() => {
+                        if (window.showToast) window.showToast('🗑️ تم حذف الجهاز نهائياً', 'success');
+                    }).catch(err => {
+                        console.error("Error permanently deleting device:", err);
+                        if (window.showToast) window.showToast('❌ حدث خطأ أثناء الحذف النهائي', 'error');
+                    });
+                }
+            };
+
+            window.restoreDeviceRecord = function(devId) {
+                if (!globalUserId || !db) return;
+                
+                if (window.showToast) window.showToast('⏳ جاري استعادة الجهاز...', 'info');
+                db.collection("users").doc(globalUserId).collection("devices").doc(devId).update({
+                    status: 'authorized',
+                    updatedAt: new Date().toISOString()
+                }).then(() => {
+                    if (window.showToast) window.showToast('🟢 تم استعادة وتفعيل الجهاز بنجاح', 'success');
+                }).catch(err => {
+                    console.error("Error restoring device:", err);
+                    if (window.showToast) window.showToast('❌ حدث خطأ أثناء استعادة الجهاز', 'error');
+                });
+            };
+
+            // نافذة تعديل بيانات وصلاحيات الجهاز
+            window.openEditDeviceModal = function(devId, currentName, currentUser, currentExpiry) {
+                const existing = document.getElementById('edit-device-modal');
+                if (existing) existing.remove();
+
+                const users = JSON.parse(localStorage.getItem('acc_bayan_users') || '[]');
+                const employeeOptions = users.map(u => `<option value="${u.name}" ${currentUser === u.name ? 'selected' : ''}>${u.name} (${u.role === 'admin' ? 'مدير' : 'موظف'})</option>`).join('');
+
+                const modal = document.createElement('div');
+                modal.id = 'edit-device-modal';
+                modal.className = 'modal-overlay';
+                modal.style.zIndex = '100000';
+                
+                let expiryValue = '';
+                if (currentExpiry) {
+                    try {
+                        const d = new Date(currentExpiry);
+                        const tzoffset = d.getTimezoneOffset() * 60000;
+                        const localISOTime = (new Date(d.getTime() - tzoffset)).toISOString().slice(0, 16);
+                        expiryValue = localISOTime;
+                    } catch(e) {}
+                }
+
+                modal.innerHTML = `
+                <div class="modal-box" style="width:90%; max-width:400px; padding:20px; background:rgba(15, 23, 42, 0.98); border: 1px solid rgba(212, 175, 55, 0.3); border-radius:16px; font-family:'El Messiri', sans-serif;">
+                    <h4 style="margin-top:0; color:#fbbf24; border-bottom:1px solid rgba(212,175,55,0.2); padding-bottom:10px; display:flex; align-items:center; gap:8px;">⚙️ تعديل صلاحيات الجهاز</h4>
+                    
+                    <div style="display:flex; flex-direction:column; gap:12px; margin-top:15px; text-align: right;" dir="rtl">
+                        <div>
+                            <label style="font-size:12px; color:#94a3b8; display:block; margin-bottom:5px;">اسم الجهاز:</label>
+                            <input type="text" id="editDevName" class="custom-input" value="${currentName || ''}" style="width:100%; box-sizing:border-box; background:rgba(0,0,0,0.3); color:#fff; border: 1px solid rgba(255,255,255,0.1); padding:8px; border-radius:8px;">
+                        </div>
+                        
+                        <div>
+                            <label style="font-size:12px; color:#94a3b8; display:block; margin-bottom:5px;">الموظف المسؤول:</label>
+                            <select id="editDevUser" class="custom-input" style="width:100%; box-sizing:border-box; background:rgba(0,0,0,0.3); color:#fff; border: 1px solid rgba(255,255,255,0.1); padding:8px; border-radius:8px;">
+                                <option value="" ${!currentUser ? 'selected' : ''}>غير محدد</option>
+                                ${employeeOptions}
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label style="font-size:12px; color:#94a3b8; display:block; margin-bottom:5px;">مدة صلاحية التشغيل:</label>
+                            <select id="editDevDurationPreset" class="custom-input" onchange="window.handleDeviceDurationPresetChange(this.value)" style="width:100%; box-sizing:border-box; background:rgba(0,0,0,0.3); color:#fff; border: 1px solid rgba(255,255,255,0.1); padding:8px; border-radius:8px; margin-bottom:8px;">
+                                <option value="permanent" ${!currentExpiry ? 'selected' : ''}>دائمة (مفتوحة) ♾️</option>
+                                <option value="1h">ساعة واحدة 🕐</option>
+                                <option value="12h">12 ساعة ⏰</option>
+                                <option value="1d">يوم واحد 📅</option>
+                                <option value="3d">3 أيام 🗓️</option>
+                                <option value="1w">أسبوع 📆</option>
+                                <option value="1m">شهر ⏳</option>
+                                <option value="custom" ${currentExpiry ? 'selected' : ''}>تاريخ ووقت مخصص ⚙️</option>
+                            </select>
+                            
+                            <div id="customExpiryContainer" style="display: ${currentExpiry ? 'block' : 'none'};">
+                                <input type="datetime-local" id="editDevExpiry" class="custom-input" value="${expiryValue}" style="width:100%; box-sizing:border-box; background:rgba(0,0,0,0.3); color:#fff; border: 1px solid rgba(255,255,255,0.1); padding:8px; border-radius:8px;">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="display:flex; gap:10px; margin-top:20px; justify-content:flex-end;">
+                        <button class="btn" onclick="document.getElementById('edit-device-modal').remove()" style="background:rgba(255,255,255,0.05); color:#ccc; padding:8px 15px; border-radius:8px; border:none; cursor:pointer;">إلغاء</button>
+                        <button class="btn" onclick="window.saveDeviceEdit('${devId}')" style="background:#fbbf24; color:#000; font-weight:bold; padding:8px 20px; border-radius:8px; border:none; cursor:pointer;">حفظ التغييرات</button>
+                    </div>
+                </div>`;
+                
+                document.body.appendChild(modal);
+            };
+
+            window.handleDeviceDurationPresetChange = function(val) {
+                const container = document.getElementById('customExpiryContainer');
+                if (container) {
+                    container.style.display = val === 'custom' ? 'block' : 'none';
+                }
+            };
+            
+            window.saveDeviceEdit = function(devId) {
+                if (!globalUserId || !db) return;
+                
+                const name = document.getElementById('editDevName').value.trim();
+                const user = document.getElementById('editDevUser').value;
+                const preset = document.getElementById('editDevDurationPreset').value;
+                
+                let expiryDate = null;
+                
+                if (preset === 'custom') {
+                    const customVal = document.getElementById('editDevExpiry').value;
+                    if (customVal) {
+                        expiryDate = new Date(customVal).toISOString();
+                    }
+                } else if (preset !== 'permanent') {
+                    const now = new Date();
+                    if (preset === '1h') now.setHours(now.getHours() + 1);
+                    else if (preset === '12h') now.setHours(now.getHours() + 12);
+                    else if (preset === '1d') now.setDate(now.getDate() + 1);
+                    else if (preset === '3d') now.setDate(now.getDate() + 3);
+                    else if (preset === '1w') now.setDate(now.getDate() + 7);
+                    else if (preset === '1m') now.setMonth(now.getMonth() + 1);
+                    expiryDate = now.toISOString();
+                }
+                
+                if (window.showToast) window.showToast('⏳ جاري حفظ التعديلات...', 'info');
+                
+                const updateData = {
+                    name: name || 'جهاز جديد',
+                    currentUser: user || 'غير محدد',
+                    expiryDate: expiryDate,
+                    updatedAt: new Date().toISOString()
+                };
+                
+                db.collection("users").doc(globalUserId).collection("devices").doc(devId).update(updateData).then(() => {
+                    if (window.showToast) window.showToast('✅ تم تحديث الجهاز بنجاح', 'success');
+                    const modal = document.getElementById('edit-device-modal');
+                    if (modal) modal.remove();
+                }).catch(err => {
+                    console.error("Error updating device details:", err);
+                    if (window.showToast) window.showToast('❌ حدث خطأ أثناء الحفظ', 'error');
+                });
             };
 
             function fetchConnectedDevices() {
@@ -16351,6 +17108,11 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                     const isMaster = window.currentDeviceRole === 'master' || localStorage.getItem('acc_device_role') === 'master';
                     const maxLimit = parseInt(localStorage.getItem('acc_max_devices_limit')) || 15;
                     
+                    const currentUserRole = localStorage.getItem('acc_current_user_role');
+                    const currentUserName = localStorage.getItem('acc_current_user_name');
+                    const isAdmin = (currentUserRole === 'admin' || currentUserName === 'المدير العام' || currentUserName === 'عمرو' || currentUserName === 'المدير' || currentUserName === 'الأداره');
+                    const canManage = isMaster || isAdmin;
+
                     if (countEl) {
                         if (isMaster) {
                             countEl.textContent = `(${snap.size} / ${maxLimit})`;
@@ -16375,29 +17137,67 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                         const devId = device.id || doc.id;
                         const devName = device.name || device.deviceName || 'جهاز مجهول';
                         const isCurrent = devId === localStorage.getItem('acc_device_id');
-                        const statusColor = device.status === 'authorized' ? '#22c55e' : (device.status === 'blocked' ? '#ef4444' : '#eab308');
-                        const statusAr = device.status === 'authorized' ? 'نشط' : (device.status === 'blocked' ? 'محظور' : 'انتظار');
                         
-                        const isBlocked = device.status === 'blocked';
-                        if (activeSubTab === 'connected' && isBlocked) return;
-                        if (activeSubTab === 'blocked' && !isBlocked) return;
+                        // filtering logic for tabs
+                        if (activeSubTab === 'connected' && (device.status === 'blocked' || device.status === 'deleted')) return;
+                        if (activeSubTab === 'blocked' && device.status !== 'blocked') return;
+                        if (activeSubTab === 'deleted' && device.status !== 'deleted') return;
                         
+                        const statusColor = device.status === 'authorized' ? '#22c55e' : (device.status === 'blocked' ? '#ef4444' : (device.status === 'deleted' ? '#94a3b8' : '#eab308'));
+                        const statusAr = device.status === 'authorized' ? 'نشط' : (device.status === 'blocked' ? 'محظور' : (device.status === 'deleted' ? 'محذوف' : 'انتظار'));
+
                         renderedCount++;
+
+                        let expiryText = '';
+                        if (device.expiryDate) {
+                            const diff = new Date(device.expiryDate) - new Date();
+                            if (diff <= 0) {
+                                expiryText = `<div style="font-size:10px; color:#ef4444; margin-top:2px;">⏳ انتهت فترة الصلاحية ❌</div>`;
+                            } else {
+                                const diffMins = Math.floor(diff / 60000);
+                                if (diffMins < 60) {
+                                    expiryText = `<div style="font-size:10px; color:#f59e0b; margin-top:2px;">⏳ متبقي: ${diffMins} دقيقة</div>`;
+                                } else {
+                                    const diffHours = Math.floor(diffMins / 60);
+                                    if (diffHours < 24) {
+                                        expiryText = `<div style="font-size:10px; color:#f59e0b; margin-top:2px;">⏳ متبقي: ${diffHours} ساعة</div>`;
+                                    } else {
+                                        const diffDays = Math.floor(diffHours / 24);
+                                        expiryText = `<div style="font-size:10px; color:#f59e0b; margin-top:2px;">⏳ متبقي: ${diffDays} يوم</div>`;
+                                    }
+                                }
+                            }
+                        }
                         
                         html += `
                         <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); padding:12px; border-radius:12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
                             <div>
                                 <div style="font-size:13px; font-weight:bold; color:#fff;">${devName} ${isCurrent ? '<span style="color:#a78bfa; font-size:10px;">(هذا الجهاز)</span>' : ''}</div>
-                                <div style="font-size:11px; color:#64748b;">ID: ${devId} | ${(device.role === 'master' || device.isMaster || (isCurrent && window.currentDeviceRole === 'master')) ? '👑 رئيسي' : '👤 فرعي'}</div>
+                                <div style="font-size:11px; color:#64748b;">ID: ${devId} | ${(device.role === 'master' || device.isMaster) ? '👑 رئيسي' : '👤 فرعي'}</div>
                                 <div style="font-size:11px; color:#64748b; margin-top:2px;">👤 الموظف المسئول: <span style="color:#cbd5e1;">${device.currentUser || 'غير محدد'}</span></div>
+                                ${expiryText}
                                 <div style="display:inline-block; font-size:10px; color:${statusColor}; border:1px solid ${statusColor}; padding:1px 6px; border-radius:4px; margin-top:5px;">${statusAr}</div>
                             </div>
-                            <div style="display:flex; gap:5px;">
-                                ${ (window.currentDeviceRole === 'master' && device.role !== 'master' && !isCurrent) ? `
-                                    <button class="btn" onclick="updateDeviceStatus('${devId}', '${device.status === 'authorized' ? 'blocked' : 'authorized'}')" style="padding:5px 10px; background:${device.status === 'authorized' ? '#ef4444' : '#22c55e'}22; color:${device.status === 'authorized' ? '#ef4444' : '#22c55e'}; border:1px solid ${device.status === 'authorized' ? '#ef4444' : '#22c55e'}44; font-size:11px;">
-                                        ${device.status === 'authorized' ? 'حظر' : 'تفعيل'}
-                                    </button>
-                                    <button class="btn" onclick="deleteDeviceRecord('${devId}')" style="padding:5px; background:rgba(100,116,139,0.1); color:#64748b; border:none; font-size:11px;">🗑️</button>
+                            <div style="display:flex; gap:5px; align-items:center;">
+                                ${ canManage ? `
+                                    ${ activeSubTab === 'deleted' ? `
+                                        <button class="btn" onclick="restoreDeviceRecord('${devId}')" style="padding:5px 10px; background:rgba(34, 197, 94, 0.1); color:#22c55e; border:1px solid rgba(34, 197, 94, 0.2); font-size:11px; border-radius:6px; cursor:pointer;">
+                                            استعادة 🟢
+                                        </button>
+                                        <button class="btn" onclick="permanentlyDeleteDevice('${devId}')" style="padding:5px 10px; background:rgba(239, 68, 68, 0.1); color:#ef4444; border:1px solid rgba(239, 68, 68, 0.2); font-size:11px; border-radius:6px; cursor:pointer;">
+                                            حذف نهائي 🗑️
+                                        </button>
+                                    ` : `
+                                        <button class="btn" onclick="window.openEditDeviceModal('${devId}', '${devName.replace(/'/g, "\\'")}', '${(device.currentUser || '').replace(/'/g, "\\'")}', '${device.expiryDate || ''}')" style="padding:5px 10px; background:rgba(245, 158, 11, 0.1); color:#f59e0b; border:1px solid rgba(245, 158, 11, 0.2); font-size:11px; border-radius:6px; cursor:pointer;">
+                                            تعديل ⚙️
+                                        </button>
+                                        ${ (device.role !== 'master' && !isCurrent) ? `
+                                            <button class="btn" onclick="updateDeviceStatus('${devId}', '${device.status === 'authorized' ? 'blocked' : 'authorized'}')" style="padding:5px 10px; background:${device.status === 'authorized' ? '#ef4444' : '#22c55e'}22; color:${device.status === 'authorized' ? '#ef4444' : '#22c55e'}; border:1px solid ${device.status === 'authorized' ? '#ef4444' : '#22c55e'}44; font-size:11px; border-radius:6px; cursor:pointer;">
+                                                ${device.status === 'authorized' ? 'حظر' : 'تفعيل'}
+                                            </button>
+                                            <button class="btn" onclick="deleteDeviceRecord('${devId}')" style="padding:5px 10px; background:rgba(239, 68, 68, 0.1); color:#ef4444; border:1px solid rgba(239, 68, 68, 0.2); font-size:11px; border-radius:6px; cursor:pointer;">🗑️</button>
+                                        ` : '' }
+                                    ` }
                                 ` : ''}
                             </div>
                         </div>`;
@@ -16406,8 +17206,10 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                     if (renderedCount === 0) {
                         if (activeSubTab === 'connected') {
                             container.innerHTML = '<div style="text-align:center; padding:20px; color:#64748b; font-size:12px;">🟢 لا يوجد أجهزة نشطة حالياً</div>';
-                        } else {
+                        } else if (activeSubTab === 'blocked') {
                             container.innerHTML = '<div style="text-align:center; padding:20px; color:#64748b; font-size:12px;">🚫 لا يوجد أجهزة محظورة حالياً</div>';
+                        } else {
+                            container.innerHTML = '<div style="text-align:center; padding:20px; color:#64748b; font-size:12px;">🗑️ لا يوجد أجهزة محذوفة حالياً</div>';
                         }
                         return;
                     }
@@ -16429,9 +17231,8 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                             
                             console.log("🔔 New Pending Device Detected:", devId);
 
-                            // ظهور تنبيه فوري للمدير مع صوت تنبيه
                             if (typeof showModernAlert === 'function') {
-                                if (typeof beep === 'function') beep(600, 0.1, 0.3); // صوت تنبيه
+                                if (typeof beep === 'function') beep(600, 0.1, 0.3);
                                 
                                 const maxLimit = parseInt(localStorage.getItem('acc_max_devices_limit')) || 15;
                                 const limitWarning = snap.size >= maxLimit ? `\n\n⚠️ تنبيه: لقد وصلت للحد الأقصى للأجهزة (${maxLimit}). يرجى ترقية ترخيصك أو حذف جهاز قديم لتتمكن من تفعيل هذا الجهاز.` : '';
@@ -16612,6 +17413,24 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                                 }
                             }
 
+                            // 2.5 تفاصيل جميع الأرصدة المخصصة (allStocks)
+                            if (data.allStocks) {
+                                let stocksChanged = false;
+                                Object.keys(data.allStocks).forEach(invId => {
+                                    const k = `acc_inv_stock_${invId}_${selectedDate}`;
+                                    const localS = localStorage.getItem(k);
+                                    const cloudS = JSON.stringify(data.allStocks[invId]);
+                                    if (localS !== cloudS) {
+                                        localStorage.setItem(k, cloudS);
+                                        stocksChanged = true;
+                                    }
+                                });
+                                if (stocksChanged) {
+                                    if (typeof renderInventoriesHeader === 'function') renderInventoriesHeader();
+                                    storageChanged = true;
+                                }
+                            }
+
                             // 3. مستودع "بيان" الذكي (bayanInventory)
                             if (data.bayanInventory) {
                                 const currentInvStr = localStorage.getItem('acc_bayan_inventory');
@@ -16683,11 +17502,20 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                 }
 
                 // تجميع كل البيانات بدقة 100%
+                let allStocks = {};
+                if (typeof inventoriesConfig !== 'undefined') {
+                    inventoriesConfig.forEach(inv => {
+                        const k = `acc_inv_stock_${inv.id}_${date}`;
+                        allStocks[inv.id] = JSON.parse(localStorage.getItem(k) || '{"u1":"0","u2":"0"}');
+                    });
+                }
+
                 const payload = {
                     date: date,
                     records: records, // العمليات الحالية
                     eggBalance: currentEggBalance, // الرصيد الأساسي
                     eggStock: JSON.parse(localStorage.getItem(stockKey) || '{"plates":"0","pieces":"0"}'),
+                    allStocks: allStocks, // الكميات المخصصة لجميع الأرصدة
                     bayanInventory: JSON.parse(localStorage.getItem('acc_bayan_inventory') || '[]'),
                     settings: {
                         userName: localStorage.getItem('acc_user_name') || '',
@@ -16810,34 +17638,7 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
     }
 </style>
 
-<button id="calculatorBtn"
-    style="position: fixed; bottom: 25px; left: 25px; z-index: 9999; padding: 14px 24px; background: linear-gradient(135deg, #161a22 0%, #0d0f14 100%); color: var(--gold2); border-radius: 20px; border: 1.5px solid var(--gold2); font-weight: 800; box-shadow: 0 8px 32px rgba(214, 175, 55, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.05); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); font-size: 15px; display: flex; align-items: center; gap: 12px; cursor: pointer; animation: calc-float 3s ease-in-out infinite; font-family: inherit;">
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--gold2); filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.6)); transition: all 0.3s;">
-        <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
-        <line x1="8" y1="6" x2="16" y2="6"></line>
-        <line x1="16" y1="14" x2="16" y2="18"></line>
-        <path d="M16 10h.01M12 10h.01M8 10h.01M12 14h.01M8 14h.01M12 18h.01M8 18h.01"></path>
-    </svg>
-    <span>الآلة الحاسبة</span>
-</button>
 
-<style>
-    @keyframes calc-float {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-8px); }
-    }
-    #calculatorBtn:hover { 
-        transform: scale(1.05) translateY(-5px); 
-        background: linear-gradient(135deg, var(--gold2) 0%, var(--gold3) 100%) !important; 
-        color: #000 !important; 
-        box-shadow: 0 15px 40px rgba(212, 175, 55, 0.5); 
-        border-color: transparent;
-    }
-    #calculatorBtn:hover svg { 
-        color: #000 !important; 
-        filter: none !important;
-    }
-</style>
 
 <script>
     // Global Shortcut for Calculator
@@ -17009,6 +17810,54 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
         reader.readAsArrayBuffer(file);
     }
 
+    window.showUpdateNotesModal = function() {
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        overlay.innerHTML = `
+            <div class="modal-box" style="max-width: 600px; background: linear-gradient(145deg, #1e293b, #0f172a); border: 2px solid #fbbf24; box-shadow: 0 10px 40px rgba(0,0,0,0.6); color: #fff; border-radius: 20px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px;">
+                    <h3 style="margin:0; font-size: 19px; display:flex; align-items:center; gap:8px;"><span style="font-size:24px;">🚀</span> مميزات التحديث الجديد (الإصدار 1.9.0)</h3>
+                    <button class="btn ghost" style="color:#ef4444; background: rgba(239, 68, 68, 0.1); padding:8px; border-radius:50%; cursor:pointer;" onclick="document.body.removeChild(this.closest('.modal-overlay'))"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXgiPjxsaW5lIHgxPSIxOCIgeDI9IjYiIHkxPSI2IiB5Mj0iMTgiLz48bGluZSB4MT0iNiIgeDI9IjE4IiB5MT0iNiIgeTI9IjE4Ii8+PC9zdmc+" class="icon" style="margin:0;"></button>
+                </div>
+
+                <div style="max-height: 400px; overflow-y: auto; padding-right: 10px; line-height: 1.8; font-size: 14px; text-align: right;">
+                    <div style="margin-bottom: 15px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 10px;">
+                        <span style="font-size: 16px; font-weight: 800; color: #fbbf24;">🌓 زر تبديل الوضع السريع بالشاشة الرئيسية</span>
+                        <p style="margin: 5px 0 0 0; color: #94a3b8;">إضافة زر مخصص في الجزء العلوي الأيسر من الشاشة لتبديل المظهر النهاري/الليلي فوراً وبأشكال تعبيرية ذكية تتفاعل مع الضغط وعليها شارة تنبيه مميزة.</p>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 10px;">
+                        <span style="font-size: 16px; font-weight: 800; color: #fbbf24;">🎨 ثورة وتطوير مظهر الوضع الفاتح (Light Mode)</span>
+                        <p style="margin: 5px 0 0 0; color: #94a3b8;">تحسين ألوان وخلفيات الثيمات في الوضع الفاتح لتصبح ناعمة وزاهية، مع تحسين تباين نصوص الجدول كلياً، وجعل كروت الإحصائيات وبطاقات المدخلات مقروءة وواضحة بأعلى وضوح بصري.</p>
+                    </div>
+
+                    <div style="margin-bottom: 15px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 10px;">
+                        <span style="font-size: 16px; font-weight: 800; color: #fbbf24;">👥 أرشيف وسجل الموظفين المحذوفين</span>
+                        <p style="margin: 5px 0 0 0; color: #94a3b8;">إدراج سجل مخصص للموظفين المحذوفين أسفل قائمة الموظفين النشطين مع إمكانية استعادتهم أو حذفهم نهائياً بلمسة زر لحماية الهيكل الوظيفي للنظام.</p>
+                    </div>
+
+                    <div style="margin-bottom: 15px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 10px;">
+                        <span style="font-size: 16px; font-weight: 800; color: #fbbf24;">🛡️ حماية وتأمين الكود المصدري أوفلاين وأونلاين</span>
+                        <p style="margin: 5px 0 0 0; color: #94a3b8;">تطوير جدار أمني معزز يمنع كلياً النقر الأيمن (كليك يمين) ومفاتيح اختصارات المتصفح مثل (Ctrl+U, Ctrl+S, Ctrl+P) لعرض المصدر أو تخزينه محلياً لحماية شيفرتك البرمجية حتى في حالة انقطاع الإنترنت.</p>
+                    </div>
+
+                    <div style="margin-bottom: 15px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 10px;">
+                        <span style="font-size: 16px; font-weight: 800; color: #fbbf24;">🎯 موازنة وتنسيق أزرار التعديل والحذف</span>
+                        <p style="margin: 5px 0 0 0; color: #94a3b8;">إعادة تصميم وتوسيط الأزرار في عمود الإجراءات بالجدول عمودياً بحيث تظهر متوازنة ومنتصفة تماماً بجانب تفاصيل كل عملية بدون انحرافات بصرية.</p>
+                    </div>
+
+                    <div style="margin-bottom: 10px;">
+                        <span style="font-size: 16px; font-weight: 800; color: #fbbf24;">🇺🇸 توحيد لغة نظام الوقت لـ (en-US)</span>
+                        <p style="margin: 5px 0 0 0; color: #94a3b8;">تحديث وعرض أرقام وصيغة وقت التعديلات بالنظام والترميز الإنجليزي المعياري (AM/PM) لتكون مريحة ومتشابهة مع تنسيق وقت العمليات الأصلي.</p>
+                    </div>
+                </div>
+
+                <button class="btn green" style="width:100%; padding: 12px; font-weight:bold; font-size:15px; margin-top: 20px; background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #0f172a; cursor: pointer;" onclick="document.body.removeChild(this.closest('.modal-overlay'))">👍 حسناً، رائع جداً</button>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+    };
+
     function showAppNotesModal() {
         const savedNotes = localStorage.getItem('acc_app_notes') || '';
         const savedName = localStorage.getItem('acc_notes_box_name') || 'ملاحظات تطبيق سهل واطبيق محاسبة اليومية';
@@ -17152,7 +18001,7 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
     function showModal(title, contentHtml) {
         const overlay = document.createElement('div');
         overlay.className = 'modal-overlay';
-        overlay.style.zIndex = '1000001';
+        overlay.style.zIndex = '99999999';
         overlay.innerHTML = `
             <div class="modal-box" style="max-width: 500px; background: #1e293b; border: 1px solid #334155; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); padding: 0; overflow: hidden;">
                 <div style="background: linear-gradient(90deg, #1e293b, #0f172a); padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center;">
@@ -17356,8 +18205,9 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                 <button class="login-btn-cyan" onclick="window.attemptTeamLogin()">Sign In</button>
                 
                 <div style="margin-top: 20px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 15px; display: flex; justify-content: space-between; font-size: 11px;">
-                    <a href="#" onclick="alert('اتصل بالمسؤول لإعادة تعيين كلمة السر، أو استخدم كود الطوارئ الخاص بك')" style="color: #ff3b7e; text-decoration: none;">🔒 نسيت كود السر؟</a>
-                    <a href="#" onclick="alert('يتم إنشاء الحسابات من خلال قسم فريق العمل في الإعدادات')" style="color: #00d8ff; text-decoration: none;">👥 حساب جديد؟</a>
+                    <a href="#" onclick="event.preventDefault(); if(window.showModal){ window.showModal('نسيت الرمز السري؟', '<div style=\'text-align:center; padding:20px;\'><div style=\'font-size:40px; margin-bottom:15px;\'>🔐</div><p style=\'color:#e2e8f0; line-height:1.6; font-size:14px;\'>يرجى التواصل مع <b>المدير المسؤول</b> لإعادة تعيين كلمة المرور الخاصة بك، أو استخدام <b>كود الطوارئ</b> إذا كان متوفراً لديك.</p></div>'); } else { alert('اتصل بالمسؤول لإعادة تعيين كلمة السر، أو استخدم كود الطوارئ الخاص بك'); }" style="color: #ff3b7e; text-decoration: none; transition: all 0.3s;" onmouseover="this.style.textShadow='0 0 10px rgba(255,59,126,0.6)'" onmouseout="this.style.textShadow='none'">🔒 نسيت كود السر؟</a>
+                    
+                    <a href="#" onclick="event.preventDefault(); if(window.showModal){ window.showModal('إنشاء حساب جديد', '<div style=\'text-align:center; padding:20px;\'><div style=\'font-size:40px; margin-bottom:15px;\'>👨‍💼</div><p style=\'color:#e2e8f0; line-height:1.6; font-size:14px;\'>لأسباب أمنية، يتم إنشاء حسابات الموظفين الجديدة وتحديد صلاحياتهم حصرياً من خلال <b>إعدادات التطبيق &gt; فريق العمل</b> بواسطة الإدارة.</p></div>'); } else { alert('يتم إنشاء الحسابات من خلال قسم فريق العمل في الإعدادات'); }" style="color: #00d8ff; text-decoration: none; transition: all 0.3s;" onmouseover="this.style.textShadow='0 0 10px rgba(0,216,255,0.6)'" onmouseout="this.style.textShadow='none'">👥 حساب جديد؟</a>
                 </div>
             </div>
 
@@ -17530,11 +18380,30 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
             localStorage.setItem('acc_current_user_id', selectedUser.id);
             localStorage.setItem('acc_current_user_role', selectedUser.role || 'staff');
             
-            const overlay = document.getElementById('team-login-overlay');
-            if (overlay) overlay.remove();
-            document.getElementById('app').style.display = 'block';
-            updateHeaderName();
-            if (typeof startRealtimeSync === 'function') startRealtimeSync();
+            const loginBtn = document.querySelector('.login-btn-cyan');
+            if (loginBtn) {
+                loginBtn.innerHTML = '<span style="display:inline-block; animation: spin 1s linear infinite;">⏳</span> جاري التحميل...';
+                loginBtn.style.pointerEvents = 'none';
+            }
+
+            setTimeout(() => {
+                const overlay = document.getElementById('team-login-overlay');
+                if (overlay) {
+                    overlay.style.transition = 'opacity 0.3s ease';
+                    overlay.style.opacity = '0';
+                }
+                
+                setTimeout(() => {
+                    if (overlay) overlay.remove();
+                    document.getElementById('app').style.display = 'block';
+                    updateHeaderName();
+                    if (typeof render === 'function') requestAnimationFrame(render);
+                    
+                    setTimeout(() => {
+                        if (typeof startRealtimeSync === 'function') startRealtimeSync();
+                    }, 300);
+                }, 300);
+            }, 50);
             return;
         }
         
@@ -17570,14 +18439,36 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                 localStorage.setItem('acc_user_activity_logs', JSON.stringify(logs.slice(-1000)));
             } catch(e){}
 
-            if (typeof startRealtimeSync === 'function') startRealtimeSync();
-            
-            const overlay = document.getElementById('team-login-overlay');
-            if (overlay) overlay.remove();
-            
-            document.getElementById('app').style.display = 'block';
-            updateHeaderName();
-            if (window.showToast) window.showToast(`مرحباً بك: ${user.name} 👋`, 'success');
+            // إظهار حالة التحميل للزر لتجربة أسرع
+            const loginBtn = document.querySelector('.login-btn-cyan');
+            if (loginBtn) {
+                loginBtn.innerHTML = '<span style="display:inline-block; animation: spin 1s linear infinite;">⏳</span> جاري التحميل...';
+                loginBtn.style.opacity = '0.8';
+                loginBtn.style.pointerEvents = 'none';
+            }
+
+            // تأخير العمليات الثقيلة لكي لا تتجمد الواجهة
+            setTimeout(() => {
+                const overlay = document.getElementById('team-login-overlay');
+                if (overlay) {
+                    overlay.style.transition = 'opacity 0.3s ease';
+                    overlay.style.opacity = '0';
+                }
+                
+                setTimeout(() => {
+                    if (overlay) overlay.remove();
+                    document.getElementById('app').style.display = 'block';
+                    updateHeaderName();
+                    if (typeof render === 'function') requestAnimationFrame(render);
+                    
+                    // تأخير بدء المزامنة السحابية حتى يكتمل عرض الواجهة بسلاسة
+                    setTimeout(() => {
+                        if (typeof startRealtimeSync === 'function') startRealtimeSync();
+                    }, 300);
+
+                    if (window.showToast) window.showToast(`مرحباً بك: ${user.name} 👋`, 'success');
+                }, 300);
+            }, 50);
         } else {
             // Failure Feedback
             if (window.showToast) window.showToast('❌ كلمة السر غير صحيحة أو البيانات غير متوفرة', 'error');
@@ -17846,10 +18737,106 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
         users.splice(idx, 1);
         localStorage.setItem('acc_bayan_users', JSON.stringify(users));
         window.renderUsersList();
+        if (typeof window.renderDeletedUsersList === 'function') window.renderDeletedUsersList();
         if (window.showToast) window.showToast('♻️ تم النقل لسلة المحذوفات', 'success');
         
         // مزامنة الحذف سحابياً
         if (typeof window.saveToCloud === 'function') window.saveToCloud();
+    };
+
+    window.toggleDeletedUsersList = function() {
+        const section = document.getElementById('deletedUsersSection');
+        const btn = document.getElementById('toggleDeletedUsersBtn');
+        if (!section || !btn) return;
+        
+        if (section.style.display === 'none') {
+            section.style.display = 'block';
+            btn.textContent = '🙈 إخفاء أرشيف الموظفين المحذوفين';
+            window.renderDeletedUsersList();
+        } else {
+            section.style.display = 'none';
+            btn.textContent = '👁️ عرض أرشيف الموظفين المحذوفين';
+        }
+    };
+    
+    window.renderDeletedUsersList = function() {
+        try {
+            const container = document.getElementById('deletedUsersListContainer');
+            if (!container) return;
+            
+            const trash = JSON.parse(localStorage.getItem('acc_bayan_trash') || '[]');
+            const deletedUsers = trash.filter(item => item.itemType === 'user');
+            
+            if (deletedUsers.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:15px; color:#64748b; font-size:11px;">لا يوجد موظفين محذوفين حالياً.</div>';
+                return;
+            }
+            
+            container.innerHTML = deletedUsers.map((user, idx) => `
+                <div class="user-item" style="background:rgba(239, 68, 68, 0.05); padding:12px; border-radius:12px; display:flex; justify-content:space-between; align-items:center; border:1px solid rgba(239, 68, 68, 0.2); margin-bottom:6px;">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <div style="width:35px; height:35px; background:linear-gradient(135deg, #ef4444, #991b1b); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:bold;">${user.name.charAt(0).toUpperCase()}</div>
+                        <div>
+                            <div style="font-weight:bold; color:#fff; font-size:13px;">${user.name}</div>
+                            <div style="font-size:10px; color:#f87171;">${user.role === 'admin' ? 'مدير النظام' : 'موظف'}</div>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:6px;">
+                        <button onclick="window.restoreUser(${idx})" class="btn" style="background:rgba(34, 197, 94, 0.1); color:#4ade80; border:1px solid rgba(34, 197, 94, 0.2); padding:4px 8px; font-size:11px; border-radius:6px; cursor:pointer;">استعادة 🟢</button>
+                        <button onclick="window.permanentlyDeleteUser(${idx})" class="btn" style="background:rgba(239, 68, 68, 0.15); color:#f87171; border:1px solid rgba(239, 68, 68, 0.3); padding:4px 8px; font-size:11px; border-radius:6px; cursor:pointer;">حذف نهائي 🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        } catch(e) { console.error(e); }
+    };
+    
+    window.restoreUser = function(trashIdx) {
+        try {
+            let trash = JSON.parse(localStorage.getItem('acc_bayan_trash') || '[]');
+            const deletedUsers = trash.filter(item => item.itemType === 'user');
+            const userToRestore = deletedUsers[trashIdx];
+            if (!userToRestore) return;
+            
+            // Remove from trash
+            const actualTrashIdx = trash.indexOf(userToRestore);
+            if (actualTrashIdx > -1) {
+                trash.splice(actualTrashIdx, 1);
+                localStorage.setItem('acc_bayan_trash', JSON.stringify(trash));
+            }
+            
+            // Add back to active users
+            let users = JSON.parse(localStorage.getItem('acc_bayan_users') || '[]');
+            delete userToRestore.deletedAt;
+            delete userToRestore.itemType;
+            users.push(userToRestore);
+            localStorage.setItem('acc_bayan_users', JSON.stringify(users));
+            
+            window.renderUsersList();
+            window.renderDeletedUsersList();
+            if (window.showToast) window.showToast('🟢 تم استعادة الموظف بنجاح', 'success');
+            if (typeof window.saveToCloud === 'function') window.saveToCloud();
+        } catch(e) { console.error(e); }
+    };
+    
+    window.permanentlyDeleteUser = function(trashIdx) {
+        try {
+            if (!confirm('هل أنت متأكد من حذف هذا الموظف نهائياً؟ لا يمكن استرجاعه بعد ذلك.')) return;
+            
+            let trash = JSON.parse(localStorage.getItem('acc_bayan_trash') || '[]');
+            const deletedUsers = trash.filter(item => item.itemType === 'user');
+            const userToDelete = deletedUsers[trashIdx];
+            if (!userToDelete) return;
+            
+            // Remove from trash
+            const actualTrashIdx = trash.indexOf(userToDelete);
+            if (actualTrashIdx > -1) {
+                trash.splice(actualTrashIdx, 1);
+                localStorage.setItem('acc_bayan_trash', JSON.stringify(trash));
+            }
+            
+            window.renderDeletedUsersList();
+            if (window.showToast) window.showToast('🗑️ تم الحذف النهائي للموظف', 'success');
+        } catch(e) { console.error(e); }
     };
 
     window.togglePasswordVisibility = function (inputId, iconId) {
