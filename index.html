@@ -32,7 +32,7 @@
     <!-- 🛡️ درع الأمان وتشفير الوصول (Code Protection Shield) -->
     <script>
         // تعريف إصدار التطبيق (يجب أن يتطابق مع version.txt)
-        const APP_VERSION = '1.9.1';
+        const APP_VERSION = '1.9.2';
 
         // Global Modern Alert / Toast System (Must be at top)
         window.showToast = function(message, type = 'info') {
@@ -16643,9 +16643,27 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                                  if (localUsers && Array.isArray(localUsers)) {
                                      const matched = localUsers.find(u => u.serial === serialString || (u.id && u.id === serialString));
                                      if (matched) {
-                                         console.log("📂 Local Database Match Found:", matched);
-                                         return completeLogin(serialString, { role: matched.role || 'master' });
-                                     }
+                                          console.log("📂 Local Database Match Found:", matched);
+                                          // تسجيل الجهاز في الفايربيس لتسهيل التعرف عليه من الأجهزة الأخرى
+                                          db.collection("users").doc(serialString).collection("devices").doc(currentDeviceId).get().then(devDoc => {
+                                              if (!devDoc.exists) {
+                                                  db.collection("users").doc(serialString).collection("devices").doc(currentDeviceId).set({
+                                                      id: currentDeviceId,
+                                                      name: localStorage.getItem('acc_user_name') || 'جهاز جديد',
+                                                      status: 'authorized',
+                                                      role: matched.role || 'master',
+                                                      lastSeen: new Date().toISOString(),
+                                                      fingerprint: fingerprint,
+                                                      platform: navigator.platform || 'unknown'
+                                                  });
+                                              } else {
+                                                  db.collection("users").doc(serialString).collection("devices").doc(currentDeviceId).update({
+                                                      lastSeen: new Date().toISOString()
+                                                  });
+                                              }
+                                          }).catch(e => console.error(e));
+                                          return completeLogin(serialString, { role: matched.role || 'master' });
+                                      }
                                  }
                                  
                                  // إذا لم يجد في المحلي، نواصل العمل كجهاز جديد أو نبحث في السحاب
@@ -16704,13 +16722,13 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                             });
                         }
 
-                        if (deviceData.status === 'blocked') {
+                        if (deviceData && deviceData.status === 'blocked') {
                         showModernAlert('🚫 عذراً، تم حظر هذا الجهاز من قبل المسؤول. يرجى التواصل مع الإدارة لاستعادة الوصول.', 'error');
                         localStorage.removeItem('app_auth_serial');
-                    } else if (deviceData.expiryDate && new Date(deviceData.expiryDate) < new Date()) {
+                    } else if (deviceData && deviceData.expiryDate && new Date(deviceData.expiryDate) < new Date()) {
                         showModernAlert('🚫 عذراً، انتهت صلاحية هذا الجهاز. يرجى التواصل مع الإدارة لتمديد الصلاحية.', 'error');
                         localStorage.removeItem('app_auth_serial');
-                    } else if (deviceData.status === 'pending') {
+                    } else if (deviceData && deviceData.status === 'pending') {
                         let countdown = 10;
                         const loginMsg = `⏳ يرجى الانتظار لتفعيل الحساب من الجهاز الرئيسي...\n\nسيتم الفحص التلقائي خلال: ${countdown} ثانية`;
                         showModernAlert(loginMsg, 'info');
@@ -16820,24 +16838,13 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                 }
             }
 
+            let deviceHasExisted = false;
             function listenToDeviceStatus(serial, devId) {
                 if (window.deviceStatusUnsubscribe) window.deviceStatusUnsubscribe();
+                deviceHasExisted = false;
                 window.deviceStatusUnsubscribe = db.collection("users").doc(serial).collection("devices").doc(devId).onSnapshot(doc => {
-                    if (!doc.exists) {
-                        // The device was deleted completely by the master
-                        if (typeof showModernAlert === 'function') {
-                            showModernAlert('🔴 تم إنهاء جلستك: تم حذف ترخيص هذا الجهاز من قبل المسؤول.', 'error');
-                        } else {
-                            alert('⚠️ تم حذف ترخيص هذا الجهاز من قبل المسؤول.');
-                        }
-                        localStorage.removeItem('app_auth_serial');
-                        localStorage.removeItem('acc_device_id');
-                        localStorage.removeItem('acc_device_role');
-                        setTimeout(() => window.location.reload(), 3000);
-                        return;
-                    }
-                    
                     if (doc.exists) {
+                        deviceHasExisted = true;
                         const data = doc.data();
                         
                         // تحديث الحالة (حظر/نشط)
@@ -16873,6 +16880,17 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                             if (typeof updateHeaderName === 'function') updateHeaderName();
                             if (typeof showToast === 'function') showToast(`👤 تم تغيير اسمك إلى: ${data.name}`, 'info');
                         }
+                    } else if (deviceHasExisted) {
+                        // The device was deleted completely by the master AFTER it existed
+                        if (typeof showModernAlert === 'function') {
+                            showModernAlert('🔴 تم إنهاء جلستك: تم حذف ترخيص هذا الجهاز من قبل المسؤول.', 'error');
+                        } else {
+                            alert('⚠️ تم حذف ترخيص هذا الجهاز من قبل المسؤول.');
+                        }
+                        localStorage.removeItem('app_auth_serial');
+                        localStorage.removeItem('acc_device_id');
+                        localStorage.removeItem('acc_device_role');
+                        setTimeout(() => window.location.reload(), 3000);
                     }
                 });
             }

@@ -3,9 +3,9 @@
 //  النسخة: 1.1.0 (تحديث الأيقونات)
 // ============================================================
 
-const CACHE_NAME = 'mohassaba-v191';
-const STATIC_CACHE = 'mohassaba-static-v191';
-const DYNAMIC_CACHE = 'mohassaba-dynamic-v191';
+const CACHE_NAME = 'mohassaba-v192';
+const STATIC_CACHE = 'mohassaba-static-v192';
+const DYNAMIC_CACHE = 'mohassaba-dynamic-v192';
 
 // الملفات الأساسية التي يجب تخزينها مسبقاً
 const STATIC_FILES = [
