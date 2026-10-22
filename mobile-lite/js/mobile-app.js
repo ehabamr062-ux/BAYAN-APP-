@@ -3,7 +3,7 @@
 //  Hot-Update & High-Resilience Cloud Sync Pipeline 🚀
 // ============================================================
 
-window.MOBILE_APP_VERSION = '1.0.0';
+window.MOBILE_APP_VERSION = '1.0.1';
 window._mobileSWReg = null;
 
 const firebaseConfig = {

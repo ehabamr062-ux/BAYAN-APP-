@@ -3,7 +3,7 @@
 //  Auto-Update & Resilient Cloud Sync Engine 🚀
 // ============================================================
 
-const CACHE_NAME = 'bayan-mobile-lite-v100';
+const CACHE_NAME = 'bayan-mobile-lite-v101';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',

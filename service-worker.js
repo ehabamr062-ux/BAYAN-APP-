@@ -3,9 +3,9 @@
 //  النسخة الموحدة الرسمية: v6.0.0 (تحديث شامل وربط فوري 🚀)
 // ============================================================
 
-const CACHE_NAME = 'bayan-pos-pro-v600';
-const STATIC_CACHE = 'bayan-pos-pro-static-v600';
-const DYNAMIC_CACHE = 'bayan-pos-pro-dynamic-v600';
+const CACHE_NAME = 'bayan-pos-pro-v601';
+const STATIC_CACHE = 'bayan-pos-pro-static-v601';
+const DYNAMIC_CACHE = 'bayan-pos-pro-dynamic-v601';
 
 // الملفات الأساسية التي يجب تخزينها مسبقاً
 const STATIC_FILES = [
