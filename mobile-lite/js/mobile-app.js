@@ -816,8 +816,8 @@ function renderUI() {
     let totalSales = 0;
     // 2. Expenses and cash deductions: all other categories written in bottom
     let totalExpenses = 0;
-    // 3. Other inflows (any top revenue in non-sales)
-    let otherInflows = 0;
+    // 3. Informational Top Sum: (فوق للعلم فقط)
+    let totalTopSum = 0;
 
     let cashTotal = 0;
     let instaTotal = 0;
@@ -833,11 +833,11 @@ function renderUI() {
         if (cat === 'مبيعات') {
             totalSales += (bottom + top);
         } else {
-            // Any other category (مشتريات، كاش، إيجار، بضاعة، الخ)
-            // bottom is outflow (منصرف/مسحوب من الخزينة ويطرح من المبيعات)
-            // top is inflow (وارد/مقبوض إضافي للخزينة)
+            // Any other category (مشتريات، كاش، إيجار، بضاعة، مصاريف، كهربا، ميه، فودافون كاش، انستا باي، الخ)
+            // bottom is outflow from drawer (يخصم من المبيعات)
+            // top is informational (فوق للعلم والمتابعة فقط ولا يخصم ولا يضاف للدرج)
             totalExpenses += bottom;
-            otherInflows += top;
+            totalTopSum += top;
         }
 
         // Payments Classification (Cash, InstaPay, Vodafone Cash)
@@ -854,13 +854,15 @@ function renderUI() {
     });
 
     // Net Difference / Cash Drawer Balance (عجز / زيادة الخزينة)
-    // Formula: (إجمالي المبيعات + أي وارد إضافي) - إجمالي المنصرف والمسحوبات
-    const netDifference = (totalSales + otherInflows) - totalExpenses;
+    // الفرق الحسابي الدقيق لدرج النقدية: إجمالي المبيعات - إجمالي المنصرف والمسحوبات من الدرج (تحت)
+    // خانة (فوق) للعرض والمتابعة فقط ولا تدخل في معادلة فرق الخزينة
+    const netDifference = totalSales - totalExpenses;
 
     // Update KPI Numbers
     const elSales = document.getElementById('kpi-sales-amount');
     const elExpenses = document.getElementById('kpi-expenses-amount');
     const elProfit = document.getElementById('kpi-profit-amount');
+    const elTop = document.getElementById('kpi-top-amount');
     const elCount = document.getElementById('kpi-count-badge');
     const elBalanceTitle = document.getElementById('kpi-balance-title');
     const elBalanceDesc = document.getElementById('kpi-balance-status-desc');
@@ -868,25 +870,26 @@ function renderUI() {
 
     if (elSales) elSales.textContent = formatCurrency(totalSales);
     if (elExpenses) elExpenses.textContent = formatCurrency(totalExpenses);
+    if (elTop) elTop.textContent = formatCurrency(totalTopSum);
 
     if (elProfit) {
         if (netDifference > 0) {
             elProfit.textContent = `+${formatCurrency(netDifference)}`;
             elProfit.style.color = '#10b981';
-            if (elBalanceTitle) elBalanceTitle.textContent = 'زيادة في الخزينة (+)';
-            if (elBalanceDesc) elBalanceDesc.textContent = `فائض نقدي بالخزينة: ${formatCurrency(netDifference)}`;
+            if (elBalanceTitle) elBalanceTitle.textContent = 'زيادة في الخزينة (+ فرق اليوم)';
+            if (elBalanceDesc) elBalanceDesc.textContent = `فائض نقدي بالدرج: ${formatCurrency(netDifference)}`;
             if (elBalanceIcon) elBalanceIcon.innerHTML = '<i class="fa-solid fa-arrow-trend-up" style="color: #10b981;"></i>';
         } else if (netDifference < 0) {
             elProfit.textContent = `-${formatCurrency(Math.abs(netDifference))}`;
             elProfit.style.color = '#ef4444';
-            if (elBalanceTitle) elBalanceTitle.textContent = 'عجز في الخزينة (-)';
-            if (elBalanceDesc) elBalanceDesc.textContent = `عجز نقدي مطلوب توريده: ${formatCurrency(Math.abs(netDifference))}`;
+            if (elBalanceTitle) elBalanceTitle.textContent = 'عجز في الخزينة (- فرق اليوم)';
+            if (elBalanceDesc) elBalanceDesc.textContent = `عجز نقدي بالدرج: ${formatCurrency(Math.abs(netDifference))}`;
             if (elBalanceIcon) elBalanceIcon.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color: #ef4444;"></i>';
         } else {
             elProfit.textContent = formatCurrency(0);
             elProfit.style.color = 'var(--text-primary)';
-            if (elBalanceTitle) elBalanceTitle.textContent = 'عجز / زيادة الخزينة';
-            if (elBalanceDesc) elBalanceDesc.textContent = 'الخزينة متزنة تماماً (0 ج.م)';
+            if (elBalanceTitle) elBalanceTitle.textContent = 'عجز / زيادة الخزينة (فرق اليوم)';
+            if (elBalanceDesc) elBalanceDesc.textContent = 'الدرج متزن تماماً (0 ج.م)';
             if (elBalanceIcon) elBalanceIcon.innerHTML = '<i class="fa-solid fa-scale-balanced" style="color: #fbbf24;"></i>';
         }
     }
@@ -1127,16 +1130,23 @@ window.printDailyReport = function() {
     const dateStr = window.MobileState.currentDate;
     const storeName = window.MobileState.storeName || 'بيان المحاسبي';
 
-    let totalSales = 0, totalExpenses = 0, cash = 0, insta = 0, voda = 0;
+    let totalSales = 0, totalExpenses = 0, totalTop = 0, cash = 0, insta = 0, voda = 0;
     records.forEach(r => {
         const top = parseFloat(r.top) || 0;
         const bottom = parseFloat(r.bottom) || 0;
+        const cat = (r.category || '').trim();
         const notes = (r.notes || '').toLowerCase();
-        totalSales += bottom;     // مبيعات (تحت)
-        totalExpenses += top;     // مصروفات (فوق)
+
+        if (cat === 'مبيعات') {
+            totalSales += (bottom + top);
+        } else {
+            totalExpenses += bottom; // المنصرف والمسحوبات من الدرج (تحت)
+            totalTop += top;         // إجمالي فوق للعلم فقط
+        }
+
         const effectiveAmt = bottom > 0 ? bottom : top;
-        if (notes.includes('انستا') || notes.includes('instapay')) insta += effectiveAmt;
-        else if (notes.includes('فودافون') || notes.includes('vodafone')) voda += effectiveAmt;
+        if (notes.includes('انستا') || notes.includes('instapay') || cat.includes('انستا')) insta += effectiveAmt;
+        else if (notes.includes('فودافون') || notes.includes('vodafone') || cat.includes('فودافون')) voda += effectiveAmt;
         else cash += effectiveAmt;
     });
 
@@ -1158,19 +1168,24 @@ window.printDailyReport = function() {
             <div class="receipt-divider">══════════════════════════</div>
 
             <div class="receipt-row-bold">
-                <span>إجمالي المبيعات (تحت ⬇️):</span>
+                <span>إجمالي المبيعات:</span>
                 <span>${formatCurrency(totalSales)}</span>
             </div>
             <div class="receipt-row-bold">
-                <span>إجمالي المصروفات (فوق ⬆️):</span>
+                <span>المنصرف من الدرج (تحت ⬇️):</span>
                 <span>${formatCurrency(totalExpenses)}</span>
             </div>
+            ${totalTop > 0 ? `
+            <div class="receipt-row" style="font-size: 11px; color: #64748b;">
+                <span>إجمالي خانة (فوق للعلم):</span>
+                <span>${formatCurrency(totalTop)}</span>
+            </div>` : ''}
 
             <div class="receipt-divider">──────────────────────────</div>
 
             <div class="receipt-row-highlight">
-                <span>صافي الأرباح:</span>
-                <span>${formatCurrency(net)}</span>
+                <span>فرق اليوم (الصافي):</span>
+                <span>${net >= 0 ? '+' : ''}${formatCurrency(net)}</span>
             </div>
 
             <div class="receipt-divider">──────────────────────────</div>
@@ -1384,16 +1399,23 @@ window.shareViaWhatsApp = function() {
     const records = window.MobileState.records;
     const dateStr = window.MobileState.currentDate;
 
-    let totalSales = 0, totalExpenses = 0, cash = 0, insta = 0, voda = 0;
+    let totalSales = 0, totalExpenses = 0, totalTop = 0, cash = 0, insta = 0, voda = 0;
     records.forEach(r => {
         const top = parseFloat(r.top) || 0;
         const bottom = parseFloat(r.bottom) || 0;
+        const cat = (r.category || '').trim();
         const notes = (r.notes || '').toLowerCase();
-        totalSales += bottom; // المبيعات (تحت)
-        totalExpenses += top;  // المصروفات (فوق)
+
+        if (cat === 'مبيعات') {
+            totalSales += (bottom + top);
+        } else {
+            totalExpenses += bottom; // المنصرف من الدرج
+            totalTop += top;         // خانة فوق للعلم فقط
+        }
+
         const amt = bottom > 0 ? bottom : top;
-        if (notes.includes('انستا')) insta += amt;
-        else if (notes.includes('فودافون')) voda += amt;
+        if (notes.includes('انستا') || notes.includes('instapay') || cat.includes('انستا')) insta += amt;
+        else if (notes.includes('فودافون') || notes.includes('vodafone') || cat.includes('فودافون')) voda += amt;
         else cash += amt;
     });
 
@@ -1402,16 +1424,19 @@ window.shareViaWhatsApp = function() {
     let msg = `📊 *تقرير الحسابات اليومي - بيان موبايل لايت*\n`;
     msg += `📅 *تاريخ اليوم:* ${dateStr}\n`;
     msg += `═══════════════════════\n`;
-    msg += `💰 *إجمالي المبيعات (تحت ⬇️):* *${formatCurrency(totalSales)}*\n`;
-    msg += `🔻 *إجمالي المصروفات (فوق ⬆️):* *${formatCurrency(totalExpenses)}*\n`;
+    msg += `💰 *إجمالي المبيعات:* *${formatCurrency(totalSales)}*\n`;
+    msg += `🔻 *المنصرف من الدرج (تحت ⬇️):* *${formatCurrency(totalExpenses)}*\n`;
+    if (totalTop > 0) {
+        msg += `⬆️ *إجمالي خانة (فوق ⬆️ للعلم):* *${formatCurrency(totalTop)}*\n`;
+    }
     msg += `═══════════════════════\n`;
-    msg += `✨ *صافي أرباح اليوم:* *${formatCurrency(net)}* ${net >= 0 ? '🟢' : '🔴'}\n`;
+    msg += `✨ *فرق اليوم (عجز / زيادة الخزينة):* *${net >= 0 ? '+' : ''}${formatCurrency(net)}* ${net >= 0 ? '🟢' : '🔴'}\n`;
     msg += `💵 *كاش نقدي:* ${formatCurrency(cash)}\n`;
     msg += `🟣 *إنستا باي:* ${formatCurrency(insta)}\n`;
     msg += `🔴 *فودافون كاش:* ${formatCurrency(voda)}\n`;
     msg += `📝 *عدد العمليات:* ${records.length} حركة\n`;
     msg += `═══════════════════════\n`;
-    msg += `🤖 _تم الإنشاء تلقائياً عبر تطبيق بيان_`;
+    msg += `🤖 _تم الإنشاء تلقائياً عبر تطبيق بيان المحاسبي_`;
 
     let digits = targetPhone.replace(/\D/g, '');
     if (digits.startsWith('01')) digits = '2' + digits; // مصر كود الدولة +20
@@ -2047,17 +2072,21 @@ window.showCardDetailsModal = function(type) {
         totalAmt = matchingOps.reduce((sum, r) => sum + (parseFloat(r.bottom) || 0) + (parseFloat(r.top) || 0), 0);
     } else if (type === 'expenses') {
         icon = '💸';
-        title = 'تفاصيل المصروفات والمنصرف';
-        matchingOps = indexedRecords.filter(r => r.category !== 'مبيعات');
+        title = 'تفاصيل المنصرف من الدرج والمصروفات (تحت)';
+        matchingOps = indexedRecords.filter(r => r.category !== 'مبيعات' && (parseFloat(r.bottom) || 0) > 0);
         totalAmt = matchingOps.reduce((sum, r) => sum + (parseFloat(r.bottom) || 0), 0);
+    } else if (type === 'top') {
+        icon = '⬆️';
+        title = 'إجمالي مبالغ خانة (فوق للعلم فقط)';
+        matchingOps = indexedRecords.filter(r => r.category !== 'مبيعات' && (parseFloat(r.top) || 0) > 0);
+        totalAmt = matchingOps.reduce((sum, r) => sum + (parseFloat(r.top) || 0), 0);
     } else if (type === 'diff') {
         icon = '⚖️';
-        title = 'تحليل عجز / زيادة الخزينة';
+        title = 'تحليل عجز / زيادة الخزينة (فرق اليوم)';
         isDiffMode = true;
         const sales = indexedRecords.filter(r => r.category === 'مبيعات').reduce((sum, r) => sum + (parseFloat(r.bottom) || 0) + (parseFloat(r.top) || 0), 0);
         const nonSalesBottom = indexedRecords.filter(r => r.category !== 'مبيعات').reduce((sum, r) => sum + (parseFloat(r.bottom) || 0), 0);
-        const nonSalesTop = indexedRecords.filter(r => r.category !== 'مبيعات').reduce((sum, r) => sum + (parseFloat(r.top) || 0), 0);
-        totalAmt = (sales + nonSalesTop) - nonSalesBottom;
+        totalAmt = sales - nonSalesBottom;
         matchingOps = indexedRecords;
     } else if (type === 'cash') {
         icon = '💵';

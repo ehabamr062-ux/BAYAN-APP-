@@ -2408,8 +2408,9 @@
             // totals - Recalculate from raw records for accuracy
             const totalTop = records.filter(r => r.category !== 'مبيعات').reduce((s, a) => s + Number(a.top || 0), 0);
             const totalBottom = records.filter(r => r.category !== 'مبيعات').reduce((s, a) => s + Number(a.bottom || 0), 0);
-            // صافي وفرق اليوم الصحيح: إجمالي المبيعات + أي إيراد آخر (فوق) مخصوماً منه المصروفات (تحت)
-            const netDifference = (salesTotal + totalTop) - totalBottom;
+            // صافي وفرق اليوم الصحيح: إجمالي المبيعات ناقص المصروفات/المنصرف من الدرج (تحت)
+            // خانة (فوق) مخصصة فقط لعرض إجمالي (فوق) للعلم والمتابعة ولا تدخل في خصم أو زيادة درج النقدية
+            const netDifference = salesTotal - totalBottom;
 
             sumTopEl.textContent = formatNum(totalTop);
             sumBottomEl.textContent = formatNum(totalBottom);
@@ -2694,10 +2695,10 @@
 
             records.forEach(r => {
                 if (r.category === 'مبيعات') {
-                    totalSales += (r.bottom || 0);
+                    totalSales += (Number(r.bottom || 0) + Number(r.top || 0));
                 } else {
-                    // Assuming non-sales are expenses/purchases
-                    totalExpenses += (r.top || 0) + (r.bottom || 0);
+                    // المنصرف والمسحوبات من الدرج (تحت)
+                    totalExpenses += Number(r.bottom || 0);
                 }
             });
 
@@ -3059,7 +3060,6 @@
                 if (r.category === 'مبيعات') {
                     salesTotal += (topVal || bottomVal);
                 } else {
-                    if (topVal > 0) salesTotal += topVal;
                     expensesTotal += bottomVal;
                 }
 
@@ -12748,8 +12748,11 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                             const dayData = JSON.parse(localStorage.getItem(key));
                             if (Array.isArray(dayData)) {
                                 dayData.forEach(r => {
-                                    totalSales += Number(r.top || 0);
-                                    totalExpenses += Number(r.bottom || 0);
+                                    if (r.category === 'مبيعات') {
+                                        totalSales += (Number(r.bottom || 0) + Number(r.top || 0));
+                                    } else {
+                                        totalExpenses += Number(r.bottom || 0);
+                                    }
                                     opsCount++;
                                 });
                             }
@@ -12845,8 +12848,11 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                             const dayData = JSON.parse(localStorage.getItem(key));
                             if (Array.isArray(dayData)) {
                                 dayData.forEach(r => {
-                                    totalSales += Number(r.top || 0);
-                                    totalExpenses += Number(r.bottom || 0);
+                                    if (r.category === 'مبيعات') {
+                                        totalSales += (Number(r.bottom || 0) + Number(r.top || 0));
+                                    } else {
+                                        totalExpenses += Number(r.bottom || 0);
+                                    }
                                     opsCount++;
                                 });
                             }
@@ -13002,12 +13008,14 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
         // 2. Net Details
         function showNetDetails() {
             // Use the DOM elements for accurate totals matching the main screen
-            const sumTopMatch = (document.getElementById('sumTop').textContent || '0').replace(/,/g, '');
-            const sumBottomMatch = (document.getElementById('sumBottom').textContent || '0').replace(/,/g, '');
-            const netVal = document.getElementById('diffTotal').textContent || '0';
+            const sumTopMatch = (document.getElementById('sumTop')?.textContent || '0').replace(/,/g, '');
+            const sumBottomMatch = (document.getElementById('sumBottom')?.textContent || '0').replace(/,/g, '');
+            const salesTotalMatch = (document.getElementById('salesTotal')?.textContent || document.getElementById('headerSalesTotal')?.textContent || '0').replace(/,/g, '');
+            const netVal = document.getElementById('diffTotal')?.textContent || document.getElementById('headerDiffTotal')?.textContent || '0';
 
             const topVal = parseFloat(sumTopMatch) || 0;
             const bottomVal = parseFloat(sumBottomMatch) || 0;
+            const salesVal = parseFloat(salesTotalMatch) || 0;
 
             const modal = document.createElement('div');
             modal.className = 'modal-overlay';
@@ -13015,10 +13023,10 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                 <div class="modal-box" style="animation: modalSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); background: linear-gradient(145deg, rgba(20, 30, 48, 0.98), rgba(12, 18, 30, 0.98)) !important; border: 1.5px solid rgba(56, 189, 248, 0.35) !important; box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 30px rgba(56, 189, 248, 0.12) !important; border-radius: 22px; max-width: 500px; width: 95%; padding: 24px; color: #f8fafc;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.08);">
                         <div style="display: flex; align-items: center; gap: 12px;">
-                            <span style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 12px; background: rgba(248, 113, 113, 0.15); border: 1px solid rgba(248, 113, 113, 0.3); font-size: 20px;">📈</span>
+                            <span style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 12px; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.3); font-size: 20px;">⚖️</span>
                             <div>
-                                <h3 style="margin: 0; color: #f87171; font-size: 18px; font-weight: 800; letter-spacing: 0.3px;">تحليل الصافي اليومي</h3>
-                                <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">مقارنة إجمالي الوارد والمنصرف</div>
+                                <h3 style="margin: 0; color: #38bdf8; font-size: 18px; font-weight: 800; letter-spacing: 0.3px;">تحليل فرق اليوم (حركة الخزينة)</h3>
+                                <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">المبيعات ناقص المنصرف من الدرج</div>
                             </div>
                         </div>
                         <button style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; width: 34px; height: 34px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.2s;" onmouseover="this.style.background='rgba(239, 68, 68, 0.2)'; this.style.color='#f87171'" onmouseout="this.style.background='rgba(255,255,255,0.06)'; this.style.color='#cbd5e1'" onclick="this.closest('.modal-overlay').remove()">✕</button>
@@ -13026,21 +13034,25 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                     
                     <div style="display: grid; gap: 12px; margin-bottom: 20px;">
                         <div style="background: rgba(15, 23, 42, 0.6); padding: 14px 16px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center;">
-                            <span style="color: #cbd5e1; font-size: 14px; font-weight: 600;">إجمالي الوارد (فوق):</span>
-                            <span style="font-weight: 800; color: #4ade80; font-size: 17px; font-family: 'Inter', sans-serif;">${formatNum(topVal)}</span>
+                            <span style="color: #cbd5e1; font-size: 14px; font-weight: 600;">💰 إجمالي المبيعات:</span>
+                            <span style="font-weight: 800; color: #4ade80; font-size: 17px; font-family: 'Inter', sans-serif;">${formatNum(salesVal)} ج.م</span>
                         </div>
                         <div style="background: rgba(15, 23, 42, 0.6); padding: 14px 16px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center;">
-                            <span style="color: #cbd5e1; font-size: 14px; font-weight: 600;">إجمالي المنصرف (تحت):</span>
-                            <span style="font-weight: 800; color: #f87171; font-size: 17px; font-family: 'Inter', sans-serif;">${formatNum(bottomVal)}</span>
+                            <span style="color: #cbd5e1; font-size: 14px; font-weight: 600;">🔻 المنصرف من الدرج (تحت):</span>
+                            <span style="font-weight: 800; color: #f87171; font-size: 17px; font-family: 'Inter', sans-serif;">${formatNum(bottomVal)} ج.م</span>
+                        </div>
+                        <div style="background: rgba(15, 23, 42, 0.4); padding: 10px 16px; border-radius: 12px; border: 1px dashed rgba(56, 189, 248, 0.2); display: flex; justify-content: space-between; align-items: center;">
+                            <span style="color: #94a3b8; font-size: 12.5px; font-weight: 600;">⬆️ إجمالي خانة (فوق للعلم فقط):</span>
+                            <span style="font-weight: 700; color: #38bdf8; font-size: 15px; font-family: 'Inter', sans-serif;">${formatNum(topVal)} ج.م</span>
                         </div>
                         <div style="background: rgba(30, 41, 59, 0.7); padding: 16px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; border: 1.5px solid rgba(56, 189, 248, 0.35); box-shadow: 0 4px 18px rgba(0,0,0,0.25);">
-                            <span style="color: #f1f5f9; font-weight: 800; font-size: 16px;">الصافي النهائي:</span>
-                            <span style="font-weight: 900; font-size: 21px; font-family: 'Inter', sans-serif; color: ${parseFloat(netVal.replace(/,/g, '')) >= 0 ? '#4ade80' : '#f87171'}; text-shadow: 0 0 14px ${parseFloat(netVal.replace(/,/g, '')) >= 0 ? 'rgba(74, 222, 128, 0.35)' : 'rgba(248, 113, 113, 0.35)'};">${netVal}</span>
+                            <span style="color: #f1f5f9; font-weight: 800; font-size: 16px;">الصافي (فرق اليوم):</span>
+                            <span style="font-weight: 900; font-size: 21px; font-family: 'Inter', sans-serif; color: ${parseFloat(netVal.replace(/,/g, '')) >= 0 ? '#4ade80' : '#f87171'}; text-shadow: 0 0 14px ${parseFloat(netVal.replace(/,/g, '')) >= 0 ? 'rgba(74, 222, 128, 0.35)' : 'rgba(248, 113, 113, 0.35)'};">${netVal} ج.م</span>
                         </div>
                     </div>
 
                     <p style="font-size: 12px; color: #94a3b8; text-align: center; margin: 0 0 16px 0;">
-                        الصافي = إجمالي الوارد (فوق) - إجمالي المنصرف (تحت)
+                        فرق اليوم = إجمالي المبيعات − إجمالي المنصرف من الدرج (تحت)
                     </p>
 
                     <button style="width: 100%; padding: 13px; background: linear-gradient(135deg, #16a34a, #15803d); color: #ffffff; border: 1px solid rgba(74, 222, 128, 0.3); border-radius: 12px; font-size: 15px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 15px rgba(22, 163, 74, 0.3); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 20px rgba(22, 163, 74, 0.45)'" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 15px rgba(22, 163, 74, 0.3)'" onclick="this.closest('.modal-overlay').remove()">
