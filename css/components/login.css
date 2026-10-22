@@ -1,0 +1,135 @@
+/* ============================================================
+   Bayan POS Pro — Luxury Enterprise Team Login Card
+   css/components/login.css (Design System 2.0)
+   ============================================================ */
+
+#team-login-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.95) 0%, #05070d 100%);
+    -webkit-backdrop-filter: blur(25px);
+    backdrop-filter: blur(25px);
+    z-index: 9999999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    direction: rtl;
+}
+
+.neon-box-outer {
+    position: relative;
+    width: 440px;
+    max-width: 92vw;
+    background: rgba(17, 24, 39, 0.92);
+    border-radius: var(--radius-xl);
+    padding: 3px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75), 0 0 40px rgba(2, 132, 199, 0.15);
+    border: 1px solid var(--border-medium);
+    overflow: hidden;
+}
+
+.login-inner {
+    background: linear-gradient(180deg, rgba(24, 34, 53, 0.95) 0%, rgba(13, 20, 35, 0.98) 100%);
+    padding: 40px 32px;
+    border-radius: 21px;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    justify-content: center;
+}
+
+.login-inner h2 {
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-family: inherit;
+}
+
+.login-inner h2 i {
+    color: var(--net-light);
+    font-size: 20px;
+}
+
+.neon-input-bx {
+    position: relative;
+    width: 100%;
+    margin-bottom: 18px;
+}
+
+.neon-input-bx select,
+.neon-input-bx input {
+    width: 100%;
+    padding: 13px 20px;
+    background: rgba(10, 15, 26, 0.7);
+    border: 1px solid var(--border-subtle);
+    outline: none;
+    border-radius: var(--radius-md);
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+    text-align: center;
+    font-family: inherit;
+}
+
+.neon-input-bx select:focus,
+.neon-input-bx input:focus {
+    border-color: var(--border-focus);
+    background: rgba(10, 15, 26, 0.95);
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+}
+
+.neon-submit-btn {
+    width: 100%;
+    padding: 13px;
+    margin-top: 8px;
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 800;
+    font-size: 15px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4);
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.neon-submit-btn:hover {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    box-shadow: 0 8px 25px rgba(2, 132, 199, 0.55);
+    transform: translateY(-1px);
+}
+
+.neon-group {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 22px;
+    padding: 0 4px;
+}
+
+.neon-group a {
+    color: var(--text-secondary);
+    font-size: 12px;
+    text-decoration: none;
+    transition: color 0.2s;
+    font-weight: 600;
+}
+
+.neon-group a:hover {
+    color: #ffffff;
+}
+
+.neon-group a:last-child {
+    color: var(--net-light);
+    font-weight: 700;
+}

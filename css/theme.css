@@ -1,0 +1,364 @@
+@keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Moving Green Border Animation for Edit Modal */
+        @keyframes borderMoveGreen {
+            0% {
+                background-position: 0% 0%;
+            }
+
+            100% {
+                background-position: 200% 0%;
+            }
+        }
+
+        .modal-box.edit-mode-active {
+            border: 3px solid transparent;
+            background-image: linear-gradient(var(--card), var(--card)), linear-gradient(90deg, #22c55e 0%, #bbf7d0 50%, #22c55e 100%);
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
+            background-size: 200% 100%;
+            animation: borderMoveGreen 3s linear infinite;
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.4), inset 0 0 10px rgba(34, 197, 94, 0.1);
+        }
+
+        /* Animated Purple Border Class (Rotating Neon Style) */
+        .animated-border-purple {
+            position: relative;
+            z-index: 1;
+            overflow: hidden !important;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: none !important;
+            padding: 2px;
+        }
+
+        .animated-border-purple::before {
+            content: '';
+            position: absolute;
+            width: 500%;
+            height: 500%;
+            background: linear-gradient(0deg, transparent, transparent, #a855f7, #6366f1, #d946ef);
+            z-index: -2;
+            animation: neon-animate 4s linear infinite;
+        }
+
+        .animated-border-purple::after {
+            content: '';
+            position: absolute;
+            inset: 3px;
+            border-radius: inherit;
+            z-index: -1;
+        }
+
+        /* Specific Button Backgrounds (Inner Mask) */
+        #clearBtn.animated-border-purple::after {
+            background: linear-gradient(145deg, #ef4444, #b91c1c);
+        }
+
+        #addBtn.animated-border-purple::after {
+            background: linear-gradient(145deg, #16a34a, #15803d);
+        }
+
+        /* Gold/Success Animated Border for Save Buttons */
+        .animated-border-gold {
+            position: relative;
+            z-index: 1;
+            overflow: hidden !important;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: none !important;
+            padding: 2px;
+        }
+
+        .animated-border-gold::before {
+            content: '';
+            position: absolute;
+            width: 400%;
+            height: 400%;
+            background: linear-gradient(0deg, transparent, transparent, #fbbf24, #f59e0b, #fbbf24);
+            z-index: -2;
+            animation: neon-animate 4s linear infinite;
+        }
+
+        .animated-border-gold::after {
+            content: '';
+            position: absolute;
+            inset: 3px;
+            background: linear-gradient(145deg, #10b981, #059669);
+            border-radius: inherit;
+            z-index: -1;
+        }
+
+        /* Electric Border Animation for Egg Balance */
+        @property --angle {
+            syntax: '<angle>';
+            initial-value: 0deg;
+            inherits: false;
+        }
+
+        @keyframes rotateBorder {
+            to {
+                --angle: 360deg;
+            }
+        }
+
+        .electric-border-box {
+            position: relative;
+            padding: 2px;
+            /* Border width */
+            border-radius: 12px;
+            background: linear-gradient(var(--angle), #0ea5e9, #8b5cf6, #0ea5e9);
+            animation: rotateBorder 3s linear infinite;
+            cursor: pointer;
+            transition: box-shadow 0.2s ease;
+            z-index: 10;
+        }
+
+        .electric-border-box:hover {
+            transform: none;
+            box-shadow: 0 0 15px rgba(14, 165, 233, 0.4);
+        }
+
+        .electric-content {
+            background: linear-gradient(145deg, rgba(20, 30, 45, 0.95), rgba(10, 20, 35, 0.98));
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            padding: 10px 15px;
+            /* Reduced side padding for better fit */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            /* Flexible width */
+            box-sizing: border-box;
+            height: 100%;
+        }
+
+        .onboarding-overlay {
+            -webkit-backdrop-filter: blur(15px) !important;
+            backdrop-filter: blur(15px) !important;
+            background: rgba(0, 0, 0, 0.8) !important;
+            z-index: 99999 !important;
+        }
+
+        /* Specific scrollbar styles removed */
+        /* Modern Premium Toast Notifications */
+        .modern-toast-container {
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            pointer-events: none;
+        }
+
+        .modern-toast {
+            min-width: 300px;
+            max-width: 450px;
+            padding: 16px 24px;
+            border-radius: 20px;
+            background: rgba(15, 23, 42, 0.8);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            direction: rtl;
+            pointer-events: auto;
+            animation: modernToastIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes modernToastIn {
+            from {
+                opacity: 0;
+                transform: translateY(-40px) scale(0.8);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modern-toast.fade-out {
+            animation: modernToastOut 0.4s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
+        }
+
+        @keyframes modernToastOut {
+            to {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.9);
+            }
+        }
+
+        .modern-toast-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .modern-toast.success .modern-toast-icon {
+            color: #10b981;
+            background: rgba(16, 185, 129, 0.15);
+        }
+
+        .modern-toast.error .modern-toast-icon {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.15);
+        }
+
+        .modern-toast.warning .modern-toast-icon {
+            color: #f59e0b;
+            background: rgba(245, 158, 11, 0.15);
+        }
+
+        .modern-toast.info .modern-toast-icon {
+            color: #3b82f6;
+            background: rgba(59, 130, 246, 0.15);
+        }
+
+        #usersListContainer {
+            scrollbar-width: thin;
+        }
+
+/* ============================================================
+   Ultra-High Contrast Light Mode Optimization (تجربة الوضع الفاتح)
+   ============================================================ */
+
+body:not(.dark) {
+    background-color: #f1f5f9 !important;
+    color: #0f172a !important;
+    --card: #ffffff;
+    --muted: #334155;
+    --neu-bg: #f8fafc;
+    --neu-text: #0f172a;
+    --neu-shadow-light: #ffffff;
+    --neu-shadow-dark: #cbd5e1;
+}
+
+body:not(.dark) .card {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08) !important;
+    color: #0f172a !important;
+}
+
+body:not(.dark) h1, 
+body:not(.dark) h2, 
+body:not(.dark) h3, 
+body:not(.dark) h4, 
+body:not(.dark) h5, 
+body:not(.dark) h6 {
+    color: #0f172a !important;
+}
+
+body:not(.dark) table {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+}
+
+body:not(.dark) th {
+    background: #e2e8f0 !important;
+    color: #0f172a !important;
+    font-weight: 900 !important;
+    border-bottom: 2px solid #94a3b8 !important;
+}
+
+body:not(.dark) td {
+    color: #0f172a !important;
+    border-color: #e2e8f0 !important;
+    font-weight: 700 !important;
+}
+
+body:not(.dark) input, 
+body:not(.dark) select, 
+body:not(.dark) textarea {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: 1.5px solid #64748b !important;
+    font-weight: 700 !important;
+}
+
+body:not(.dark) input::placeholder,
+body:not(.dark) textarea::placeholder {
+    color: #475569 !important;
+    opacity: 1 !important;
+}
+
+body:not(.dark) .header-island {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06) !important;
+}
+
+body:not(.dark) .header-island span,
+body:not(.dark) .header-island h2 {
+    color: #0f172a !important;
+}
+
+body:not(.dark) #calculatorCard {
+    background: #ffffff !important;
+    border: 2px solid #cbd5e1 !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15) !important;
+}
+
+body:not(.dark) #calcDisplay {
+    background: #f8fafc !important;
+    color: #047857 !important;
+    border: 1.5px solid #64748b !important;
+}
+
+body:not(.dark) #calcFormula {
+    color: #334155 !important;
+}
+
+body:not(.dark) .modal-box {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.2) !important;
+}
+
+body:not(.dark) .settings-card {
+    background: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+    color: #0f172a !important;
+}
+
+body:not(.dark) .tab-link {
+    color: #475569 !important;
+}
+
+body:not(.dark) .tab-link.active {
+    color: #0284c7 !important;
+    border-bottom-color: #0284c7 !important;
+    font-weight: 900 !important;
+}

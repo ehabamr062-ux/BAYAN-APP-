@@ -1,0 +1,116 @@
+/* ============================================================
+   Bayan POS Pro — Scientific & Cash Calculator
+   css/components/calculator.css (Design System 2.0)
+   ============================================================ */
+
+.calc-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+}
+
+.calc-grid button {
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    -webkit-user-select: none;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    padding: 14px 8px;
+    font-family: 'Inter', 'Readex Pro', sans-serif;
+}
+
+.calc-grid button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+.calc-grid button:active {
+    transform: scale(0.95);
+}
+
+/* Number buttons */
+.calc-grid button.num {
+    background: #ffffff;
+    color: #0f172a;
+    border: 1.5px solid #cbd5e1;
+}
+
+/* Operator buttons (amber) */
+.calc-grid button.op {
+    background: #fffbeb;
+    border: 1.5px solid #fde68a;
+    color: #b45309;
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.calc-grid button.op:hover {
+    background: #fef3c7;
+    border-color: #f59e0b;
+    color: #92400e;
+}
+
+/* Function buttons (purple) */
+.calc-grid button.func {
+    background: #f5f3ff;
+    border: 1.5px solid #ddd6fe;
+    color: #7c3aed;
+    font-weight: 800;
+}
+
+.calc-grid button.func:hover {
+    background: #ede9fe;
+    border-color: #8b5cf6;
+    color: #6d28d9;
+}
+
+/* Control & Action buttons (emerald) */
+.calc-grid button.control {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #ffffff;
+    font-weight: 800;
+    border: none;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);
+}
+
+.calc-grid button.control:hover {
+    background: linear-gradient(135deg, #34d399, #10b981);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+}
+
+/* ============================================================
+   DARK MODE CALCULATOR (Luminous Sapphire Theme)
+   ============================================================ */
+body.dark .calc-grid button.num {
+    background: rgba(255, 255, 255, 0.08);
+    color: #f8fafc;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+body.dark .calc-grid button.op {
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    color: #fbbf24;
+}
+
+body.dark .calc-grid button.op:hover {
+    background: rgba(245, 158, 11, 0.3);
+    color: #ffffff;
+}
+
+body.dark .calc-grid button.func {
+    background: rgba(168, 85, 247, 0.15);
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    color: #c084fc;
+}
+
+body.dark .calc-grid button.func:hover {
+    background: rgba(168, 85, 247, 0.3);
+    color: #ffffff;
+}

@@ -1,0 +1,229 @@
+/* ============================================================
+   Bayan POS Pro — Luxury Financial Tables & Operations Grid
+   css/components/tables.css (Design System 2.0)
+   ============================================================ */
+
+#aggTable {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 16px;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+    transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+/* 1. Table Header Rows */
+#aggTable thead tr,
+table thead tr {
+    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%) !important;
+}
+
+thead th,
+#aggTable th {
+    color: #1e293b !important;
+    padding: 14px 12px;
+    text-align: center;
+    font-weight: 800 !important;
+    font-size: 13px;
+    border-bottom: 2px solid #cbd5e1 !important;
+    letter-spacing: 0.3px;
+    -webkit-user-select: none;
+    user-select: none;
+    font-family: 'Readex Pro', 'Tajawal', sans-serif;
+}
+
+#aggTable th.col-editTime {
+    color: #b45309 !important;
+    cursor: pointer;
+}
+
+/* 2. Body Cells & Row States */
+tbody td,
+#aggTable tbody td {
+    padding: 13px 12px;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: #0f172a !important;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+tbody tr,
+#aggTable tbody tr {
+    transition: background 0.15s ease;
+}
+
+tbody tr:nth-child(even),
+#aggTable tbody tr:nth-child(even) {
+    background-color: #f8fafc;
+}
+
+tbody tr:hover,
+#aggTable tbody tr:hover {
+    background-color: rgba(2, 132, 199, 0.08) !important;
+}
+
+/* 3. Amounts Display in Cells (High Contrast Semantic Colors) */
+.cell-amount {
+    font-family: 'Inter', monospace, sans-serif;
+    font-weight: 800 !important;
+    letter-spacing: -0.02em;
+}
+
+.cell-top,
+.col-top {
+    color: #059669 !important; /* Emerald 600 */
+    font-weight: 800;
+}
+
+.cell-bottom,
+.col-bottom {
+    color: #e11d48 !important; /* Rose 600 */
+    font-weight: 800;
+}
+
+.col-cashSold {
+    color: #7c3aed !important; /* Violet 600 */
+    font-weight: 800;
+}
+
+.col-total {
+    color: #0284c7 !important; /* Sky 600 */
+    font-weight: 900;
+}
+
+/* 4. Footer Totals */
+tfoot td,
+#aggTable tfoot td {
+    padding: 16px 12px;
+    font-weight: 900 !important;
+    text-align: center;
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+    border-top: 2px solid #cbd5e1 !important;
+    font-size: 15px;
+}
+
+.col-hidden {
+    display: none !important;
+}
+
+/* 5. Modern Table Toolbar & Filter */
+.table-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 14px;
+    flex-wrap: wrap;
+}
+
+.table-filter {
+    padding: 8px 16px;
+    border-radius: var(--radius-full);
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    color: #0f172a;
+    font-size: 13px;
+    font-weight: 700;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.table-filter:focus {
+    border-color: #0284c7;
+    box-shadow: 0 0 12px rgba(2, 132, 199, 0.2);
+}
+
+/* 6. Sorting Indicators */
+th.sortable {
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+th.sortable:hover {
+    color: #0284c7 !important;
+}
+
+.sort-icon {
+    display: inline-block;
+    margin-right: 4px;
+    font-size: 11px;
+    color: #64748b;
+}
+
+/* ============================================================
+   DARK MODE OVERRIDES (Deep Sapphire Luxury Theme)
+   ============================================================ */
+body.dark #aggTable {
+    background: rgba(19, 29, 49, 0.95) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+}
+
+body.dark #aggTable thead tr,
+body.dark table thead tr {
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%) !important;
+}
+
+body.dark thead th,
+body.dark #aggTable th {
+    color: #f8fafc !important;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+body.dark #aggTable th.col-editTime {
+    color: #fbbf24 !important;
+}
+
+body.dark tbody td,
+body.dark #aggTable tbody td {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    color: #f1f5f9 !important;
+}
+
+body.dark tbody tr:nth-child(even),
+body.dark #aggTable tbody tr:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.02) !important;
+}
+
+body.dark tbody tr:hover,
+body.dark #aggTable tbody tr:hover {
+    background-color: rgba(56, 189, 248, 0.1) !important;
+}
+
+body.dark tfoot td,
+body.dark #aggTable tfoot td {
+    background: #0d1424 !important;
+    color: #38bdf8 !important;
+    border-top: 2px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+body.dark .cell-top,
+body.dark .col-top {
+    color: #34d399 !important;
+}
+
+body.dark .cell-bottom,
+body.dark .col-bottom {
+    color: #fb7185 !important;
+}
+
+body.dark .col-cashSold {
+    color: #c084fc !important;
+}
+
+body.dark .col-total {
+    color: #38bdf8 !important;
+}
+
+body.dark .table-filter {
+    background: rgba(15, 23, 42, 0.8) !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff !important;
+}

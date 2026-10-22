@@ -1,0 +1,236 @@
+/* ============================================================
+   Bayan POS Pro — Luxury KPI Metric Cards & Analytics
+   css/components/cards.css (Design System 2.0)
+   ============================================================ */
+
+/* 1. Core Metric Cards */
+.metric-card {
+    border-radius: var(--radius-lg);
+    padding: 16px 20px;
+    text-align: right;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: rgba(17, 24, 39, 0.75);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-sm);
+    min-height: 100px;
+}
+
+.metric-card:hover {
+    transform: translateY(-3px);
+    background: rgba(30, 41, 59, 0.85);
+    border-color: var(--border-medium);
+    box-shadow: var(--shadow-md);
+    z-index: 2;
+}
+
+.metric-card:active {
+    transform: translateY(-1px);
+}
+
+.metric-card .metric-icon {
+    font-size: 24px;
+    margin-bottom: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+}
+
+.metric-card .metric-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+    letter-spacing: 0.3px;
+}
+
+.metric-card .metric-value {
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.2;
+    color: #ffffff;
+}
+
+/* 2. Semantic Modern Variations (Fintech Grade) */
+.card-green {
+    border-top: 3px solid var(--income);
+}
+.card-green .metric-icon {
+    background: var(--income-bg);
+    color: var(--income-light);
+}
+.card-green .metric-value {
+    color: var(--income-light);
+}
+
+.card-red {
+    border-top: 3px solid var(--expense);
+}
+.card-red .metric-icon {
+    background: var(--expense-bg);
+    color: var(--expense-light);
+}
+.card-red .metric-value {
+    color: var(--expense-light);
+}
+
+.card-orange {
+    border-top: 3px solid var(--cash);
+}
+.card-orange .metric-icon {
+    background: var(--cash-bg);
+    color: var(--cash-light);
+}
+.card-orange .metric-value {
+    color: var(--cash-light);
+}
+
+.card-purple {
+    border-top: 3px solid var(--instapay);
+}
+.card-purple .metric-icon {
+    background: var(--instapay-bg);
+    color: var(--instapay-light);
+}
+.card-purple .metric-value {
+    color: var(--instapay-light);
+}
+
+.card-blue {
+    border-top: 3px solid var(--net);
+}
+.card-blue .metric-icon {
+    background: var(--net-bg);
+    color: var(--net-light);
+}
+.card-blue .metric-value {
+    color: var(--net-light);
+}
+
+.card-teal {
+    border-top: 3px solid #0d9488;
+}
+.card-teal .metric-icon {
+    background: rgba(13, 148, 136, 0.15);
+    color: #2dd4bf;
+}
+
+/* 3. Luxury Stats Bar */
+.premium-stats-bar {
+    margin: 20px 0;
+    padding: 16px 36px;
+    background: rgba(15, 23, 42, 0.7);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-xl);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: var(--shadow-md);
+    gap: 40px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.premium-stats-bar:hover {
+    border-color: rgba(56, 189, 248, 0.25);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.stat-icon-wrapper {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 12px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-subtle);
+    font-size: 20px;
+}
+
+.stat-details {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.stat-number {
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 26px;
+    line-height: 1.1;
+}
+
+.stat-divider {
+    width: 1px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* 4. Modern Clean Search Bar */
+.neon-search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: rgba(15, 23, 42, 0.7);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    border-radius: var(--radius-full);
+    padding: 8px 18px;
+    width: 95%;
+    max-width: 720px;
+    margin: 0 auto 20px auto;
+    border: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.25s ease;
+    direction: rtl;
+}
+
+.neon-search-container:focus-within {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.25);
+    background: rgba(15, 23, 42, 0.9);
+}
+
+.neon-search-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #ffffff;
+    padding: 6px 10px;
+    font-size: 14px;
+    font-family: inherit;
+    font-weight: 600;
+}
+
+.neon-search-input::placeholder {
+    color: var(--text-muted);
+}

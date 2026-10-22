@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Bayan POS Pro — Accounting System</title>
+
+    <!-- Core Libraries (100% Offline Local with Zero Network Latency) -->
+    <script src="lib/dexie.min.js"></script>
+    <script src="lib/firebase-app-compat.js"></script>
+    <script src="lib/firebase-firestore-compat.js"></script>
+
+    <!-- Utility Libraries: Deferred for faster initial load -->
+    <script src="lib/chart.min.js" defer></script>
+    <script src="lib/html2canvas.min.js" defer></script>
+    <script src="lib/xlsx.full.min.js" defer></script>
+    <script src="lib/qrcode.min.js"></script>
+
+    <!-- Local Database API -->
+    <script src="database-api.js?v=6.0.0"></script>
+
+    <!-- Google Fonts & FontAwesome (Local Offline Supported) -->
+    <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;600;700&family=Inter:wght@400;500;600;700;800;900&family=Readex+Pro:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="lib/fontawesome/css/all.min.css">
+
+    <!-- CSS Modular Architecture (Design System v6.0.0) -->
+    <link rel="stylesheet" href="css/base/variables.css?v=6.0.0">
+    <link rel="stylesheet" href="css/base/reset.css?v=6.0.0">
+    <link rel="stylesheet" href="css/base/typography.css?v=6.0.0">
+    <link rel="stylesheet" href="css/layout/layout.css?v=6.0.0">
+    <link rel="stylesheet" href="css/layout/navigation.css?v=6.0.0">
+    <link rel="stylesheet" href="css/components/cards.css?v=6.0.0">
+    <link rel="stylesheet" href="css/components/tables.css?v=6.0.0">
+    <link rel="stylesheet" href="css/components/forms.css?v=6.0.0">
+    <link rel="stylesheet" href="css/components/modals.css?v=6.0.0">
+    <link rel="stylesheet" href="css/components/login.css?v=6.0.0">
+    <link rel="stylesheet" href="css/components/calculator.css?v=6.0.0">
+    <link rel="stylesheet" href="css/components/notifications.css?v=6.0.0">
+    <link rel="stylesheet" href="css/components/print.css?v=6.0.0">
+    <!-- Legacy & Transition Stylesheets -->
+    <link rel="stylesheet" href="css/main.css?v=6.0.0">
+    <link rel="stylesheet" href="css/theme.css?v=6.0.0">
+    <link rel="stylesheet" href="css/animations.css?v=6.0.0">
+    <link rel="stylesheet" href="css/components.css?v=6.0.0">
+    <!-- Modern UI Redesign Master Override -->
+    <link rel="stylesheet" href="styles.css?v=6.0.0">
+    <link rel="stylesheet" href="css/components/page-elements.css?v=6.0.0">
+
+    <!-- Security & Core Systems -->
+    <script src="js/core/security.js"></script>
+    <script src="js/core/pwa-updater.js"></script>
+
+    <!-- PWA & Apple Meta Tags -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192x192.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="icons/icon-144x144.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="محاسبة يومية">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="msapplication-TileColor" content="#d4af37">
+    <meta name="msapplication-TileImage" content="icons/icon-144x144.png">
+    <script>
+        (function () {
+            var tc = document.createElement('meta');
+            tc.name = 'theme-color';
+            tc.content = '#0ea5e9';
+            document.head.appendChild(tc);
+        })();
+    </script>
+</head>
+
+<body class="theme-galaxy">
+
+    <div class="stage">
+        <div class="stage-inner">
+            <div class="container" id="app">
+                <!-- Announcement Bar for Version 6.0.0 with Auto-Hide -->
+                <div id="announcementBar" class="luxury-announcement-bar" onclick="window.showUpdateNotesModal()">
+                    <div class="announcement-inner">
+                        <span class="announcement-chip">🚀 إصدار v6.0.0</span>
+                        <span class="announcement-title">تم إطلاق التحديث الجديد وتطوير واجهة الاستخدام الاحترافية!</span>
+                        <span class="announcement-link">اضغط لمعاينة المميزات ✨</span>
+                    </div>
+                </div>
+
+                <script>
+                    (function() {
+                        // تفعيل الاختفاء التلقائي بعد 48 ساعة
+                        const startTimeKey = 'bayan_announcement_start_time_6_0_0';
+                        let startTime = localStorage.getItem(startTimeKey);
+                        if (!startTime) {
+                            startTime = Date.now();
+                            localStorage.setItem(startTimeKey, startTime);
+                        }
+
+                        const fortyEightHoursMs = 48 * 60 * 60 * 1000;
+                        if (Date.now() - parseInt(startTime) >= fortyEightHoursMs) {
+                            const bar = document.getElementById('announcementBar');
+                            if (bar) bar.style.display = 'none';
+                        }
+                    })();
+                </script>
+
+                <div class="island-header">
+
+                    <!-- الجزيرة 1: الهوية الملكية المطورة (Right) -->
+                    <div class="header-island header-island-identity">
+                        
+                        <!-- توهج خفيف جداً في الخلفية -->
+                        <div class="header-island-glow"></div>
+
+                        <!-- قسم الشعار واسم التطبيق -->
+                        <div class="header-brand-group">
+                            <div class="header-logo-container" onclick="showSettingsModal()">
+                                <img src="logo.png" alt="Logo" class="header-logo-img">
+                                <div class="header-online-dot"></div>
+                            </div>
+                            <div class="header-brand-texts">
+                                <div class="header-brand-title-row">
+                                    <h2 class="header-brand-heading">Bayan POS <span class="highlight-cyan">Pro</span></h2>
+                                    <span class="header-version-badge">v6.0.0</span>
+                                </div>
+                                <span class="header-brand-sub"><i class="fa-solid fa-circle-check" style="color: #10b981; font-size: 10px;"></i> الإصدار الحالي: 6.0.0</span>
+                            </div>
+                        </div>
+
+                        <!-- فاصل عمودي ناعم -->
+                        <div class="header-vertical-sep"></div>
+
+                        <!-- قسم المستخدم (المدير) -->
+                        <div class="header-user-badge" onclick="showSettingsModal()">
+                            <div class="header-user-labels">
+                                <span class="header-user-role-label">المدير المسئول</span>
+                                <span id="header-user-name-display-main" class="header-user-name-label">المدير العام</span>
+                            </div>
+                            <div class="header-user-avatar-circle">
+                                <i class="fa-solid fa-user-tie"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- لوحة التحكم المتقدمة (Left) -->
+                    <div class="header-island header-island-actions">
+                        <div class="header-actions-group">
+                            <div class="action-tile action-tile-cyan" id="privacyToggleTile" title="إخفاء / إظهار المبالغ (وضع الخصوصية)" onclick="window.togglePrivacyMode()">
+                                <i id="privacyToggleIcon" class="fa-solid fa-eye"></i>
+                            </div>
+                            <div class="action-tile action-tile-wifi" id="networkStatus" title="حالة الاتصال: متصل بالإنترنت" onclick="window.showNetworkToast()">
+                                <i id="networkStatusIcon" class="fa-solid fa-wifi"></i>
+                                <span id="networkStatusText" style="display:none;">متصل</span>
+                            </div>
+                            <div class="action-tile action-tile-key" id="serialQrActionTile" title="كود السيريال والباركود السحابي 🔑" onclick="window.showSerialQrModal()">
+                                <i class="fa-solid fa-key"></i>
+                            </div>
+                            <div class="action-tile" id="themeToggleTile" title="تبديل المظهر" onclick="toggleTheme()">
+                                <span id="themeToggleIcon"><i class="fa-solid fa-moon"></i></span>
+                            </div>
+                            <div class="action-tile" title="حفظ البيانات" onclick="exportAllData()"><i
+                                    class="fa-solid fa-floppy-disk"></i></div>
+                            <div class="action-tile" title="لقطة شاشة" onclick="takeScreenshot()"><i
+                                    class="fa-solid fa-camera"></i></div>
+                            <div class="action-tile action-tile-green" title="واتساب" onclick="shareToWhatsApp()">
+                                <i class="fa-solid fa-comment-dots"></i>
+                            </div>
+                            <div class="action-tile action-tile-gold" title="الآلة الحاسبة المتقدمة (F7)" onclick="window.toggleCalculatorModal()">
+                                <i class="fa-solid fa-calculator"></i>
+                            </div>
+                            <div class="action-tile action-tile-gold" title="طباعة الفواتير والتقارير (Ctrl+P)" onclick="window.showPrintModal()"><i
+                                    class="fa-solid fa-print"></i></div>
+                            <div class="action-tile" id="layoutToggleTile" title="تبديل العرض" onclick="toggleLayoutMode()"><i
+                                    id="layoutToggleIcon" class="fa-solid fa-mobile-screen-button"></i></div>
+                        </div>
+
+                        <!-- أيقونة جرس الإشعارات والتنبيهات الذكية مع البادج المشع -->
+                        <div class="action-tile action-tile-bell" id="notificationBellTile" title="مركز الإشعارات والتنبيهات الذكية" onclick="window.toggleNotificationsModal()">
+                            <i class="fa-solid fa-bell"></i>
+                            <span class="notification-badge" id="notificationBadge">0</span>
+                        </div>
+
+                        <div class="action-tile action-tile-settings" onclick="showSettingsModal()">
+                            <i class="fa-solid fa-gears"></i>
+                        </div>
+
+                        <button onclick="lockAppNow()" title="قفل الجلسة وتشفير الشاشة / تبديل المستخدم" class="header-lock-btn action-pill-lock" id="header-lock-btn">
+                            <span class="lock-icon-badge"><i class="fa-solid fa-user-lock"></i></span>
+                            <span>قفل / تبديل</span>
+                        </button>
+                    </div>
+
+                </div>
+
+
+                <header class="app-sub-header">
+                    <div class="header-controls">
+                        <!-- Dynamic Inventories Button -->
+                        <div class="header-btns-wrapper">
+                            <button class="btn btn-ai-action" id="headerAiBtnAction"
+                                onclick="window.toggleBayanAiChat()" title="مساعد بيان الذكي">
+                                <i class="fa-solid fa-brain-circuit ai-icon-brain"></i> 
+                                <i class="fa-solid fa-microchip ai-icon-chip"></i> 
+                                <span>مساعد بيان الذكي</span>
+                                <span class="badge-new-animated">NEW</span>
+                            </button>
+                            <button class="btn btn-balances-action" id="balancesBtn"
+                                onclick="openInventoriesSideMenu()" title="المخزون والأرصدة">📦 الأرصدة</button>
+
+                            <button class="btn btn-external-action"
+                                onclick="showExternalBalancesModal()" title="حسابات خارجية (له وعليه)">💳 حساب خارجي</button>
+
+                            <button class="btn btn-notes-action"
+                                onclick="showAppNotesModal()" title="الملاحظات">📝 <span id="headerNotesBoxNameBtn">ملاحظات</span></button>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- Key Metrics Dashboard -->
+                <div class="metrics-dashboard">
+
+                    <div class="metric-card card-orange" onclick="showSalesDetails()">
+                        <div class="metric-icon">💰</div>
+                        <div class="metric-label">إجمالي المبيعات</div>
+                        <div class="metric-value" id="headerSalesTotal">0</div>
+                    </div>
+
+                    <div class="metric-card card-green" onclick="showNetDetails()">
+                        <div class="metric-icon">📈</div>
+                        <div class="metric-label">صافي اليوم</div>
+                        <div class="metric-value" id="headerDiffTotal">0</div>
+                    </div>
+
+                    <div class="metric-card card-blue" onclick="showOperationsDetails()">
+                        <div class="metric-icon">📊</div>
+                        <div class="metric-label">عدد العمليات</div>
+                        <div class="metric-value" id="headerOperationsCount">0</div>
+                    </div>
+
+                    <div class="metric-card card-red" onclick="showCashDetails()">
+                        <div class="metric-icon">💵</div>
+                        <div class="metric-label">الكاش</div>
+                        <div class="metric-value" id="headerCashTotal">0</div>
+                    </div>
+
+                    <div class="metric-card card-purple" onclick="showInstaPayDetails()">
+                        <div class="metric-icon">🟣</div>
+                        <div class="metric-label">انستا باي</div>
+                        <div class="metric-value" id="headerInstaPayTotal">0</div>
+                    </div>
+                </div>
+
+
+
+                <div class="layout">
+                    <!-- MAIN CONTENT -->
+                    <div class="main-content">
+
+                        <!-- Quick Input Card -->
+                        <div class="card" id="inputCard">
+
+                            <div class="card-header-row">
+                                <span class="card-header-icon">➕</span>
+                                <h3 class="card-header-title">إضافة عملية جديدة</h3>
+                                <!-- Voice input functional removed per user request -->
+                            </div>
+
+                            <!-- Quick Date Navigation -->
+
+                            <div class="input-grid">
+                                <!-- Quick Jump -->
+                                <div class="input-box-wrapper">
+                                    <label class="input-label" for="quickDateSelect"><span class="input-icon">🕒</span> قفز سريع</label>
+                                    <select id="quickDateSelect" class="custom-input quick-date-select" title="قفز سريع للفترة الزمنية" aria-label="قفز سريع للفترة الزمنية" onchange="if(this.value) setQuickDate(this.value)">
+                                        <option value="">الفترة...</option>
+                                        <option value="today">اليوم</option>
+                                        <option value="yesterday">الأمس</option>
+                                        <option value="this-week">أول الأسبوع</option>
+                                        <option value="last-week">الأسبوع السابق</option>
+                                        <option value="this-month">أول الشهر</option>
+                                        <option value="last-month">الشهر السابق</option>
+                                    </select>
+                                </div>
+
+                                <!-- Date -->
+                                <div class="input-box-wrapper">
+                                    <label class="input-label" for="dateInput"><span class="input-icon">📅</span> التاريخ</label>
+                                    <input type="date" id="dateInput" class="custom-input" title="التاريخ" placeholder="التاريخ" aria-label="التاريخ">
+                                </div>
+
+                                <!-- Category (Restored as Box) -->
+                                <div class="input-box-wrapper">
+                                    <label class="input-label"><span class="input-icon">📂</span> البند</label>
+                                    <div id="categoryTrigger" class="custom-input category-trigger-box"
+                                        onclick="showHorizontalCategoryModal()">
+                                        <span id="selectedCategoryText" class="selected-cat-text">اختر البند...</span>
+                                        <span class="arrow-down-icon">▼</span>
+                                    </div>
+                                    <input type="hidden" id="category" value="مبيعات">
+                                    <input type="text" id="customName" placeholder="✍️ اسم البند المخصص"
+                                        title="اسم البند المخصص" aria-label="اسم البند المخصص"
+                                        class="custom-input custom-name-input">
+                                </div>
+
+                                <!-- Notes -->
+                                <div class="input-box-wrapper">
+                                    <label id="mainFormNotesLabel" class="input-label"><span
+                                            class="input-icon">📝</span> ملاحظات</label>
+                                    <input type="text" id="note" placeholder="ملاحظة..." class="custom-input" list="notesQuickList" autocomplete="on">
+                                    <datalist id="notesQuickList">
+                                        <option value="انستا باي"></option>
+                                        <option value="كاش"></option>
+                                        <option value="فودافون كاش"></option>
+                                        <option value="تحويل بنكي"></option>
+                                    </datalist>
+                                </div>
+                            </div>
+
+                            <!-- Cash Calculation Fields (Smart Assistant) -->
+                            <div id="cashCalcRow" class="cash-calc-row">
+                                <div class="input-box-wrapper">
+                                    <label class="input-label label-gold"><span
+                                            class="input-icon">💹</span> قيمة المبيعة (بعت بكام؟)</label>
+                                    <input type="text" inputmode="decimal" id="cashSoldAmount" placeholder="0.00"
+                                        title="قيمة المبيعة" aria-label="قيمة المبيعة"
+                                        class="custom-input input-gold-border" oninput="runCashCalc()">
+                                </div>
+                                <div class="input-box-wrapper">
+                                    <label class="input-label label-green"><span
+                                            class="input-icon">🧧</span> الباقي للزبون</label>
+                                    <input type="text" id="cashChangeResult" placeholder="0.00" class="custom-input input-cash-change"
+                                        title="الباقي للزبون" aria-label="الباقي للزبون"
+                                        readonly>
+                                </div>
+                            </div>
+
+                            <div class="amounts-section">
+                                <!-- Amount Top -->
+                                <div class="input-box-wrapper input-wrapper-top">
+                                    <label class="input-label label-amt-top"><span
+                                            class="input-icon">⬆️</span> المبلغ (فوق)</label>
+                                    <input type="text" inputmode="decimal" id="amtTop" placeholder="0.00"
+                                        title="المبلغ فوق" aria-label="المبلغ فوق"
+                                        class="custom-input input-amt-top" onblur="evaluateMathInput(this)"
+                                        onkeydown="if(event.key==='Enter'){ event.preventDefault(); window.addTransaction(); }">
+                                </div>
+                                <!-- Amount Bottom -->
+                                <div class="input-box-wrapper input-wrapper-bottom">
+                                    <label class="input-label label-amt-bottom"><span
+                                            class="input-icon">⬇️</span> المبلغ (تحت)</label>
+                                    <input type="text" inputmode="decimal" id="amtBottom" placeholder="0.00"
+                                        title="المبلغ تحت" aria-label="المبلغ تحت"
+                                        class="custom-input input-amt-bottom" onblur="evaluateMathInput(this)"
+                                        onkeydown="if(event.key==='Enter'){ event.preventDefault(); window.addTransaction(); }">
+                                </div>
+                            </div>
+
+                            <div class="actions-row">
+                                <button class="btn animated-border-purple btn-action-clear" id="clearBtn"
+                                    title="تفريغ (Ctrl+L)">
+                                    <span class="btn-icon-trash">🗑️</span>
+                                </button>
+
+                                <button class="btn green animated-border-purple btn-action-add" id="addBtn"
+                                    title="إضافة العملية (Enter)">
+                                    <span class="btn-icon-plus">➕</span>
+                                    <span class="btn-text-content">إضافة العملية</span>
+                                </button>
+                            </div>
+
+                            <!-- Form Validation Messages -->
+                            <div id="formMessages" class="form-messages-container">
+                                <div id="successMessage" class="message success form-msg-success">
+                                    ✅ تمت الإضافة
+                                </div>
+                                <div id="errorMessage" class="message error form-msg-error">
+                                    ❌ خطأ في الإدخال
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Transactions Table -->
+                        <div class="card card-table-flex">
+                            <div class="table-card-header">
+                                <div class="table-header-title-group">
+                                    <span class="table-header-icon">📊</span>
+                                    <h3 class="table-header-title">سجل العمليات اليوم</h3>
+                                </div>
+                                <div class="table-header-actions-group">
+                                    <button class="btn animated-border-gold btn-table-options" onclick="showTableOptionsMenu()">
+                                        🛠️ خيارات الجدول
+                                    </button>
+                                    <input type="file" id="importExcelInput" accept=".xlsx, .xls, .csv" class="hidden-file-input" title="استيراد ملف إكسيل" placeholder="استيراد ملف إكسيل" aria-label="استيراد ملف إكسيل" onchange="importExcelData(event)">
+                                </div>
+                            </div>
+
+                            <!-- Refined Purple Neon Search Bar -->
+                            <div class="neon-search-container">
+                                <i class="fas fa-search search-glass-icon"></i>
+                                <input type="search" id="smartTableSearch" class="neon-search-input" placeholder="بحث..." title="بحث في العمليات" aria-label="بحث في العمليات" oninput="window.handleSearchInput ? window.handleSearchInput() : render()">
+                                <div class="filter-icon-container" onclick="showSearchModal()"
+                                    title="بحث واستعلام متقدم">
+                                    <i class="fas fa-filter"></i>
+                                </div>
+                            </div>
+                            <div class="table-scroll-container">
+                                <table id="aggTable" class="agg-table-full">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-m">م</th>
+                                            <th data-sort="timestamp" class="col-timestamp">
+                                                الوقت <span class="sort-icon">↕️</span></th>
+                                            <th data-sort="lastEditTime" class="col-editTime">
+                                                آخر تعديل <span class="sort-icon">↕️</span></th>
+                                            <th class="col-device">الجهاز</th>
+                                            <th data-sort="category" class="col-category">
+                                                الفئة <span class="sort-icon">↕️</span></th>
+                                            <th data-sort="top" class="col-top">
+                                                فوق <span class="sort-icon">↕️</span></th>
+                                            <th data-sort="bottom" class="col-bottom">
+                                                تحت <span class="sort-icon">↕️</span></th>
+                                            <th data-sort="cashSold" class="col-cashSold">
+                                                بعت كام <span class="sort-icon">↕️</span></th>
+                                            <th data-sort="total" class="col-total">
+                                                الإجمالي <span class="sort-icon">↕️</span></th>
+                                            <th data-sort="notes" class="col-notes">
+                                                <span id="tableNotesHeaderName">الملاحظات</span> <span
+                                                    class="sort-icon">↕️</span>
+                                            </th>
+                                            <th data-sort="user" class="col-user">
+                                                المستخدم <span class="sort-icon">↕️</span></th>
+                                            <th class="col-actions">إجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="12" class="table-empty-cell">
+                                                <div class="empty-state-card">
+                                                    <div class="empty-state-badge">
+                                                        <span class="empty-state-emoji">📝</span>
+                                                    </div>
+                                                    <div class="empty-state-title">لا توجد عمليات مسجلة اليوم بعد</div>
+                                                    <div class="empty-state-desc">ابدأ بتسجيل أولى معاملاتك لتبدأ الحركة المالية والإحصائيات اللحظية</div>
+                                                    <button type="button" class="empty-state-action-btn" onclick="window.focusNewTransaction()">
+                                                        <span class="empty-action-icon">➕</span>
+                                                        <span class="empty-action-text">إضافة عملية جديدة</span>
+                                                        <span class="empty-action-kbd">Enter ↵</span>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Premium Stats Bar (إحصائيات الفئات والعمليات) -->
+                            <div id="tableStats" class="premium-stats-bar">
+                                <div class="stat-item">
+                                    <div class="stat-icon-wrapper stat-icon-sky">
+                                        <i class="fa-solid fa-shapes stat-icon-shapes"></i>
+                                    </div>
+                                    <div class="stat-details">
+                                        <div class="stat-label stat-label-sky" id="lblTotalCategories">
+                                            <span>إجمالي الفئات اليوم</span>
+                                            <span class="stat-badge-sky">تأثير</span>
+                                        </div>
+                                        <div class="stat-number stat-number-sky" id="statTotalCategories">0</div>
+                                    </div>
+                                </div>
+
+                                <div class="stat-divider stat-divider-glow"></div>
+
+                                <div class="stat-item">
+                                    <div class="stat-icon-wrapper stat-icon-gold">
+                                        <i class="fa-solid fa-receipt stat-icon-receipt"></i>
+                                    </div>
+                                    <div class="stat-details">
+                                        <div class="stat-label stat-label-gold" id="lblTotalOperations">
+                                            <span>إجمالي العمليات (العدد)</span>
+                                            <span class="stat-badge-gold">سجل اليوم</span>
+                                        </div>
+                                        <div class="stat-number stat-number-gold" id="statTotalRecords">0</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- RIGHT -->
+                    <div class="right">
+                        <div class="card card-summary-spacing" id="summaryCard">
+                            <h3 class="summary-card-title">
+                                📊 ملخص مالي سريع
+                            </h3>
+                            <div class="summary">
+                                <div class="stat stat-above">
+                                    <div class="stat-header">
+                                        <div class="stat-icon">🔼</div>
+                                        <h4>إجمالي (فوق)</h4>
+                                    </div>
+                                    <p id="sumTop">0</p>
+                                </div>
+                                <div class="stat stat-below">
+                                    <div class="stat-header">
+                                        <div class="stat-icon">🔽</div>
+                                        <h4>إجمالي (تحت)</h4>
+                                    </div>
+                                    <p id="sumBottom">0</p>
+                                </div>
+                                <div class="stat stat-sales">
+                                    <div class="stat-header">
+                                        <div class="stat-icon">💰</div>
+                                        <h4>إجمالي المبيعات</h4>
+                                    </div>
+                                    <p id="salesTotal">0</p>
+                                </div>
+                                <div class="stat stat-diff" id="diffStat">
+                                    <div class="stat-header">
+                                        <div class="stat-icon">⚖️</div>
+                                        <h4>فرق اليوم</h4>
+                                    </div>
+                                    <p id="diffTotal">0</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dashboard Cash & InstaPay Chart Card (لوحة تحليلات الكاش وانستا باي) -->
+                        <div class="card card-cash-dashboard" id="cashDashboardCard">
+                            <div class="cash-dash-header">
+                                <h3 class="cash-dash-title">
+                                    📊 الرسم البياني والداشبورد (كاش 🆚 انستا باي)
+                                </h3>
+                                <span class="cash-dash-badge">توزيع الإيرادات</span>
+                            </div>
+
+                            <div class="cash-dash-row">
+                                <div class="cash-dash-card card-cash">
+                                    <div class="cash-dash-card-label label-cash">💵 النقدي (كاش)</div>
+                                    <div id="dashboardCashVal" class="cash-dash-card-val val-cash">0.00</div>
+                                </div>
+                                <div class="cash-dash-card card-insta">
+                                    <div class="cash-dash-card-label label-insta">🟣 انستا باي</div>
+                                    <div id="dashboardInstaVal" class="cash-dash-card-val val-insta">0.00</div>
+                                </div>
+                            </div>
+
+                            <div class="chart-box chart-box-donut">
+                                <canvas id="cashInstaPieChart" width="300" height="200"></canvas>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h3 class="chart-section-title">الرسوم البيانية</h3>
+                            <div class="chart-row">
+                                <div class="chart-box">
+                                    <canvas id="dailyChart" class="chart-canvas-standard" width="356" height="261"></canvas>
+                                </div>
+                            </div>
+
+                            <div class="chart-row chart-row-spaced">
+                                <div class="chart-box">
+                                    <canvas id="categoryChart" class="chart-canvas-standard" width="356" height="356"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+
+                <div class="footer-wrapper">
+                    <footer class="footer-box">
+                        <span>✨</span> حقوق © عمرو إيهاب — Bayan POS Pro 2026 — جميع الحقوق محفوظة
+                    </footer>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating PWA Install Button -->
+    <button id="pwa-install-btn" class="pwa-floating-btn" title="تثبيت التطبيق على جهازك">
+        <span>📲</span> تثبيت التطبيق
+    </button>
+
+    <input type="file" id="restoreFile" class="hidden-file-input" title="استعادة ملف النسخة الاحتياطية" placeholder="استعادة ملف النسخة الاحتياطية" aria-label="استعادة ملف النسخة الاحتياطية">
+
+    <!-- AI Chatbot Window -->
+    <div id="bayan-ai-chat" class="bayan-ai-chat-window">
+        <div class="ai-chat-header">
+            <div class="ai-chat-title">
+                <button class="btn btn-ai-back" onclick="window.toggleBayanAiChat()" title="العودة للبرنامج">
+                    ➡️ عودة للتطبيق
+                </button>
+                <div class="ai-title-group">
+                    <i class="fa-solid fa-wand-magic-sparkles ai-title-icon"></i>
+                    <strong>مساعد بيان الذكي (قسم كامل)</strong>
+                </div>
+            </div>
+            <div class="ai-chat-controls">
+                <button class="ai-control-btn btn-ai-export" onclick="window.exportAiConversationReport()" title="تصدير كشف محادثة الذكاء الاصطناعي">
+                    📥 تصدير المحادثة
+                </button>
+                <button id="ai-theme-btn" class="ai-control-btn btn-ai-theme" onclick="window.toggleAiThemeMode()" title="تبديل الوضع الفاتح / الداكن للذكاء الاصطناعي">
+                    <i class="fa-solid fa-sun ai-sun-icon"></i> <span id="ai-theme-text">الوضع الفاتح</span>
+                </button>
+                <button id="ai-resize-btn" class="ai-control-btn btn-ai-resize" onclick="window.toggleAiWindowSize()" title="تصغير / تكبير النافذة (Maximize/Minimize)">
+                    <i class="fa-solid fa-compress"></i> <span id="ai-resize-text">تصغير النافذة</span>
+                </button>
+                <button class="ai-control-btn btn-ai-clear" onclick="window.clearAiHistory()" title="مسح سجل المحادثات السابقة">
+                    🗑️ مسح السجل
+                </button>
+                <span id="ai-usage-badge" class="ai-usage-badge">♾️ غير محدود (أوفلاين)</span>
+                <button class="ai-close-btn" onclick="window.toggleBayanAiChat()" title="إغلاق النافذة">×</button>
+            </div>
+        </div>
+        <!-- Main Body Layout with Sidebar -->
+        <div class="ai-body-layout">
+            <!-- Sidebar: Quick Ready Prompts & Favorites -->
+            <div class="ai-sidebar">
+                <div class="ai-sidebar-section-title title-gold">
+                    ⭐ أسئلة سريعة ومفضلة
+                </div>
+
+                <div class="ai-sidebar-list">
+                    <button class="ai-quick-btn" onclick="window.sendBayanAiMessageText('فحص النواقص والمخزون')">
+                        🚨 فحص النواقص والمخزون
+                    </button>
+                    <button class="ai-quick-btn" onclick="window.sendBayanAiMessageText('سجل مبيعة 100 كاش')">
+                        ➕ تسجيل عملية سريعة
+                    </button>
+                    <button class="ai-quick-btn" onclick="window.sendBayanAiMessageText('مبيعات اليوم والإيرادات')">
+                        💰 مبيعات اليوم والإيرادات
+                    </button>
+                    <button class="ai-quick-btn" onclick="window.sendBayanAiMessageText('صافي الأرباح اليوم')">
+                        📈 صافي الأرباح اليوم
+                    </button>
+                    <button class="ai-quick-btn" onclick="window.sendBayanAiMessageText('ساعة الذروة واكثر وقت بيع')">
+                        ⏰ ساعة الذروة وأفضل وقت
+                    </button>
+                    <button class="ai-quick-btn" onclick="window.sendBayanAiMessageText('أعلى وأقل فاتورة ومتوسط المبيعات')">
+                        📊 أعلى وأقل فاتورة ومتوسط
+                    </button>
+                    <button class="ai-quick-btn" onclick="window.sendBayanAiMessageText('الكاش وانستا باي')">
+                        💳 الكاش وانستا باي
+                    </button>
+                    <button class="ai-quick-btn" onclick="window.sendBayanAiMessageText('الديون والحسابات الخارجية')">
+                        📋 الديون والحسابات الخارجية
+                    </button>
+                    <button class="ai-quick-btn" onclick="window.sendBayanAiMessageText('رصيد البيض والمخزون')">
+                        📦 رصيد البيض والمخزون
+                    </button>
+                    <button class="ai-quick-btn" onclick="window.sendBayanAiMessageText('مقارنة مبيعات اليوم بأمس')">
+                        ⚖️ مقارنة مبيعات اليوم بأمس
+                    </button>
+                    <button class="ai-quick-btn" onclick="window.sendBayanAiMessageText('عدد الفواتير والعمليات')">
+                        📝 عدد الفواتير والعمليات
+                    </button>
+                </div>
+
+                <div class="ai-sidebar-section-title title-sky">
+                    ⚡ أوامر النظام السريعة
+                </div>
+                <div class="ai-sidebar-list">
+                    <button class="ai-quick-btn" onclick="window.sendBayanAiMessageText('افتح الإعدادات')">
+                        ⚙️ فتح الإعدادات
+                    </button>
+                    <button class="ai-quick-btn" onclick="window.sendBayanAiMessageText('افتح الحسابات الخارجية')">
+                        💳 فتح الحسابات الخارجية
+                    </button>
+                    <button class="ai-quick-btn" onclick="window.sendBayanAiMessageText('افتح المخزون الأرصدة')">
+                        📦 فتح الأرصدة والمخزن
+                    </button>
+                    <button class="ai-quick-btn" onclick="window.sendBayanAiMessageText('اطبع التقرير اليومي')">
+                        🖨️ طباعة التقرير اليومي
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chat Content Area -->
+            <div class="ai-chat-main-area">
+                <!-- Smart Scroll Navigation Floating Button -->
+                <button id="ai-scroll-nav-btn" class="ai-scroll-nav-btn" onclick="window.toggleAiChatScroll()" title="الانتقال للأعلى / الأسفل">
+                    <i class="fa-solid fa-arrow-up" id="ai-scroll-nav-icon"></i>
+                </button>
+
+                <div id="ai-chat-messages" class="ai-chat-messages" onscroll="window.handleAiChatScroll(this)">
+                    <div class="ai-message system">
+                        أهلاً بك في مساعد بيان الذكي 🤖! اضغط على أي سؤال جاهز في القائمة الجانبية أو اكتب سؤالك مباشرة.
+                    </div>
+                </div>
+                <div class="ai-chat-input-area">
+                    <input type="text" id="ai-chat-input" class="ai-chat-input-field" placeholder="اسألني أو املني صوتياً (مثال: سجل مبيعة 200 كاش)..."
+                        title="رسالة الذكاء الاصطناعي" aria-label="رسالة الذكاء الاصطناعي"
+                        onkeydown="if(event.key === 'Enter') window.sendBayanAiMessage()">
+                    <button id="ai-mic-btn" class="ai-mic-btn" onclick="window.toggleAiVoiceDictation()" title="التحدث بالأملية الصوتية (Voice Dictation)">
+                        🎤
+                    </button>
+                    <button class="ai-send-btn" id="ai-send-btn" onclick="window.sendBayanAiMessage()">إرسال 🚀</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Modular Scripts -->
+    <script src="js/core/app-main.js?v=6.0.0"></script>
+    <script src="js/services/notifications.js"></script>
+    <script src="js/modules/inventories.js"></script>
+    <script src="js/services/cloud-sync.js"></script>
+    <script src="js/modules/pos.js?v=6.0.0"></script>
+
+    <!-- Bayan AI Engine v1 (Modular & Independent) -->
+    <script src="js/bayan-ai/utils.js"></script>
+    <script src="js/bayan-ai/database.js"></script>
+    <script src="js/bayan-ai/cache.js"></script>
+    <script src="js/bayan-ai/parser.js"></script>
+    <script src="js/bayan-ai/router.js"></script>
+    <script src="js/bayan-ai/intents.js"></script>
+    <script src="js/bayan-ai/analyzer.js"></script>
+    <script src="js/bayan-ai/responses.js"></script>
+    <script src="js/bayan-ai/suggestions.js"></script>
+    <script src="js/bayan-ai/compare.js"></script>
+    <script src="js/bayan-ai/commands.js"></script>
+    <script src="js/bayan-ai/favorites.js"></script>
+    <script src="js/bayan-ai/history.js"></script>
+    <script src="js/bayan-ai/shortcuts.js"></script>
+    <script src="js/bayan-ai/ai.js"></script>
+
+    <script src="js/core/init.js"></script>
+
+</body>
+</html>

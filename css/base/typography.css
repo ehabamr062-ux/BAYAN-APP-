@@ -1,0 +1,56 @@
+/* ============================================================
+   Bayan POS Pro — Typography & High-Precision Financial Numbers
+   css/base/typography.css (Design System 2.0)
+   ============================================================ */
+
+html,
+body {
+    font-family: 'Readex Pro', 'Tajawal', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    direction: rtl;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: inherit;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+    margin: 0;
+}
+
+/* الأرقام المالية الاحترافية ذات العرض الثابت لسهولة القراءة والتدقيق */
+.num-display,
+.metric-value,
+.card-value,
+.cell-amount,
+.stat-number,
+#sumTop,
+#sumBottom,
+#diffTotal,
+#salesTotal,
+#headerSalesTotal,
+#headerDiffTotal,
+#extOwedToMe,
+#extOwedByMe {
+    font-family: 'Inter', 'Readex Pro', -apple-system, monospace, sans-serif;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.03em;
+    font-weight: 800;
+}
+
+/* Badges & Chips */
+.badge-chip {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}

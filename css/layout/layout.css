@@ -1,0 +1,103 @@
+/* ============================================================
+   Bayan POS Pro — Luxury Layout & Screen Architecture
+   css/layout/layout.css (Design System 2.0)
+   ============================================================ */
+
+html,
+body {
+    min-height: 100vh;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow-x: hidden;
+    overflow-y: auto !important;
+    scroll-behavior: auto;
+    background: var(--bg-canvas);
+}
+
+body {
+    background: var(--bg-canvas);
+    color: var(--text-primary);
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+#app, .container {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+}
+
+.stage {
+    max-width: 100% !important;
+    width: 100% !important;
+    min-height: 100vh;
+    margin: 0 !important;
+    padding: 16px 24px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    position: relative;
+    box-sizing: border-box !important;
+}
+
+.stage-inner {
+    width: 100%;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+/* Privacy Mode (Eye Masking) - Refined Frosted Blur */
+body.privacy-mode-enabled .metric-value,
+body.privacy-mode-enabled .cell-amount,
+body.privacy-mode-enabled .card-value,
+body.privacy-mode-enabled #statNet,
+body.privacy-mode-enabled #statSales,
+body.privacy-mode-enabled #statCash,
+body.privacy-mode-enabled #statExpenses,
+body.privacy-mode-enabled #statInsta,
+body.privacy-mode-enabled #statOwedToMe,
+body.privacy-mode-enabled #statOwedByMe {
+    filter: blur(8px) !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
+    transition: filter 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    opacity: 0.7;
+}
+
+body.privacy-mode-enabled .metric-value:hover,
+body.privacy-mode-enabled .cell-amount:hover,
+body.privacy-mode-enabled .card-value:hover,
+body.privacy-mode-enabled #statNet:hover,
+body.privacy-mode-enabled #statSales:hover,
+body.privacy-mode-enabled #statCash:hover,
+body.privacy-mode-enabled #statExpenses:hover,
+body.privacy-mode-enabled #statInsta:hover,
+body.privacy-mode-enabled #statOwedToMe:hover,
+body.privacy-mode-enabled #statOwedByMe:hover {
+    filter: none !important;
+    opacity: 1;
+}
+
+/* Force Desktop / Mobile Modes */
+body.force-desktop {
+    min-width: 1200px !important;
+    overflow-x: auto !important;
+}
+
+@media (max-width: 768px) {
+    .stage {
+        padding: 10px 12px !important;
+    }
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}

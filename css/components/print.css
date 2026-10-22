@@ -1,0 +1,314 @@
+/* ============================================================
+   Bayan POS Pro — Print & PDF Engine Styles (A4 / 80mm)
+   css/components/print.css
+   ============================================================ */
+
+/* 1. Hide print containers from regular browser screen */
+@media screen {
+    #printArea,
+    #thermalPrintArea {
+        display: none !important;
+    }
+}
+
+/* 2. Print & PDF Export Media Rules */
+@media print {
+    /* Set page margins for standard A4 document printing */
+    @page {
+        size: A4 portrait;
+        margin: 10mm 10mm 12mm 10mm;
+    }
+
+    /* Force color accuracy for background gradients and badges */
+    html, body {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        font-family: 'El Messiri', 'Cairo', 'Segoe UI', Tahoma, sans-serif !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        min-height: 0 !important;
+        height: auto !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* 🚨 ABSOLUTE ISOLATION: Hide the entire application UI during print */
+    .stage,
+    .stage-inner,
+    #app,
+    .container,
+    .layout,
+    .main-content,
+    .metrics-dashboard,
+    .app-header,
+    header,
+    footer,
+    nav,
+    aside,
+    .sidebar,
+    .navbar,
+    .btn,
+    .calculator,
+    .settings-modal,
+    .chart-container,
+    .modal-overlay,
+    .ai-modal-overlay,
+    #team-login-overlay,
+    .controls,
+    .quick-date-filters-container,
+    .neon-search-container,
+    .bayan-ai-chat-window,
+    #announcementBar,
+    #bayanAiFab,
+    .ai-quick-btn,
+    .action-tile,
+    .header-actions {
+        display: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        overflow: hidden !important;
+    }
+
+    body > *:not(#printArea):not(#thermalPrintArea) {
+        display: none !important;
+    }
+
+    /* 📄 A4 PDF Print Area Container */
+    #printArea {
+        display: block !important;
+        visibility: visible !important;
+        position: relative !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 auto !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+        color: #0f172a !important;
+        box-shadow: none !important;
+        border: none !important;
+        font-family: 'El Messiri', 'Cairo', 'Segoe UI', Tahoma, sans-serif !important;
+    }
+
+    #printArea,
+    #printArea * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* Clean Table Pagination */
+    #printArea table {
+        width: 100% !important;
+        border-collapse: separate !important;
+        border-spacing: 0 !important;
+        page-break-inside: auto !important;
+        break-inside: auto !important;
+        color: #1e293b !important;
+    }
+
+    #printArea thead {
+        display: table-header-group !important;
+    }
+
+    #printArea tfoot {
+        display: table-footer-group !important;
+    }
+
+    #printArea tr {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    #printArea th,
+    #printArea td {
+        font-size: 11pt !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* Prevent awkward card & section breaks */
+    .print-summary-box,
+    .print-header-banner,
+    .print-info-grid,
+    .print-footer-section {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    h1, h2, h3, h4, h5 {
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+    }
+
+    /* Thermal receipt mode when specifically active */
+    body.is-printing-thermal {
+        width: 80mm !important;
+        max-width: 80mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+    }
+
+    body.is-printing-thermal #printArea {
+        display: none !important;
+    }
+
+    body.is-printing-thermal #thermalPrintArea {
+        display: block !important;
+        visibility: visible !important;
+        width: 76mm !important;
+        max-width: 76mm !important;
+        margin: 0 auto !important;
+        padding: 2mm 0 !important;
+        background: #ffffff !important;
+    }
+}
+
+/* 3. Thermal Receipt Styling (80mm POS Roll Printers) */
+.thermal-receipt {
+    width: 76mm;
+    max-width: 76mm;
+    margin: 0 auto;
+    padding: 4px 5px;
+    background: #ffffff;
+    color: #000000;
+    font-family: 'El Messiri', 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;
+    font-size: 11.5px;
+    font-weight: 600;
+    line-height: 1.35;
+    direction: rtl;
+    text-align: right;
+    box-sizing: border-box;
+}
+
+.thermal-receipt * {
+    color: #000000 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+}
+
+.thermal-receipt h1 {
+    font-size: 16px;
+    font-weight: 900;
+    text-align: center;
+    margin: 0 0 3px 0;
+    line-height: 1.2;
+}
+
+.thermal-receipt .receipt-subtitle {
+    font-size: 12px;
+    font-weight: 800;
+    text-align: center;
+    margin: 2px 0 6px 0;
+}
+
+.thermal-divider-dashed {
+    border-bottom: 1.5px dashed #000000;
+    margin: 5px 0;
+}
+
+.thermal-divider-solid {
+    border-bottom: 1.5px solid #000000;
+    margin: 5px 0;
+}
+
+.thermal-divider-double {
+    border-bottom: 3px double #000000;
+    margin: 6px 0;
+}
+
+.receipt-header-grid {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10.5px;
+    line-height: 1.35;
+    margin-bottom: 3px;
+}
+
+.receipt-header-grid .col-right {
+    text-align: right;
+}
+
+.receipt-header-grid .col-left {
+    text-align: left;
+    direction: ltr;
+}
+
+.receipt-header-grid div {
+    margin-bottom: 2px;
+}
+
+.thermal-receipt table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10.5px;
+    border: 1px solid #000000;
+    margin: 6px 0;
+    table-layout: fixed;
+}
+
+.thermal-receipt th,
+.thermal-receipt td {
+    border: 1px solid #000000;
+    padding: 3px 2px;
+    text-align: center;
+    vertical-align: middle;
+    word-break: break-word;
+}
+
+.thermal-receipt th {
+    background-color: #f1f1f1;
+    font-weight: 800;
+    border-bottom: 1.5px solid #000000;
+}
+
+.thermal-totals-box {
+    border: 1.5px solid #000000;
+    border-radius: 4px;
+    padding: 5px 7px;
+    margin: 6px 0;
+    background: #ffffff;
+}
+
+.thermal-total-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    margin-bottom: 2px;
+}
+
+.thermal-total-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14.5px;
+    font-weight: 900;
+    border-top: 1.5px solid #000000;
+    padding-top: 4px;
+    margin-top: 4px;
+}
+
+.thermal-qr-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 6px 0;
+}
+
+.thermal-qr-wrapper canvas,
+.thermal-qr-wrapper img {
+    display: block;
+    margin: 0 auto;
+}
+
+.thermal-footer {
+    text-align: center;
+    font-size: 10px;
+    font-weight: 700;
+    margin-top: 6px;
+    line-height: 1.35;
+}

@@ -1,0 +1,57 @@
+/* Print Styles */
+        @media print {
+            @page {
+                size: A4;
+                margin: 10mm;
+            }
+
+            html,
+            body {
+                height: auto !important;
+                min-height: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                background-color: white !important;
+                overflow: visible !important;
+                display: block !important;
+            }
+
+            body>*:not(#printArea) {
+                display: none !important;
+            }
+
+            #printArea {
+                display: block !important;
+                position: relative;
+                width: 100%;
+                height: auto !important;
+                margin: 0;
+                padding: 0;
+                background: white;
+                color: black;
+                direction: rtl;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                overflow: visible !important;
+            }
+
+            #printArea * {
+                visibility: visible;
+                color: black !important;
+                box-shadow: none !important;
+                text-shadow: none !important;
+            }
+
+            #printArea table {
+                width: 100% !important;
+                border-collapse: collapse;
+                font-size: 12px;
+                table-layout: fixed;
+            }
+
+            #printArea th,
+            #printArea td {
+                padding: 6px 8px;
+                border: 1px solid #ddd;
+                word-wrap: break-word;
+            }
+        }
