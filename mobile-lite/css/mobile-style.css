@@ -1372,6 +1372,98 @@ body.light-mode select.select-category-field option {
     align-items: center;
     justify-content: center;
     gap: 8px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-login-serial:active {
+    transform: scale(0.98);
+}
+
+/* Quick QR Actions Grid on Login Screen */
+.login-qr-actions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+    margin-top: 4px;
+}
+
+.btn-login-qr-camera, .btn-login-qr-gallery {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 8px;
+    border-radius: var(--radius-md);
+    font-size: 12.5px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s ease;
+    text-align: center;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.btn-login-qr-camera {
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.18), rgba(37, 99, 235, 0.25));
+    border: 1.5px solid rgba(56, 189, 248, 0.5);
+    color: #38bdf8;
+    box-shadow: 0 4px 15px rgba(56, 189, 248, 0.15);
+}
+
+.btn-login-qr-camera:active {
+    transform: scale(0.96);
+    background: rgba(56, 189, 248, 0.3);
+}
+
+.btn-login-qr-gallery {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.18), rgba(124, 58, 237, 0.25));
+    border: 1.5px solid rgba(168, 85, 247, 0.5);
+    color: #c084fc;
+    box-shadow: 0 4px 15px rgba(168, 85, 247, 0.15);
+    margin: 0;
+}
+
+.btn-login-qr-gallery:active {
+    transform: scale(0.96);
+    background: rgba(168, 85, 247, 0.3);
+}
+
+.login-cam-box {
+    width: 100%;
+    margin-top: 6px;
+    margin-bottom: 4px;
+    animation: fadeInCam 0.25s ease-out;
+}
+
+@keyframes fadeInCam {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.login-divider-or {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin: 6px 0 2px 0;
+    color: var(--text-muted);
+    font-size: 11.5px;
+    font-weight: 700;
+}
+
+.login-divider-or::before,
+.login-divider-or::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--border-glass);
+}
+
+.login-divider-or span {
+    padding: 0 12px;
 }
 
 /* Bottom Navigation Bar */
@@ -1920,6 +2012,23 @@ body.light-mode .serial-code-input {
     border-color: #3b82f6;
 }
 
+body.light-mode .btn-login-qr-camera {
+    background: #e0f2fe;
+    border-color: #38bdf8;
+    color: #0284c7;
+}
+
+body.light-mode .btn-login-qr-gallery {
+    background: #f3e8ff;
+    border-color: #c084fc;
+    color: #7e22ce;
+}
+
+body.light-mode .login-divider-or::before,
+body.light-mode .login-divider-or::after {
+    background: rgba(0, 0, 0, 0.1);
+}
+
 body.light-mode .bottom-nav-bar {
     background: rgba(255, 255, 255, 0.96) !important;
     border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
@@ -2128,6 +2237,25 @@ body.light-mode .bg-aura-2 {
     justify-content: center;
     overflow: hidden;
     position: relative;
+}
+
+.scanner-laser-bar {
+    position: absolute;
+    top: 10%;
+    left: 8%;
+    right: 8%;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #38bdf8, #60a5fa, transparent);
+    box-shadow: 0 0 12px #38bdf8, 0 0 20px #3b82f6;
+    border-radius: 3px;
+    animation: laserScanMove 1.8s infinite ease-in-out alternate;
+    z-index: 5;
+    pointer-events: none;
+}
+
+@keyframes laserScanMove {
+    0% { top: 8%; opacity: 0.95; }
+    100% { top: 88%; opacity: 0.95; }
 }
 
 .camera-placeholder {

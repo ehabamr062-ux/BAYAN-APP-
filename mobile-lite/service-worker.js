@@ -10,6 +10,7 @@ const ASSETS_TO_CACHE = [
     './manifest.json',
     './css/mobile-style.css',
     './js/mobile-app.js',
+    './js/jsqr.min.js',
     './icons/icon-192x192.png',
     './icons/icon-512x512.png',
     'https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js',

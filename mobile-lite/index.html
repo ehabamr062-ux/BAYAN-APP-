@@ -298,11 +298,47 @@
             </div>
             <div>
                 <div class="login-title">بيان موبايل لايت</div>
-                <div class="login-desc">أدخل كود السيريال الخاص بمحلك للربط السحابي ومتابعة الحسابات لحظياً من هاتفك</div>
+                <div class="login-desc">اربط هاتفك ببيانات محلك عبر مسح كود QR أو إدخال السيريال لمتابعة الحسابات لحظياً</div>
+            </div>
+
+            <!-- Quick QR Camera & Gallery Options -->
+            <div class="login-qr-actions-grid">
+                <button type="button" class="btn-login-qr-camera" onclick="window.toggleLoginCameraScanner()">
+                    <i class="fa-solid fa-camera"></i>
+                    <span id="login-camera-btn-text">مسح كود QR بالكاميرا 📷</span>
+                </button>
+                <label for="login-qr-file-input" class="btn-login-qr-gallery">
+                    <i class="fa-solid fa-image"></i>
+                    <span>صورة من المعرض 🖼️</span>
+                </label>
+                <input type="file" id="login-qr-file-input" accept="image/*" style="display: none;" onchange="window.handleQrFileUpload(event)">
+            </div>
+
+            <!-- Collapsible Camera Scanner Viewport -->
+            <div id="login-camera-scanner-container" class="camera-scanner-box login-cam-box" style="display: none;">
+                <div class="camera-scanner-header">
+                    <span><i class="fa-solid fa-qrcode"></i> وجّه الكاميرا نحو كود الـ QR على الشاشة</span>
+                    <button type="button" class="camera-close-mini" onclick="window.toggleLoginCameraScanner()">×</button>
+                </div>
+                <div class="qr-video-viewport">
+                    <video id="login-qr-camera-stream" autoplay playsinline style="width: 100%; border-radius: 12px; display: none;"></video>
+                    <div id="login-scanner-laser-line" class="scanner-laser-bar" style="display: none;"></div>
+                    <div id="login-qr-camera-placeholder" class="camera-placeholder">
+                        <i class="fa-solid fa-qrcode fa-fade" style="font-size: 38px; color: #38bdf8;"></i>
+                        <div style="font-size: 12px; margin-top: 6px;">جاري فتح الكاميرا المباشرة...</div>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #38bdf8; margin-top: 6px; font-weight: 700;">
+                    ⚡ سيتم الدخول تلقائياً فور قراءة الكود بدون أي نقرات
+                </div>
+            </div>
+
+            <div class="login-divider-or">
+                <span>أو إدخال الكود يدوياً</span>
             </div>
 
             <div class="serial-input-wrapper">
-                <input type="text" id="serial-code-input" class="serial-code-input" placeholder="BYN-XXXX-XXXX" maxlength="20" autofocus>
+                <input type="text" id="serial-code-input" class="serial-code-input" placeholder="BYN-XXXX-XXXX" maxlength="24">
             </div>
 
             <button class="btn-login-serial" onclick="window.submitSerialLogin()">
@@ -311,7 +347,7 @@
             </button>
 
             <div style="font-size: 11px; color: var(--text-muted); line-height: 1.5;">
-                * كود السيريال هو الكود المخصص لحسابك في تطبيق بيان على كمبيوتر المحل.
+                * كود السيريال هو الكود المخصص لحسابك في برنامج بيان على كمبيوتر المحل (صفحة الإعدادات أو زر كود السيريال).
             </div>
         </div>
     </div>
@@ -466,6 +502,7 @@
                             </div>
                             <div id="qr-reader-video-wrap" class="qr-video-viewport">
                                 <video id="qr-camera-stream" autoplay playsinline style="width: 100%; border-radius: 12px; display: none;"></video>
+                                <div id="settings-scanner-laser-line" class="scanner-laser-bar" style="display: none;"></div>
                                 <div id="qr-camera-placeholder" class="camera-placeholder">
                                     <i class="fa-solid fa-qrcode fa-fade" style="font-size: 40px; color: #38bdf8;"></i>
                                     <div style="font-size: 12px; margin-top: 6px;">جاري تشغيل الكاميرا المباشرة...</div>
@@ -475,7 +512,7 @@
                                 <label for="qr-file-input" class="qr-file-label">
                                     <i class="fa-solid fa-image"></i> أو اختر صورة QR من المعرض
                                 </label>
-                                <input type="file" id="qr-file-input" accept="image/*" capture="environment" style="display: none;" onchange="window.handleQrFileUpload(event)">
+                                <input type="file" id="qr-file-input" accept="image/*" style="display: none;" onchange="window.handleQrFileUpload(event)">
                             </div>
                             <div id="scanned-code-result" class="scanned-result-pill" style="display: none;"></div>
                         </div>
@@ -706,6 +743,9 @@
     <!-- Firebase SDK (Compat) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <!-- QR Code Scanner Engine (Offline Fallback) -->
+    <script src="js/jsqr.min.js"></script>
 
     <!-- Mobile Application Script -->
     <script src="js/mobile-app.js?v=1.0.1"></script>

@@ -1777,6 +1777,8 @@ window.checkMobileUpdateManual = function() {
 // ============================================================
 let cameraStream = null;
 let qrScanInterval = null;
+let loginCameraStream = null;
+let loginQrInterval = null;
 
 window.openSettingsModal = function() {
     const modal = document.getElementById('settings-modal');
@@ -1848,12 +1850,254 @@ window.copySerialCode = function() {
     }
 };
 
+// Helper: Extract clean serial string from any scanned raw format (URL, JSON, raw)
+function extractSerialFromScannedText(rawText) {
+    if (!rawText) return '';
+    let text = String(rawText).trim();
+
+    // 1. Check if it's a URL with ?serial= or &serial=
+    try {
+        if (text.includes('serial=')) {
+            const match = text.match(/[?&]serial=([^&#\s]+)/i);
+            if (match && match[1]) {
+                text = decodeURIComponent(match[1]);
+            }
+        }
+    } catch (e) {}
+
+    // 2. Check if it's a JSON string
+    if (text.startsWith('{') && text.endsWith('}')) {
+        try {
+            const parsed = JSON.parse(text);
+            if (parsed.serial) text = parsed.serial;
+            else if (parsed.code) text = parsed.code;
+            else if (parsed.id) text = parsed.id;
+        } catch (e) {}
+    }
+
+    // 3. Match BYN pattern if present (e.g. BYN-XXXX-XXXX)
+    const bynMatch = text.match(/BYN-[A-Z0-9_-]+/i);
+    if (bynMatch) {
+        return bynMatch[0].toUpperCase();
+    }
+
+    // 4. Return clean uppercase text
+    return text.replace(/[\r\n\t]/g, '').trim().toUpperCase();
+}
+
+// Universal QR Decoder (uses native BarcodeDetector if available, with jsQR canvas fallback)
+async function decodeQrFromSource(sourceElement) {
+    if (!sourceElement) return null;
+
+    // 1. Try native BarcodeDetector (fast, hardware accelerated)
+    if ('BarcodeDetector' in window) {
+        try {
+            const detector = new BarcodeDetector({ formats: ['qr_code', 'code_128', 'ean_13', 'code_39'] });
+            const barcodes = await detector.detect(sourceElement);
+            if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
+                return barcodes[0].rawValue.trim();
+            }
+        } catch (e) {
+            // Frame skip or format error, fallback to jsQR below
+        }
+    }
+
+    // 2. Fallback to jsQR via Canvas
+    if (typeof jsQR !== 'undefined') {
+        try {
+            const width = sourceElement.videoWidth || sourceElement.naturalWidth || sourceElement.width || 0;
+            const height = sourceElement.videoHeight || sourceElement.naturalHeight || sourceElement.height || 0;
+            if (width > 0 && height > 0) {
+                const canvas = document.createElement('canvas');
+                const maxDim = 800;
+                let scale = 1;
+                if (width > maxDim || height > maxDim) {
+                    scale = maxDim / Math.max(width, height);
+                }
+                canvas.width = Math.floor(width * scale);
+                canvas.height = Math.floor(height * scale);
+                const ctx = canvas.getContext('2d', { willReadFrequently: true });
+                ctx.drawImage(sourceElement, 0, 0, canvas.width, canvas.height);
+                const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+                let qr = jsQR(imgData.data, imgData.width, imgData.height, {
+                    inversionAttempts: 'dontInvert'
+                });
+                if (qr && qr.data) return qr.data.trim();
+
+                qr = jsQR(imgData.data, imgData.width, imgData.height, {
+                    inversionAttempts: 'onlyInvert'
+                });
+                if (qr && qr.data) return qr.data.trim();
+            }
+        } catch (e) {
+            console.warn('jsQR decode note:', e);
+        }
+    }
+
+    return null;
+}
+
+// Master Handler when ANY QR code is detected:
+// STOPS CAMERAS AND ENTERS / LOGS IN IMMEDIATELY! ("يدخلني على طول")
+function handleDetectedCode(code) {
+    if (!code) return;
+
+    const cleaned = extractSerialFromScannedText(code);
+    if (!cleaned) {
+        showToast('⚠️ تم مسح الكود ولكن لم يتم العثور على سيريال صالح', 'warning');
+        return;
+    }
+
+    // Stop all active camera feeds immediately
+    window.stopAllCameraStreams();
+
+    // Haptic vibration feedback if supported
+    if (navigator.vibrate) {
+        try { navigator.vibrate([50, 50, 100]); } catch (e) {}
+    }
+
+    // Save Serial & Log In Immediately
+    localStorage.setItem('app_auth_serial', cleaned);
+    window.MobileState.serial = cleaned;
+
+    // 1. Hide Login Screen View
+    const loginModal = document.getElementById('serial-login-view');
+    if (loginModal) {
+        loginModal.style.display = 'none';
+    }
+
+    // 2. Close Settings Modal if open
+    const settingsModal = document.getElementById('settings-modal');
+    if (settingsModal) {
+        settingsModal.classList.remove('active');
+    }
+
+    // 3. Update UI Badges & Inputs
+    const serialEl = document.getElementById('settings-serial-code-val');
+    const badge = document.getElementById('serial-display-badge');
+    const input = document.getElementById('serial-code-input');
+    if (serialEl) serialEl.textContent = cleaned;
+    if (badge) badge.textContent = cleaned;
+    if (input) input.value = cleaned;
+
+    const resultBox = document.getElementById('scanned-code-result');
+    if (resultBox) {
+        resultBox.style.display = 'block';
+        resultBox.innerHTML = `<div>✅ تم التعرف والدخول بالسيريال: <strong style="color: #38bdf8;">${escapeHtml(cleaned)}</strong></div>`;
+    }
+
+    // 4. Instant Feedback Toast
+    showToast(`⚡ تم التعرف والدخول الفوري بنجاح! السيريال: ${cleaned}`, 'success');
+
+    // 5. Trigger live cloud sync & date records
+    startCloudSync();
+    loadDateRecords();
+}
+
+window.applyScannedSerial = function(newSerial) {
+    if (!newSerial) return;
+    handleDetectedCode(newSerial);
+};
+
+// --- First-Time Login Screen Camera Scanner ---
+window.toggleLoginCameraScanner = function() {
+    const box = document.getElementById('login-camera-scanner-container');
+    const video = document.getElementById('login-qr-camera-stream');
+    const placeholder = document.getElementById('login-qr-camera-placeholder');
+    const btnText = document.getElementById('login-camera-btn-text');
+    const laser = document.getElementById('login-scanner-laser-line');
+    if (!box) return;
+
+    const isClosed = box.style.display === 'none' || !box.style.display;
+    if (isClosed) {
+        box.style.display = 'block';
+        if (btnText) btnText.textContent = 'إغلاق الكاميرا ✕';
+
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({
+                video: { facingMode: { ideal: 'environment' } }
+            }).then(stream => {
+                loginCameraStream = stream;
+                if (video) {
+                    video.srcObject = stream;
+                    video.style.display = 'block';
+                    video.setAttribute('playsinline', 'true');
+                    video.play().catch(e => console.warn(e));
+                }
+                if (placeholder) placeholder.style.display = 'none';
+                if (laser) laser.style.display = 'block';
+
+                loginQrInterval = setInterval(async () => {
+                    if (!video || video.readyState < 2) return;
+                    const detectedRaw = await decodeQrFromSource(video);
+                    if (detectedRaw) {
+                        handleDetectedCode(detectedRaw);
+                    }
+                }, 350);
+            }).catch(err => {
+                console.warn('Login camera error:', err);
+                if (placeholder) {
+                    placeholder.innerHTML = `
+                        <div style="font-size: 13px; color: #ef4444; padding: 10px; line-height: 1.5;">
+                            ⚠️ تعذر تشغيل الكاميرا (يرجى السماح بصلاحية الكاميرا في المتصفح)، أو استخدم زر "صورة من المعرض".
+                        </div>
+                    `;
+                }
+            });
+        } else {
+            if (placeholder) {
+                placeholder.innerHTML = `
+                    <div style="font-size: 13px; color: #ef4444; padding: 10px;">
+                        ⚠️ جهازك لا يدعم فتح الكاميرا من المتصفح، يمكنك اختيار صورة من المعرض أو إدخال الكود يدوياً.
+                    </div>
+                `;
+            }
+        }
+    } else {
+        window.stopLoginCameraStream();
+    }
+};
+
+window.stopLoginCameraStream = function() {
+    if (loginQrInterval) {
+        clearInterval(loginQrInterval);
+        loginQrInterval = null;
+    }
+    if (loginCameraStream) {
+        loginCameraStream.getTracks().forEach(track => track.stop());
+        loginCameraStream = null;
+    }
+    const box = document.getElementById('login-camera-scanner-container');
+    const video = document.getElementById('login-qr-camera-stream');
+    const placeholder = document.getElementById('login-qr-camera-placeholder');
+    const btnText = document.getElementById('login-camera-btn-text');
+    const laser = document.getElementById('login-scanner-laser-line');
+
+    if (video) {
+        video.srcObject = null;
+        video.style.display = 'none';
+    }
+    if (laser) laser.style.display = 'none';
+    if (placeholder) {
+        placeholder.style.display = 'flex';
+        placeholder.innerHTML = `
+            <i class="fa-solid fa-qrcode fa-fade" style="font-size: 38px; color: #38bdf8;"></i>
+            <div style="font-size: 12px; margin-top: 6px;">جاري فتح الكاميرا المباشرة...</div>
+        `;
+    }
+    if (box) box.style.display = 'none';
+    if (btnText) btnText.textContent = 'مسح كود QR بالكاميرا 📷';
+};
+
+// --- Settings Modal Camera Scanner ---
 window.toggleCameraScanner = function() {
     const box = document.getElementById('camera-scanner-container');
     const video = document.getElementById('qr-camera-stream');
     const placeholder = document.getElementById('qr-camera-placeholder');
     const btnLabel = document.getElementById('camera-btn-label');
     const resultBox = document.getElementById('scanned-code-result');
+    const laser = document.getElementById('settings-scanner-laser-line');
     if (!box) return;
 
     const isClosed = box.style.display === 'none' || !box.style.display;
@@ -1874,33 +2118,21 @@ window.toggleCameraScanner = function() {
                     video.play().catch(e => console.warn(e));
                 }
                 if (placeholder) placeholder.style.display = 'none';
+                if (laser) laser.style.display = 'block';
 
-                // Realtime Barcode Detection if supported
-                if ('BarcodeDetector' in window) {
-                    try {
-                        const detector = new BarcodeDetector({ formats: ['qr_code', 'code_128', 'ean_13'] });
-                        qrScanInterval = setInterval(async () => {
-                            if (!video || video.readyState < 2) return;
-                            try {
-                                const barcodes = await detector.detect(video);
-                                if (barcodes && barcodes.length > 0) {
-                                    const detectedRaw = barcodes[0].rawValue.trim();
-                                    handleDetectedCode(detectedRaw);
-                                }
-                            } catch (err) {
-                                // Frame decode skip
-                            }
-                        }, 400);
-                    } catch (e) {
-                        console.warn('BarcodeDetector note:', e);
+                qrScanInterval = setInterval(async () => {
+                    if (!video || video.readyState < 2) return;
+                    const detectedRaw = await decodeQrFromSource(video);
+                    if (detectedRaw) {
+                        handleDetectedCode(detectedRaw);
                     }
-                }
+                }, 350);
             }).catch(err => {
-                console.warn('Camera stream error:', err);
+                console.warn('Settings camera stream error:', err);
                 if (placeholder) {
                     placeholder.innerHTML = `
                         <div style="font-size: 13px; color: #ef4444; padding: 10px; line-height: 1.5;">
-                            ⚠️ تعذر فتح الكاميرا المباشرة (تأكد من إذن الكاميرا للمتصفح)، يمكنك استخدام زر اختيار صورة QR أدناه.
+                            ⚠️ تعذر فتح الكاميرا المباشرة، يمكنك استخدام زر اختيار صورة QR أدناه.
                         </div>
                     `;
                 }
@@ -1909,7 +2141,7 @@ window.toggleCameraScanner = function() {
             if (placeholder) {
                 placeholder.innerHTML = `
                     <div style="font-size: 13px; color: #ef4444; padding: 10px;">
-                        ⚠️ جهازك لا يدعم فتح الكاميرا المباشرة من المتصفح. استخدم زر اختيار صورة QR.
+                        ⚠️ جهازك لا يدعم فتح الكاميرا المباشرة. استخدم زر اختيار صورة QR.
                     </div>
                 `;
             }
@@ -1932,11 +2164,13 @@ window.stopCameraStream = function() {
     const video = document.getElementById('qr-camera-stream');
     const placeholder = document.getElementById('qr-camera-placeholder');
     const btnLabel = document.getElementById('camera-btn-label');
+    const laser = document.getElementById('settings-scanner-laser-line');
 
     if (video) {
         video.srcObject = null;
         video.style.display = 'none';
     }
+    if (laser) laser.style.display = 'none';
     if (placeholder) {
         placeholder.style.display = 'flex';
         placeholder.innerHTML = `
@@ -1948,70 +2182,49 @@ window.stopCameraStream = function() {
     if (btnLabel) btnLabel.textContent = 'مسح QR بالكاميرا 📷';
 };
 
-function handleDetectedCode(code) {
-    if (!code) return;
+window.stopAllCameraStreams = function() {
     window.stopCameraStream();
-    const resultBox = document.getElementById('scanned-code-result');
-    const cleaned = code.trim().toUpperCase();
-    if (resultBox) {
-        resultBox.style.display = 'block';
-        resultBox.innerHTML = `
-            <div>تم مسح الكود بنجاح: <strong style="color: #38bdf8;">${cleaned}</strong></div>
-            <div style="margin-top: 8px; display: flex; gap: 8px; justify-content: center;">
-                <button type="button" class="btn-scan-apply" onclick="window.applyScannedSerial('${cleaned}')">
-                    اعتماد هذا الكود للربط السحابي 🔗
-                </button>
-            </div>
-        `;
-    }
-    showToast(`📸 تم مسح الكود: ${cleaned}`, 'success');
-}
-
-window.applyScannedSerial = function(newSerial) {
-    if (!newSerial) return;
-    localStorage.setItem('app_auth_serial', newSerial);
-    window.MobileState.serial = newSerial;
-    const serialEl = document.getElementById('settings-serial-code-val');
-    const badge = document.getElementById('serial-display-badge');
-    if (serialEl) serialEl.textContent = newSerial;
-    if (badge) badge.textContent = newSerial;
-    showToast(`✅ تم ربط الحساب بالسيريال الجديد: ${newSerial}`, 'success');
-    window.closeSettingsModal();
-    startCloudSync();
-    loadDateRecords();
+    window.stopLoginCameraStream();
 };
 
+// --- Universal Gallery / File Upload QR Scanner (Supports Both Screens) ---
 window.handleQrFileUpload = async function(event) {
     const file = event.target.files && event.target.files[0];
     if (!file) return;
-    showToast('⏳ جاري فحص صورة الـ QR...', 'info');
+    showToast('⏳ جاري فحص وتحليل صورة الـ QR...', 'info');
 
-    if ('BarcodeDetector' in window) {
-        try {
-            const img = new Image();
-            img.src = URL.createObjectURL(file);
-            await img.decode();
-            const detector = new BarcodeDetector({ formats: ['qr_code', 'code_128', 'ean_13'] });
-            const barcodes = await detector.detect(img);
-            if (barcodes && barcodes.length > 0) {
-                handleDetectedCode(barcodes[0].rawValue);
-                return;
+    try {
+        const img = new Image();
+        const objUrl = URL.createObjectURL(file);
+        img.src = objUrl;
+
+        img.onload = async () => {
+            try {
+                const detected = await decodeQrFromSource(img);
+                URL.revokeObjectURL(objUrl);
+                if (detected) {
+                    handleDetectedCode(detected);
+                } else {
+                    showToast('⚠️ تعذر العثور على كود QR واضح بالصورة، يرجى تجربة صورة أوضح أو إدخال الكود يدوياً', 'warning');
+                }
+            } catch (err) {
+                console.warn('Decode error:', err);
+                URL.revokeObjectURL(objUrl);
+                showToast('⚠️ تعذر قراءة الباركود من الصورة', 'warning');
             }
-        } catch (e) {
-            console.warn('Image detection note:', e);
-        }
+        };
+
+        img.onerror = () => {
+            URL.revokeObjectURL(objUrl);
+            showToast('⚠️ تعذر تحميل ملف الصورة المحدد', 'error');
+        };
+    } catch (e) {
+        console.error('File read error:', e);
+        showToast('⚠️ حدث خطأ أثناء قراءة ملف الصورة', 'error');
     }
 
-    const resultBox = document.getElementById('scanned-code-result');
-    if (resultBox) {
-        resultBox.style.display = 'block';
-        resultBox.innerHTML = `
-            <div>تم اختيار الصورة: <strong>${file.name}</strong></div>
-            <div style="font-size: 11px; margin-top: 4px; color: var(--text-muted);">
-                إذا لم يتم فك التشفير تلقائياً، يمكنك إدخال الكود يدوياً عبر زر تغيير السيريال.
-            </div>
-        `;
-    }
+    // Reset input value so the same image can be reselected if needed
+    try { event.target.value = ''; } catch (e) {}
 };
 
 window.setThemeExplicit = function(mode) {
