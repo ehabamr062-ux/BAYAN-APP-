@@ -2408,30 +2408,42 @@
             // totals - Recalculate from raw records for accuracy
             const totalTop = records.filter(r => r.category !== 'مبيعات').reduce((s, a) => s + Number(a.top || 0), 0);
             const totalBottom = records.filter(r => r.category !== 'مبيعات').reduce((s, a) => s + Number(a.bottom || 0), 0);
-            // صافي وفرق اليوم الصحيح: إجمالي المبيعات ناقص المصروفات/المنصرف من الدرج (تحت)
-            // خانة (فوق) مخصصة فقط لعرض إجمالي (فوق) للعلم والمتابعة ولا تدخل في خصم أو زيادة درج النقدية
-            const netDifference = salesTotal - totalBottom;
+            // صافي وفرق اليوم الصحيح: إجمالي المنصرف من الدرج (تحت) ناقص إجمالي المبيعات
+            // إذا كان المنصرف من الدرج أكبر من المبيعات فهذا يعني زيادة وفائض نقدي بالدرج (+)
+            // وإذا كانت المبيعات أكبر من المنصرف من الدرج فهذا يعني عجز نقدي بالدرج (-)
+            const netDifference = totalBottom - salesTotal;
 
             sumTopEl.textContent = formatNum(totalTop);
             sumBottomEl.textContent = formatNum(totalBottom);
             salesTotalEl.textContent = formatNum(salesTotal);
-            diffTotalEl.textContent = formatNum(netDifference);
+            const diffDisplay = (netDifference > 0 ? '+' : '') + formatNum(netDifference);
+            diffTotalEl.textContent = diffDisplay;
             headerSalesTotalEl.textContent = formatNum(salesTotal);
-            headerDiffTotalEl.textContent = formatNum(netDifference);
+            headerDiffTotalEl.textContent = diffDisplay;
             $('headerOperationsCount').textContent = records.length;
 
             updateUnpaidInvoicesTotal();
             renderInventoriesHeader(); // Force update egg balance on every render
             const diffValue = netDifference;
             const diffStat = $('diffStat');
-            diffStat.classList.remove('positive', 'negative');
+            if (diffStat) {
+                diffStat.classList.remove('positive', 'negative');
+                if (diffValue > 0) diffStat.classList.add('positive');
+                else if (diffValue < 0) diffStat.classList.add('negative');
+            }
             headerDiffTotalEl.classList.remove('positive', 'negative', 'neutral');
-            if (diffValue > 0) diffStat.classList.add('positive');
-            else if (diffValue < 0) diffStat.classList.add('negative');
-
             if (diffValue > 0) headerDiffTotalEl.classList.add('positive');
             else if (diffValue < 0) headerDiffTotalEl.classList.add('negative');
             else headerDiffTotalEl.classList.add('neutral');
+
+            const diffLabelEl = document.getElementById('diffStatLabel');
+            const headerDiffLabelEl = document.getElementById('headerDiffLabel');
+            if (diffLabelEl) {
+                diffLabelEl.textContent = diffValue > 0 ? 'زيادة بالخزينة (+)' : (diffValue < 0 ? 'عجز بالخزينة (-)' : 'فرق اليوم');
+            }
+            if (headerDiffLabelEl) {
+                headerDiffLabelEl.textContent = diffValue > 0 ? 'زيادة الخزينة (+)' : (diffValue < 0 ? 'عجز الخزينة (-)' : 'صافي اليوم');
+            }
 
 
             updateCharts(agg, salesTotal);
@@ -2702,7 +2714,7 @@
                 }
             });
 
-            const net = totalSales - totalExpenses;
+            const net = totalExpenses - totalSales;
             const maxVal = Math.max(totalSales, totalExpenses) || 1;
             const salesPrev = Math.round((totalSales / maxVal) * 100);
             const expPrev = Math.round((totalExpenses / maxVal) * 100);
@@ -2710,13 +2722,26 @@
             const content = `
                 <div style="padding: 10px;">
                     <div style="text-align: center; margin-bottom: 25px;">
-                        <div style="font-size: 14px; color: var(--muted); margin-bottom: 5px;">صافي الربح اليومي</div>
+                        <div style="font-size: 14px; color: var(--muted); margin-bottom: 5px;">${net > 0 ? 'زيادة في الخزينة (+ فرق اليوم)' : (net < 0 ? 'عجز في الخزينة (- فرق اليوم)' : 'الخزينة متزنة تماماً')}</div>
                         <h2 style="font-size: 36px; margin: 0; color: ${net >= 0 ? '#4ade80' : '#f87171'}; font-family: monospace;">
-                            ${net >= 0 ? '+' : ''}${formatNum(net)} <span style="font-size: 16px; color: var(--muted);">ج.م</span>
+                            ${net > 0 ? '+' : (net < 0 ? '-' : '')}${formatNum(Math.abs(net))} <span style="font-size: 16px; color: var(--muted);">ج.م</span>
                         </h2>
                     </div>
                     
                     <div style="display: grid; gap: 16px; margin-bottom: 20px;">
+                        <!-- Expenses Bar -->
+                        <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 12px; border: 1px solid rgba(248, 113, 113, 0.1);">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <span style="display: flex; align-items: center; gap: 6px; font-weight: bold; color: #f87171;">
+                                    <span>🔻</span> المنصرف من الدرج (تحت)
+                                </span>
+                                <span style="font-family: monospace; font-size: 16px;">${formatNum(totalExpenses)}</span>
+                            </div>
+                            <div style="height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
+                                <div style="width: ${expPrev}%; height: 100%; background: #f87171; border-radius: 4px; transition: width 1s ease-out;"></div>
+                            </div>
+                        </div>
+
                         <!-- Sales Bar -->
                         <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 12px; border: 1px solid rgba(74, 222, 128, 0.1);">
                             <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
@@ -2729,28 +2754,15 @@
                                 <div style="width: ${salesPrev}%; height: 100%; background: #4ade80; border-radius: 4px; transition: width 1s ease-out;"></div>
                             </div>
                         </div>
-
-                        <!-- Expenses Bar -->
-                        <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 12px; border: 1px solid rgba(248, 113, 113, 0.1);">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                <span style="display: flex; align-items: center; gap: 6px; font-weight: bold; color: #f87171;">
-                                    <span>💸</span> المصروفات
-                                </span>
-                                <span style="font-family: monospace; font-size: 16px;">${formatNum(totalExpenses)}</span>
-                            </div>
-                            <div style="height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
-                                <div style="width: ${expPrev}%; height: 100%; background: #f87171; border-radius: 4px; transition: width 1s ease-out;"></div>
-                            </div>
-                        </div>
                     </div>
                     
                     <div style="background: rgba(255,255,255,0.05); border-radius: 8px; padding: 12px; font-size: 12px; color: var(--muted); line-height: 1.6; text-align: center;">
-                        <span style="color: var(--gold2);">💡 ملاحظة:</span> يتم احتساب صافي الربح بخصم جميع المصروفات والمشتريات من إجمالي المبيعات اليومية.
+                        <span style="color: var(--gold2);">💡 معادلة فرق الخزينة:</span> المنصرف من الدرج (تحت) − إجمالي المبيعات.
                     </div>
                 </div>
             `;
 
-            showCustomModal('📊 تحليل صافي الأرباح', content);
+            showCustomModal('⚖️ تحليل عجز وزيادة الخزينة (فرق اليوم)', content);
         }
 
         function showOperationsDetails() {
@@ -5339,26 +5351,26 @@
             const sVal = parseFloat(String(salesTotal).replace(/,/g, '')) || 0;
             const bVal = parseFloat(String(sumBottom).replace(/,/g, '')) || 0;
             const tVal = parseFloat(String(sumTop).replace(/,/g, '')) || 0;
-            const nVal = parseFloat(String(diffTotal).replace(/,/g, '')) || (sVal - bVal);
+            const nVal = (bVal - sVal);
 
-            let netStatus = 'مطابق دفترياً ونقدياً ⚪';
+            let netStatus = 'الخزينة متزنة تماماً ⚪';
             let netIcon = '⚪';
             let netSign = '';
             if (nVal > 0) {
-                netStatus = 'فائض نقدي بالخزينة 🟢';
+                netStatus = 'زيادة في الخزينة (فائض بالدرج) 🟢';
                 netIcon = '🟢';
                 netSign = '+';
             } else if (nVal < 0) {
-                netStatus = 'عجز في نقدية الخزينة 🔴';
+                netStatus = 'عجز في الخزينة (عجز نقدي) 🔴';
                 netIcon = '🔴';
-                netSign = '';
+                netSign = '-';
             }
 
             message += `💰 *ملخص الخزينة والمبيعات:*\n`;
-            message += `🟢 إجمالي المبيعات: *${fmtMoney(sVal)} ج.م*\n`;
             message += `🔻 المنصرف من الدرج (تحت): *${fmtMoney(bVal)} ج.م*\n`;
+            message += `🟢 إجمالي المبيعات: *${fmtMoney(sVal)} ج.م*\n`;
             message += `${sepMinor}\n`;
-            message += `⚖️ *صافي فرق الخزينة:* *${netSign}${fmtMoney(nVal)} ج.م* ${netIcon}\n`;
+            message += `⚖️ *فرق اليوم (الخزينة):* *${netSign}${fmtMoney(Math.abs(nVal))} ج.م* ${netIcon}\n`;
             message += `   _${netStatus}_\n`;
             message += `${sepMinor}\n`;
             if (tVal > 0) {
@@ -13110,11 +13122,24 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
             const sumTopMatch = (document.getElementById('sumTop')?.textContent || '0').replace(/,/g, '');
             const sumBottomMatch = (document.getElementById('sumBottom')?.textContent || '0').replace(/,/g, '');
             const salesTotalMatch = (document.getElementById('salesTotal')?.textContent || document.getElementById('headerSalesTotal')?.textContent || '0').replace(/,/g, '');
-            const netVal = document.getElementById('diffTotal')?.textContent || document.getElementById('headerDiffTotal')?.textContent || '0';
 
             const topVal = parseFloat(sumTopMatch) || 0;
             const bottomVal = parseFloat(sumBottomMatch) || 0;
             const salesVal = parseFloat(salesTotalMatch) || 0;
+            const diffCalc = bottomVal - salesVal;
+
+            let netStatusText = 'الخزينة متزنة تماماً';
+            let netColor = '#94a3b8';
+            let netSign = '';
+            if (diffCalc > 0) {
+                netStatusText = 'زيادة في الخزينة (+ فرق اليوم)';
+                netColor = '#4ade80';
+                netSign = '+';
+            } else if (diffCalc < 0) {
+                netStatusText = 'عجز في الخزينة (- فرق اليوم)';
+                netColor = '#f87171';
+                netSign = '-';
+            }
 
             const modal = document.createElement('div');
             modal.className = 'modal-overlay';
@@ -13124,8 +13149,8 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                         <div style="display: flex; align-items: center; gap: 12px;">
                             <span style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 12px; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.3); font-size: 20px;">⚖️</span>
                             <div>
-                                <h3 style="margin: 0; color: #38bdf8; font-size: 18px; font-weight: 800; letter-spacing: 0.3px;">تحليل فرق اليوم (حركة الخزينة)</h3>
-                                <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">المبيعات ناقص المنصرف من الدرج</div>
+                                <h3 style="margin: 0; color: #38bdf8; font-size: 18px; font-weight: 800; letter-spacing: 0.3px;">تحليل عجز وزيادة الخزينة (فرق اليوم)</h3>
+                                <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">المنصرف من الدرج (تحت) − المبيعات</div>
                             </div>
                         </div>
                         <button style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; width: 34px; height: 34px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.2s;" onmouseover="this.style.background='rgba(239, 68, 68, 0.2)'; this.style.color='#f87171'" onmouseout="this.style.background='rgba(255,255,255,0.06)'; this.style.color='#cbd5e1'" onclick="this.closest('.modal-overlay').remove()">✕</button>
@@ -13133,25 +13158,25 @@ ${report.currentData.operations.map(op => `• ${op.category}: فوق ${formatNu
                     
                     <div style="display: grid; gap: 12px; margin-bottom: 20px;">
                         <div style="background: rgba(15, 23, 42, 0.6); padding: 14px 16px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center;">
-                            <span style="color: #cbd5e1; font-size: 14px; font-weight: 600;">💰 إجمالي المبيعات:</span>
-                            <span style="font-weight: 800; color: #4ade80; font-size: 17px; font-family: 'Inter', sans-serif;">${formatNum(salesVal)} ج.م</span>
-                        </div>
-                        <div style="background: rgba(15, 23, 42, 0.6); padding: 14px 16px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center;">
                             <span style="color: #cbd5e1; font-size: 14px; font-weight: 600;">🔻 المنصرف من الدرج (تحت):</span>
                             <span style="font-weight: 800; color: #f87171; font-size: 17px; font-family: 'Inter', sans-serif;">${formatNum(bottomVal)} ج.م</span>
+                        </div>
+                        <div style="background: rgba(15, 23, 42, 0.6); padding: 14px 16px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center;">
+                            <span style="color: #cbd5e1; font-size: 14px; font-weight: 600;">💰 إجمالي المبيعات:</span>
+                            <span style="font-weight: 800; color: #4ade80; font-size: 17px; font-family: 'Inter', sans-serif;">${formatNum(salesVal)} ج.م</span>
                         </div>
                         <div style="background: rgba(15, 23, 42, 0.4); padding: 10px 16px; border-radius: 12px; border: 1px dashed rgba(56, 189, 248, 0.2); display: flex; justify-content: space-between; align-items: center;">
                             <span style="color: #94a3b8; font-size: 12.5px; font-weight: 600;">⬆️ إجمالي خانة (فوق للعلم فقط):</span>
                             <span style="font-weight: 700; color: #38bdf8; font-size: 15px; font-family: 'Inter', sans-serif;">${formatNum(topVal)} ج.م</span>
                         </div>
                         <div style="background: rgba(30, 41, 59, 0.7); padding: 16px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; border: 1.5px solid rgba(56, 189, 248, 0.35); box-shadow: 0 4px 18px rgba(0,0,0,0.25);">
-                            <span style="color: #f1f5f9; font-weight: 800; font-size: 16px;">الصافي (فرق اليوم):</span>
-                            <span style="font-weight: 900; font-size: 21px; font-family: 'Inter', sans-serif; color: ${parseFloat(netVal.replace(/,/g, '')) >= 0 ? '#4ade80' : '#f87171'}; text-shadow: 0 0 14px ${parseFloat(netVal.replace(/,/g, '')) >= 0 ? 'rgba(74, 222, 128, 0.35)' : 'rgba(248, 113, 113, 0.35)'};">${netVal} ج.م</span>
+                            <span style="color: #f1f5f9; font-weight: 800; font-size: 15px;">${netStatusText}:</span>
+                            <span style="font-weight: 900; font-size: 21px; font-family: 'Inter', sans-serif; color: ${netColor}; text-shadow: 0 0 14px ${diffCalc >= 0 ? 'rgba(74, 222, 128, 0.35)' : 'rgba(248, 113, 113, 0.35)'};">${netSign}${formatNum(Math.abs(diffCalc))} ج.م</span>
                         </div>
                     </div>
 
                     <p style="font-size: 12px; color: #94a3b8; text-align: center; margin: 0 0 16px 0;">
-                        فرق اليوم = إجمالي المبيعات − إجمالي المنصرف من الدرج (تحت)
+                        فرق اليوم = إجمالي المنصرف من الدرج (تحت) − إجمالي المبيعات
                     </p>
 
                     <button style="width: 100%; padding: 13px; background: linear-gradient(135deg, #16a34a, #15803d); color: #ffffff; border: 1px solid rgba(74, 222, 128, 0.3); border-radius: 12px; font-size: 15px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 15px rgba(22, 163, 74, 0.3); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 20px rgba(22, 163, 74, 0.45)'" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 15px rgba(22, 163, 74, 0.3)'" onclick="this.closest('.modal-overlay').remove()">

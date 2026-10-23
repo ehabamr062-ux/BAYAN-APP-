@@ -854,9 +854,10 @@ function renderUI() {
     });
 
     // Net Difference / Cash Drawer Balance (عجز / زيادة الخزينة)
-    // الفرق الحسابي الدقيق لدرج النقدية: إجمالي المبيعات - إجمالي المنصرف والمسحوبات من الدرج (تحت)
-    // خانة (فوق) للعرض والمتابعة فقط ولا تدخل في معادلة فرق الخزينة
-    const netDifference = totalSales - totalExpenses;
+    // الفرق الحسابي الدقيق لدرج النقدية: إجمالي المنصرف من الدرج (تحت) ناقص إجمالي المبيعات
+    // إذا كان المنصرف من الدرج أكبر من المبيعات فهذا يعني زيادة وفائض نقدي بالدرج (+)
+    // وإذا كانت المبيعات أكبر من المنصرف من الدرج فهذا يعني عجز نقدي بالدرج (-)
+    const netDifference = totalExpenses - totalSales;
 
     // Update KPI Numbers
     const elSales = document.getElementById('kpi-sales-amount');
@@ -889,7 +890,7 @@ function renderUI() {
             elProfit.textContent = formatCurrency(0);
             elProfit.style.color = 'var(--text-primary)';
             if (elBalanceTitle) elBalanceTitle.textContent = 'عجز / زيادة الخزينة (فرق اليوم)';
-            if (elBalanceDesc) elBalanceDesc.textContent = 'الدرج متزن تماماً (0 ج.م)';
+            if (elBalanceDesc) elBalanceDesc.textContent = 'الخزينة متزنة تماماً (0 ج.م)';
             if (elBalanceIcon) elBalanceIcon.innerHTML = '<i class="fa-solid fa-scale-balanced" style="color: #fbbf24;"></i>';
         }
     }
@@ -1150,7 +1151,7 @@ window.printDailyReport = function() {
         else cash += effectiveAmt;
     });
 
-    const net = totalSales - totalExpenses;
+    const net = totalExpenses - totalSales;
     const timeNow = new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
 
     const receiptBox = document.getElementById('printable-receipt');
@@ -1168,12 +1169,12 @@ window.printDailyReport = function() {
             <div class="receipt-divider">══════════════════════════</div>
 
             <div class="receipt-row-bold">
-                <span>إجمالي المبيعات:</span>
-                <span>${formatCurrency(totalSales)}</span>
-            </div>
-            <div class="receipt-row-bold">
                 <span>المنصرف من الدرج (تحت ⬇️):</span>
                 <span>${formatCurrency(totalExpenses)}</span>
+            </div>
+            <div class="receipt-row-bold">
+                <span>إجمالي المبيعات:</span>
+                <span>${formatCurrency(totalSales)}</span>
             </div>
             ${totalTop > 0 ? `
             <div class="receipt-row" style="font-size: 11px; color: #64748b;">
@@ -1184,8 +1185,8 @@ window.printDailyReport = function() {
             <div class="receipt-divider">──────────────────────────</div>
 
             <div class="receipt-row-highlight">
-                <span>فرق اليوم (الصافي):</span>
-                <span>${net >= 0 ? '+' : ''}${formatCurrency(net)}</span>
+                <span>${net > 0 ? 'زيادة في الخزينة (+ فرق اليوم):' : (net < 0 ? 'عجز في الخزينة (- فرق اليوم):' : 'الخزينة متزنة تماماً:')}</span>
+                <span>${net > 0 ? '+' : (net < 0 ? '-' : '')}${formatCurrency(Math.abs(net))}</span>
             </div>
 
             <div class="receipt-divider">──────────────────────────</div>
@@ -1473,28 +1474,24 @@ window.shareViaWhatsApp = function() {
         categoryGroups[cat].totalBottom += bottom;
     });
 
-    const net = totalSales - totalExpenses;
+    const net = totalExpenses - totalSales;
     const storeName = (window.MobileState.storeName || localStorage.getItem('acc_store_name') || 'بيان موبايل لايت').trim();
     const exportTime = formatReportArabicTime(new Date());
     const formattedDate = formatReportArabicDate(dateStr);
     const sepMajor = '═══════════════════════';
     const sepMinor = '───────────────────────';
 
-    let netIcon = '🟢';
-    let netStatusText = 'فائض نقدي بالخزينة 🟢';
+    let netIcon = '⚪';
+    let netStatusText = 'الخزينة متزنة تماماً ⚪';
     let netSign = '';
     if (net > 0) {
         netIcon = '🟢';
-        netStatusText = 'فائض نقدي بالخزينة 🟢';
+        netStatusText = 'زيادة في الخزينة (فائض بالدرج) 🟢';
         netSign = '+';
     } else if (net < 0) {
         netIcon = '🔴';
-        netStatusText = 'عجز في نقدية الخزينة 🔴';
-        netSign = '';
-    } else {
-        netIcon = '⚪';
-        netStatusText = 'مطابق دفترياً ونقدياً ⚪';
-        netSign = '';
+        netStatusText = 'عجز في الخزينة (عجز نقدي) 🔴';
+        netSign = '-';
     }
 
     let msg = `🏪 *${storeName}*\n`;
@@ -1505,10 +1502,10 @@ window.shareViaWhatsApp = function() {
     msg += `${sepMajor}\n\n`;
 
     msg += `💰 *ملخص الخزينة والمبيعات:*\n`;
-    msg += `🟢 إجمالي المبيعات: *${fmtMoney(totalSales)} ج.م*\n`;
     msg += `🔻 المنصرف من الدرج (تحت): *${fmtMoney(totalExpenses)} ج.م*\n`;
+    msg += `🟢 إجمالي المبيعات: *${fmtMoney(totalSales)} ج.م*\n`;
     msg += `${sepMinor}\n`;
-    msg += `⚖️ *صافي فرق الخزينة:* *${netSign}${fmtMoney(net)} ج.م* ${netIcon}\n`;
+    msg += `⚖️ *فرق اليوم (الخزينة):* *${netSign}${fmtMoney(Math.abs(net))} ج.م* ${netIcon}\n`;
     msg += `   _${netStatusText}_\n`;
     msg += `${sepMinor}\n`;
     if (totalTop > 0) {
@@ -2456,7 +2453,7 @@ window.showCardDetailsModal = function(type) {
         isDiffMode = true;
         const sales = indexedRecords.filter(r => r.category === 'مبيعات').reduce((sum, r) => sum + (parseFloat(r.bottom) || 0) + (parseFloat(r.top) || 0), 0);
         const nonSalesBottom = indexedRecords.filter(r => r.category !== 'مبيعات').reduce((sum, r) => sum + (parseFloat(r.bottom) || 0), 0);
-        totalAmt = sales - nonSalesBottom;
+        totalAmt = nonSalesBottom - sales;
         matchingOps = indexedRecords;
     } else if (type === 'cash') {
         icon = '💵';
@@ -2491,13 +2488,20 @@ window.showCardDetailsModal = function(type) {
 
     if (iconEl) iconEl.textContent = icon;
     if (titleEl) titleEl.textContent = title;
-    if (subEl) subEl.textContent = `تاريخ اليوم: ${window.MobileState.currentDate}`;
+    if (subEl) {
+        if (isDiffMode) {
+            const diffDesc = totalAmt > 0 ? 'زيادة وفائض نقدي بالدرج (+)' : (totalAmt < 0 ? 'عجز نقدي بالدرج (-)' : 'الدرج متزن');
+            subEl.textContent = `فرق اليوم = المنصرف (تحت) − المبيعات | ${diffDesc}`;
+        } else {
+            subEl.textContent = `تاريخ اليوم: ${window.MobileState.currentDate}`;
+        }
+    }
     if (countEl) countEl.textContent = `${matchingOps.length} حركة`;
 
     if (totalAmtEl) {
         if (isDiffMode) {
-            totalAmtEl.textContent = (totalAmt >= 0 ? `+${formatCurrency(totalAmt)}` : `-${formatCurrency(Math.abs(totalAmt))}`);
-            totalAmtEl.style.color = totalAmt >= 0 ? '#10b981' : '#ef4444';
+            totalAmtEl.textContent = (totalAmt > 0 ? `+${formatCurrency(totalAmt)}` : (totalAmt < 0 ? `-${formatCurrency(Math.abs(totalAmt))}` : formatCurrency(0)));
+            totalAmtEl.style.color = totalAmt > 0 ? '#10b981' : (totalAmt < 0 ? '#ef4444' : 'var(--text-primary)');
         } else {
             totalAmtEl.textContent = formatCurrency(totalAmt);
             totalAmtEl.style.color = '#38bdf8';
