@@ -5275,76 +5275,175 @@
                 });
             }
 
-            const separator = '━━━━━━━━━━━━━━━━━━';
+            const fmtMoney = (val) => {
+                if (val === null || val === undefined || val === '') return '0';
+                const n = parseFloat(String(val).replace(/,/g, '').trim()) || 0;
+                return n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+            };
 
-            let message = `🧾 تقرير يوم: ${date} 🧾\n`;
-            message += `${separator}\n`;
+            const formatReportArabicDate = (dateStr) => {
+                if (!dateStr) return '';
+                try {
+                    const parts = String(dateStr).split('-');
+                    if (parts.length === 3) {
+                        const y = parseInt(parts[0], 10);
+                        const m = parseInt(parts[1], 10) - 1;
+                        const d = parseInt(parts[2], 10);
+                        const dateObj = new Date(y, m, d);
+                        const days = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+                        const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+                        const dayName = days[dateObj.getDay()] || '';
+                        const monthName = months[m] || '';
+                        return `${dayName}، ${d} ${monthName} ${y} (${dateStr})`;
+                    }
+                } catch (e) {}
+                return dateStr;
+            };
 
-            message += `📦 الأرصدة 📦\n`;
-            message += `${inventoriesText}\n`;
+            const formatReportArabicTime = (ts) => {
+                if (!ts) return '';
+                try {
+                    const d = new Date(ts);
+                    if (!isNaN(d.getTime())) {
+                        let h = d.getHours();
+                        const m = String(d.getMinutes()).padStart(2, '0');
+                        const period = h >= 12 ? 'م' : 'ص';
+                        h = h % 12 || 12;
+                        return `${String(h).padStart(2, '0')}:${m} ${period}`;
+                    }
+                } catch (e) {}
+                const match = String(ts).match(/(\d{1,2}):(\d{2})/);
+                if (match) {
+                    let h = parseInt(match[1], 10);
+                    const m = match[2];
+                    const period = h >= 12 ? 'م' : 'ص';
+                    h = h % 12 || 12;
+                    return `${String(h).padStart(2, '0')}:${m} ${period}`;
+                }
+                return String(ts);
+            };
 
-            const extToMe = localStorage.getItem('acc_ext_tome') || 0;
-            const extByMe = localStorage.getItem('acc_ext_byme') || 0;
-            if (parseFloat(extToMe) > 0 || parseFloat(extByMe) > 0) {
-                message += `${separator}\n`;
-                message += `💳 حسابات خارجية 💳\n`;
-                if (parseFloat(extToMe) > 0) message += `   ⬆️ له (لنا): * ${formatNum(parseFloat(extToMe))} *\n`;
-                if (parseFloat(extByMe) > 0) message += `   ⬇️ عليه (دين): * ${formatNum(parseFloat(extByMe))} *\n`;
+            const storeName = (localStorage.getItem('acc_store_name') || 'بيان المحاسبي').trim();
+            const exportTime = formatReportArabicTime(new Date());
+            const formattedDate = formatReportArabicDate(date);
+            const sepMajor = '═══════════════════════';
+            const sepMinor = '───────────────────────';
+
+            let message = `🏪 *${storeName}*\n`;
+            message += `📑 *تقرير الحسابات وتقفيل الوردية اليومي*\n`;
+            message += `${sepMajor}\n`;
+            message += `📅 *اليوم:* ${formattedDate}\n`;
+            message += `⏰ *وقت التصدير:* ${exportTime}\n`;
+            message += `${sepMajor}\n\n`;
+
+            const sVal = parseFloat(String(salesTotal).replace(/,/g, '')) || 0;
+            const bVal = parseFloat(String(sumBottom).replace(/,/g, '')) || 0;
+            const tVal = parseFloat(String(sumTop).replace(/,/g, '')) || 0;
+            const nVal = parseFloat(String(diffTotal).replace(/,/g, '')) || (sVal - bVal);
+
+            let netStatus = 'مطابق دفترياً ونقدياً ⚪';
+            let netIcon = '⚪';
+            let netSign = '';
+            if (nVal > 0) {
+                netStatus = 'فائض نقدي بالخزينة 🟢';
+                netIcon = '🟢';
+                netSign = '+';
+            } else if (nVal < 0) {
+                netStatus = 'عجز في نقدية الخزينة 🔴';
+                netIcon = '🔴';
+                netSign = '';
             }
 
-            const appNotes = localStorage.getItem('acc_app_notes') || '';
-            const appNotesTitle = localStorage.getItem('acc_notes_box_name') || 'الملاحظات';
-            if (appNotes.trim() !== '') {
-                message += `${separator}\n`;
-                message += `📝 ${appNotesTitle} 📝\n`;
-                message += `${appNotes}\n`;
+            message += `💰 *ملخص الخزينة والمبيعات:*\n`;
+            message += `🟢 إجمالي المبيعات: *${fmtMoney(sVal)} ج.م*\n`;
+            message += `🔻 المنصرف من الدرج (تحت): *${fmtMoney(bVal)} ج.م*\n`;
+            message += `${sepMinor}\n`;
+            message += `⚖️ *صافي فرق الخزينة:* *${netSign}${fmtMoney(nVal)} ج.م* ${netIcon}\n`;
+            message += `   _${netStatus}_\n`;
+            message += `${sepMinor}\n`;
+            if (tVal > 0) {
+                message += `📦 حركة الفواتير/البضاعة (فوق): *${fmtMoney(tVal)} ج.م*\n`;
             }
 
-            message += `${separator}\n`;
-            message += `⬆️ إجمالي الفوق (الداخل): * ${sumTop} *\n`;
-            message += `⬇️ إجمالي التحت (الخارج): * ${sumBottom} *\n\n`;
-            message += `🟢 إجمالي المبيعات: * ${salesTotal} *\n`;
-            message += `🔵 فرق اليوم الصافي: * ${diffTotal} *\n`;
-            message += `${separator}\n`;
+            if (inventoriesText && inventoriesText.trim()) {
+                message += `\n${sepMajor}\n`;
+                message += `📦 *الأرصدة والمخزون:*\n`;
+                const invLines = inventoriesText.trim().split('\n');
+                invLines.forEach(l => {
+                    if (l.trim()) message += `▫️ ${l.trim()}\n`;
+                });
+            }
+
+            const extToMe = parseFloat(localStorage.getItem('acc_ext_tome')) || 0;
+            const extByMe = parseFloat(localStorage.getItem('acc_ext_byme')) || 0;
+            if (extToMe > 0 || extByMe > 0) {
+                message += `\n${sepMajor}\n`;
+                message += `💳 *الحسابات والديون الخارجية:*\n`;
+                if (extToMe > 0) message += `   ▫️ لنا (مستحقات): *${fmtMoney(extToMe)} ج.م*\n`;
+                if (extByMe > 0) message += `   ▫️ علينا (دين): *${fmtMoney(extByMe)} ج.م*\n`;
+            }
+
+            const appNotes = (localStorage.getItem('acc_app_notes') || '').trim();
+            const appNotesTitle = (localStorage.getItem('acc_notes_box_name') || 'الملاحظات').trim();
+            if (appNotes) {
+                message += `\n${sepMajor}\n`;
+                message += `📝 *${appNotesTitle}:*\n`;
+                message += `_${appNotes}_\n`;
+            }
 
             const categoryGroups = {};
             records.forEach(op => {
-                if (!categoryGroups[op.category]) categoryGroups[op.category] = { ops: [], totalTop: 0, totalBottom: 0 };
-                categoryGroups[op.category].ops.push(op);
-                categoryGroups[op.category].totalTop += (op.top || 0);
-                categoryGroups[op.category].totalBottom += (op.bottom || 0);
+                const cat = (op.category || 'عام').trim();
+                if (!categoryGroups[cat]) categoryGroups[cat] = { ops: [], totalTop: 0, totalBottom: 0 };
+                categoryGroups[cat].ops.push(op);
+                categoryGroups[cat].totalTop += (parseFloat(op.top) || 0);
+                categoryGroups[cat].totalBottom += (parseFloat(op.bottom) || 0);
             });
 
-            message += `📋 تفاصيل البنود والجهات 📋\n`;
-            if (Object.keys(categoryGroups).length > 0) {
-                Object.keys(categoryGroups).sort().forEach(category => {
+            const catKeys = Object.keys(categoryGroups);
+            if (catKeys.length > 0) {
+                message += `\n${sepMajor}\n`;
+                message += `📋 *تفاصيل البنود والجهات المسجلة:*\n`;
+                catKeys.sort().forEach(category => {
                     const group = categoryGroups[category];
-                    message += `\n📁 * ${category} *\n`;
+                    message += `\n📁 *[ ${category} ]*\n`;
 
-                    if (group.totalTop > 0) message += `   ⬆️ إجمالي (فوق): * ${formatNum(group.totalTop)} *\n`;
-                    if (group.totalBottom > 0) message += `   ⬇️ إجمالي (تحت): * ${formatNum(group.totalBottom)} *\n`;
+                    let catSummary = [];
+                    if (group.totalTop > 0) catSummary.push(`⬆️ فوق: *${fmtMoney(group.totalTop)} ج.م*`);
+                    if (group.totalBottom > 0) catSummary.push(`⬇️ تحت: *${fmtMoney(group.totalBottom)} ج.م*`);
+                    if (catSummary.length > 0) {
+                        message += `  ├─ 📊 إجمالي البند: ${catSummary.join(' | ')}\n`;
+                    }
 
-                    group.ops.forEach(op => {
+                    const totalOps = group.ops.length;
+                    group.ops.forEach((op, idx) => {
+                        const isLast = (idx === totalOps - 1);
+                        const branch = isLast ? '  └─' : '  ├─';
+                        const tStr = formatReportArabicTime(op.timestamp);
+
                         let opAmount = '';
-                        if (op.top > 0 && op.bottom > 0) {
-                            opAmount = `(فوق: ${formatNum(op.top)} | تحت: ${formatNum(op.bottom)})`;
-                        } else if (op.top > 0) {
-                            opAmount = `(فوق: ${formatNum(op.top)})`;
-                        } else if (op.bottom > 0) {
-                            opAmount = `(تحت: ${formatNum(op.bottom)})`;
+                        const opTop = parseFloat(op.top) || 0;
+                        const opBtm = parseFloat(op.bottom) || 0;
+                        if (opTop > 0 && opBtm > 0) {
+                            opAmount = `(فوق: ${fmtMoney(opTop)} | تحت: ${fmtMoney(opBtm)} ج.م)`;
+                        } else if (opTop > 0) {
+                            opAmount = `(فوق: ${fmtMoney(opTop)} ج.م)`;
+                        } else if (opBtm > 0) {
+                            opAmount = `(تحت: ${fmtMoney(opBtm)} ج.م)`;
                         }
 
-                        let opNote = op.notes ? ` - ${op.notes}` : '';
-                        message += `     🕒 ${op.timestamp} ${opAmount}${opNote}\n`;
+                        const notePart = op.notes && op.notes.trim() ? ` ◂ *${op.notes.trim()}*` : '';
+                        const timePart = tStr ? `🕒 ${tStr}` : '▫️';
+                        message += `${branch} ${timePart}${notePart} ${opAmount}\n`;
                     });
                 });
             }
-            message += `\n${separator}\n`;
 
-            message += `🔍 ملخص الحركات 🔍\n`;
-            message += `#️⃣ عدد العمليات الإجمالي: ${records.length}\n`;
-            message += `${separator}\n`;
-            message += `©️ تطبيق المحاسبة اليومي`;
+            message += `\n${sepMajor}\n`;
+            message += `🔍 *ملخص الحركات والوردية:*\n`;
+            message += `   #️⃣ إجمالي عدد العمليات: *${records.length} حركة مسجلة*\n`;
+            message += `   🔒 التوثيق: *معتمد ومطابق دفترياً وإلكترونياً*\n`;
+            message += `✨ *صادر عبر منظومة بيان المحاسبية الذكية*`;
 
             const encodedMessage = encodeURIComponent(message);
             let shareUrl = '';

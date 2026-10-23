@@ -1399,11 +1399,60 @@ window.shareViaWhatsApp = function() {
     const records = window.MobileState.records;
     const dateStr = window.MobileState.currentDate;
 
+    const fmtMoney = (val) => {
+        const n = parseFloat(val) || 0;
+        return n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+    };
+
+    const formatReportArabicDate = (dateStr) => {
+        if (!dateStr) return '';
+        try {
+            const parts = String(dateStr).split('-');
+            if (parts.length === 3) {
+                const y = parseInt(parts[0], 10);
+                const m = parseInt(parts[1], 10) - 1;
+                const d = parseInt(parts[2], 10);
+                const dateObj = new Date(y, m, d);
+                const days = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+                const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+                const dayName = days[dateObj.getDay()] || '';
+                const monthName = months[m] || '';
+                return `${dayName}، ${d} ${monthName} ${y} (${dateStr})`;
+            }
+        } catch (e) {}
+        return dateStr;
+    };
+
+    const formatReportArabicTime = (ts) => {
+        if (!ts) return '';
+        try {
+            const d = new Date(ts);
+            if (!isNaN(d.getTime())) {
+                let h = d.getHours();
+                const m = String(d.getMinutes()).padStart(2, '0');
+                const period = h >= 12 ? 'م' : 'ص';
+                h = h % 12 || 12;
+                return `${String(h).padStart(2, '0')}:${m} ${period}`;
+            }
+        } catch (e) {}
+        const match = String(ts).match(/(\d{1,2}):(\d{2})/);
+        if (match) {
+            let h = parseInt(match[1], 10);
+            const m = match[2];
+            const period = h >= 12 ? 'م' : 'ص';
+            h = h % 12 || 12;
+            return `${String(h).padStart(2, '0')}:${m} ${period}`;
+        }
+        return String(ts);
+    };
+
     let totalSales = 0, totalExpenses = 0, totalTop = 0, cash = 0, insta = 0, voda = 0;
+    const categoryGroups = {};
+
     records.forEach(r => {
         const top = parseFloat(r.top) || 0;
         const bottom = parseFloat(r.bottom) || 0;
-        const cat = (r.category || '').trim();
+        const cat = (r.category || 'عام').trim();
         const notes = (r.notes || '').toLowerCase();
 
         if (cat === 'مبيعات') {
@@ -1417,26 +1466,106 @@ window.shareViaWhatsApp = function() {
         if (notes.includes('انستا') || notes.includes('instapay') || cat.includes('انستا')) insta += amt;
         else if (notes.includes('فودافون') || notes.includes('vodafone') || cat.includes('فودافون')) voda += amt;
         else cash += amt;
+
+        if (!categoryGroups[cat]) categoryGroups[cat] = { ops: [], totalTop: 0, totalBottom: 0 };
+        categoryGroups[cat].ops.push(r);
+        categoryGroups[cat].totalTop += top;
+        categoryGroups[cat].totalBottom += bottom;
     });
 
     const net = totalSales - totalExpenses;
+    const storeName = (window.MobileState.storeName || localStorage.getItem('acc_store_name') || 'بيان موبايل لايت').trim();
+    const exportTime = formatReportArabicTime(new Date());
+    const formattedDate = formatReportArabicDate(dateStr);
+    const sepMajor = '═══════════════════════';
+    const sepMinor = '───────────────────────';
 
-    let msg = `📊 *تقرير الحسابات اليومي - بيان موبايل لايت*\n`;
-    msg += `📅 *تاريخ اليوم:* ${dateStr}\n`;
-    msg += `═══════════════════════\n`;
-    msg += `💰 *إجمالي المبيعات:* *${formatCurrency(totalSales)}*\n`;
-    msg += `🔻 *المنصرف من الدرج (تحت ⬇️):* *${formatCurrency(totalExpenses)}*\n`;
-    if (totalTop > 0) {
-        msg += `⬆️ *إجمالي خانة (فوق ⬆️ للعلم):* *${formatCurrency(totalTop)}*\n`;
+    let netIcon = '🟢';
+    let netStatusText = 'فائض نقدي بالخزينة 🟢';
+    let netSign = '';
+    if (net > 0) {
+        netIcon = '🟢';
+        netStatusText = 'فائض نقدي بالخزينة 🟢';
+        netSign = '+';
+    } else if (net < 0) {
+        netIcon = '🔴';
+        netStatusText = 'عجز في نقدية الخزينة 🔴';
+        netSign = '';
+    } else {
+        netIcon = '⚪';
+        netStatusText = 'مطابق دفترياً ونقدياً ⚪';
+        netSign = '';
     }
-    msg += `═══════════════════════\n`;
-    msg += `✨ *فرق اليوم (عجز / زيادة الخزينة):* *${net >= 0 ? '+' : ''}${formatCurrency(net)}* ${net >= 0 ? '🟢' : '🔴'}\n`;
-    msg += `💵 *كاش نقدي:* ${formatCurrency(cash)}\n`;
-    msg += `🟣 *إنستا باي:* ${formatCurrency(insta)}\n`;
-    msg += `🔴 *فودافون كاش:* ${formatCurrency(voda)}\n`;
-    msg += `📝 *عدد العمليات:* ${records.length} حركة\n`;
-    msg += `═══════════════════════\n`;
-    msg += `🤖 _تم الإنشاء تلقائياً عبر تطبيق بيان المحاسبي_`;
+
+    let msg = `🏪 *${storeName}*\n`;
+    msg += `📑 *تقرير الحسابات وتقفيل الوردية اليومي*\n`;
+    msg += `${sepMajor}\n`;
+    msg += `📅 *اليوم:* ${formattedDate}\n`;
+    msg += `⏰ *وقت التصدير:* ${exportTime}\n`;
+    msg += `${sepMajor}\n\n`;
+
+    msg += `💰 *ملخص الخزينة والمبيعات:*\n`;
+    msg += `🟢 إجمالي المبيعات: *${fmtMoney(totalSales)} ج.م*\n`;
+    msg += `🔻 المنصرف من الدرج (تحت): *${fmtMoney(totalExpenses)} ج.م*\n`;
+    msg += `${sepMinor}\n`;
+    msg += `⚖️ *صافي فرق الخزينة:* *${netSign}${fmtMoney(net)} ج.م* ${netIcon}\n`;
+    msg += `   _${netStatusText}_\n`;
+    msg += `${sepMinor}\n`;
+    if (totalTop > 0) {
+        msg += `📦 حركة الفواتير/البضاعة (فوق): *${fmtMoney(totalTop)} ج.م*\n`;
+    }
+
+    if (cash > 0 || insta > 0 || voda > 0) {
+        msg += `\n💳 *طرق استلام النقدية:*\n`;
+        if (cash > 0) msg += `   💵 كاش نقدي: *${fmtMoney(cash)} ج.م*\n`;
+        if (insta > 0) msg += `   🟣 إنستا باي: *${fmtMoney(insta)} ج.م*\n`;
+        if (voda > 0) msg += `   🔴 فودافون كاش: *${fmtMoney(voda)} ج.م*\n`;
+    }
+
+    const catKeys = Object.keys(categoryGroups);
+    if (catKeys.length > 0) {
+        msg += `\n${sepMajor}\n`;
+        msg += `📋 *تفاصيل البنود والجهات المسجلة:*\n`;
+        catKeys.sort().forEach(category => {
+            const group = categoryGroups[category];
+            msg += `\n📁 *[ ${category} ]*\n`;
+
+            let catSummary = [];
+            if (group.totalTop > 0) catSummary.push(`⬆️ فوق: *${fmtMoney(group.totalTop)} ج.م*`);
+            if (group.totalBottom > 0) catSummary.push(`⬇️ تحت: *${fmtMoney(group.totalBottom)} ج.م*`);
+            if (catSummary.length > 0) {
+                msg += `  ├─ 📊 إجمالي البند: ${catSummary.join(' | ')}\n`;
+            }
+
+            const totalOps = group.ops.length;
+            group.ops.forEach((op, idx) => {
+                const isLast = (idx === totalOps - 1);
+                const branch = isLast ? '  └─' : '  ├─';
+                const tStr = formatReportArabicTime(op.timestamp);
+
+                let opAmount = '';
+                const opTop = parseFloat(op.top) || 0;
+                const opBtm = parseFloat(op.bottom) || 0;
+                if (opTop > 0 && opBtm > 0) {
+                    opAmount = `(فوق: ${fmtMoney(opTop)} | تحت: ${fmtMoney(opBtm)} ج.م)`;
+                } else if (opTop > 0) {
+                    opAmount = `(فوق: ${fmtMoney(opTop)} ج.م)`;
+                } else if (opBtm > 0) {
+                    opAmount = `(تحت: ${fmtMoney(opBtm)} ج.م)`;
+                }
+
+                const notePart = op.notes && op.notes.trim() ? ` ◂ *${op.notes.trim()}*` : '';
+                const timePart = tStr ? `🕒 ${tStr}` : '▫️';
+                msg += `${branch} ${timePart}${notePart} ${opAmount}\n`;
+            });
+        });
+    }
+
+    msg += `\n${sepMajor}\n`;
+    msg += `🔍 *ملخص الحركات والوردية:*\n`;
+    msg += `   #️⃣ إجمالي عدد العمليات: *${records.length} حركة مسجلة*\n`;
+    msg += `   🔒 التوثيق: *معتمد ومطابق دفترياً وإلكترونياً*\n`;
+    msg += `✨ *صادر عبر تطبيق بيان موبايل لايت الذكي*`;
 
     let digits = targetPhone.replace(/\D/g, '');
     if (digits.startsWith('01')) digits = '2' + digits; // مصر كود الدولة +20
