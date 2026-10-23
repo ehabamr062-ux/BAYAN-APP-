@@ -2525,14 +2525,29 @@ window.showCardDetailsModal = function(type) {
             let amtStr = '';
             let amtColor = '#10b981';
 
-            if (b > 0 && t > 0) {
+            if (type === 'top') {
+                // عرض مبالغ خانة (فوق) فقط دون مبالغ تحت مع سهم الصعود كما هو مطلوب
+                dirPill = `<span class="tx-dir-pill top" style="font-size: 10px; padding: 1px 5px;"><i class="fa-solid fa-arrow-up"></i> فوق (مصروف)</span>`;
+                amtStr = `<i class="fa-solid fa-arrow-up" style="font-size: 11px;"></i> ${formatCurrency(t)}`;
+                amtColor = '#ef4444';
+            } else if (type === 'expenses') {
+                // عرض مبالغ المنصرف من الدرج (تحت) فقط
+                dirPill = `<span class="tx-dir-pill bottom" style="font-size: 10px; padding: 1px 5px;"><i class="fa-solid fa-arrow-down"></i> تحت (منصرف)</span>`;
+                amtStr = `<i class="fa-solid fa-arrow-down" style="font-size: 11px;"></i> ${formatCurrency(b)}`;
+                amtColor = '#ef4444';
+            } else if (type === 'sales') {
+                const saleAmt = (b > 0 ? b : t);
+                dirPill = `<span class="tx-dir-pill bottom" style="font-size: 10px; padding: 1px 5px;"><i class="fa-solid fa-arrow-down"></i> مبيعات نقدية</span>`;
+                amtStr = `<i class="fa-solid fa-arrow-down" style="font-size: 11px;"></i> ${formatCurrency(saleAmt)}`;
+                amtColor = '#10b981';
+            } else if (b > 0 && t > 0) {
                 dirPill = `<span class="tx-dir-pill dual" style="font-size: 10px; padding: 1px 5px;"><i class="fa-solid fa-arrows-up-down"></i> تحت وفوق</span>`;
                 amtStr = `⬇ ${formatCurrency(b)} | ⬆ ${formatCurrency(t)}`;
                 amtColor = '#3b82f6';
             } else if (b > 0) {
                 dirPill = `<span class="tx-dir-pill bottom" style="font-size: 10px; padding: 1px 5px;"><i class="fa-solid fa-arrow-down"></i> ${isSale ? 'تحت (مبيعات)' : 'تحت (منصرف)'}</span>`;
                 amtStr = `<i class="fa-solid fa-arrow-down" style="font-size: 11px;"></i> ${formatCurrency(b)}`;
-                amtColor = '#10b981';
+                amtColor = isSale ? '#10b981' : '#ef4444';
             } else {
                 dirPill = `<span class="tx-dir-pill top" style="font-size: 10px; padding: 1px 5px;"><i class="fa-solid fa-arrow-up"></i> فوق (مصروف)</span>`;
                 amtStr = `<i class="fa-solid fa-arrow-up" style="font-size: 11px;"></i> ${formatCurrency(t)}`;
@@ -2550,6 +2565,10 @@ window.showCardDetailsModal = function(type) {
                 ? `<span style="color: #fbbf24; font-size: 11px; font-weight: bold; margin-right: 4px;">(معدلة ✏️)</span>` 
                 : '';
 
+            let defaultPlaceholder = isSale ? 'مبيعات نقدية' : (b > 0 ? 'منصرف مسجل' : 'مصروف مسجل');
+            if (type === 'top') defaultPlaceholder = 'مصروف مسجل (فوق)';
+            else if (type === 'expenses') defaultPlaceholder = 'منصرف مسجل (تحت)';
+
             itemsHtml += `
                 <div class="details-item-card">
                     <div class="details-item-main">
@@ -2559,7 +2578,7 @@ window.showCardDetailsModal = function(type) {
                             ${dirPill}
                             ${editTag}
                         </div>
-                        <div class="details-item-notes">${escapeHtml(cleanOpNote || (isSale ? 'مبيعات نقدية' : (b > 0 ? 'منصرف مسجل' : 'مصروف مسجل')))}</div>
+                        <div class="details-item-notes">${escapeHtml(cleanOpNote || defaultPlaceholder)}</div>
                         <div class="details-item-sub">
                             <span><i class="fa-regular fa-clock"></i> ${timeStr}</span>
                             <span>•</span>
