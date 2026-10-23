@@ -1,9 +1,9 @@
 // ============================================================
-//  Bayan Mobile Lite - Core Application Engine & Cloud Sync v1.0.0
+//  Bayan Mobile Lite - Core Application Engine & Cloud Sync v1.0.2
 //  Hot-Update & High-Resilience Cloud Sync Pipeline 🚀
 // ============================================================
 
-window.MOBILE_APP_VERSION = '1.0.1';
+window.MOBILE_APP_VERSION = '1.0.2';
 window._mobileSWReg = null;
 
 const firebaseConfig = {
@@ -1833,7 +1833,7 @@ async function checkMobileAppUpdate(silent = true) {
         if (!response.ok) return;
         const remoteVersion = (await response.text()).trim();
 
-        const codeVersion = window.MOBILE_APP_VERSION || '1.0.1';
+        const codeVersion = window.MOBILE_APP_VERSION || '1.0.2';
         const installedVersion = localStorage.getItem('mobile_lite_version');
 
         // إذا كان المستخدم قام بتطبيق التحديث للتو في هذه الجلسة، نعتمد التحديث ونمنع التكرار
@@ -1893,7 +1893,7 @@ function showMobileUpdateBanner(newVersion) {
 }
 
 window.handleMobileAppUpdate = function(targetVersion) {
-    const versionToSet = targetVersion || window._pendingMobileUpdateVersion || '1.0.1';
+    const versionToSet = targetVersion || window._pendingMobileUpdateVersion || '1.0.2';
     try {
         localStorage.setItem('mobile_lite_version', versionToSet);
         sessionStorage.setItem('mobile_updating_to', versionToSet);

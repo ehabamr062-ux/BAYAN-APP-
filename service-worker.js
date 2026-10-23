@@ -1,11 +1,11 @@
 // ============================================================
 //  Service Worker - تطبيق بيان المحاسبي (Bayan POS Pro)
-//  النسخة الموحدة الرسمية: v6.0.0 (تحديث شامل وربط فوري 🚀)
+//  النسخة الموحدة الرسمية: v6.0.2 (تحديث شامل وربط فوري 🚀)
 // ============================================================
 
-const CACHE_NAME = 'bayan-pos-pro-v601';
-const STATIC_CACHE = 'bayan-pos-pro-static-v601';
-const DYNAMIC_CACHE = 'bayan-pos-pro-dynamic-v601';
+const CACHE_NAME = 'bayan-pos-pro-v602';
+const STATIC_CACHE = 'bayan-pos-pro-static-v602';
+const DYNAMIC_CACHE = 'bayan-pos-pro-dynamic-v602';
 
 // الملفات الأساسية التي يجب تخزينها مسبقاً
 const STATIC_FILES = [

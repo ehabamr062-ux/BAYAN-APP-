@@ -1,6 +1,6 @@
 {
   "name": "bayan-pos-desktop",
-  "version": "6.0.0",
+  "version": "6.0.2",
   "description": "تطبيق بيان POS Pro المحاسبي الذكي - نسخة سطح المكتب الخاطفة والعمل أوفلاين",
   "main": "main-electron.js",
   "scripts": {

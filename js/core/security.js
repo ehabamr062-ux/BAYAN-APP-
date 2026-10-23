@@ -1,5 +1,5 @@
 // تعريف إصدار التطبيق (يجب أن يتطابق مع version.txt)
-const APP_VERSION = '6.0.1';
+const APP_VERSION = '6.0.2';
 window.APP_VERSION = APP_VERSION;
 
         // Global Modern Alert / Toast System (Must be at top)

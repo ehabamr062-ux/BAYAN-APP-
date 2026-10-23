@@ -1,5 +1,5 @@
 // ============================================================
-//  Bayan POS Pro - Automatic Instant Hot-Update & PWA Updater v6.0.0
+//  Bayan POS Pro - Automatic Instant Hot-Update & PWA Updater v6.0.2
 // ============================================================
 
 window._bayanSWReg = null;
@@ -85,7 +85,7 @@ async function checkAppUpdate(silent = true) {
         if (!response.ok) return;
         const remoteVersion = (await response.text()).trim();
 
-        const codeVersion = (typeof APP_VERSION !== 'undefined') ? APP_VERSION : (window.APP_VERSION || '6.0.1');
+        const codeVersion = (typeof APP_VERSION !== 'undefined') ? APP_VERSION : (window.APP_VERSION || '6.0.2');
         const installedVersion = localStorage.getItem('bayan_pos_version');
 
         // إذا كان المستخدم قام بتطبيق هذا التحديث للتو في هذه الجلسة، نعتمد التحديث فوراً ونمنع ظهور النافذة
@@ -125,7 +125,7 @@ function showUpdateModal(newVersion) {
     overlay.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.94); z-index:10000000; display:flex; justify-content:center; align-items:center; backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); font-family:'El Messiri', sans-serif; direction:rtl; animation: fadeIn 0.4s ease;";
 
     const safeVersion = typeof escapeHtml === 'function' ? escapeHtml(newVersion) : String(newVersion || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    const currentVersion = localStorage.getItem('bayan_pos_version') || (typeof APP_VERSION !== 'undefined' ? APP_VERSION : (window.APP_VERSION || '6.0.1'));
+    const currentVersion = localStorage.getItem('bayan_pos_version') || (typeof APP_VERSION !== 'undefined' ? APP_VERSION : (window.APP_VERSION || '6.0.2'));
 
     overlay.innerHTML = `
         <div style="background: rgba(30, 41, 59, 0.96); padding: 35px; border-radius: 28px; text-align: center; border: 1.5px solid rgba(56, 189, 248, 0.5); box-shadow: 0 25px 60px rgba(0,0,0,0.85), 0 0 40px rgba(56, 189, 248, 0.25); max-width: 440px; width: 90%; position: relative; overflow: hidden; color: #fff;">
@@ -159,7 +159,7 @@ function showUpdateModal(newVersion) {
 }
 
 window.handleAppUpdate = function (targetVersion) {
-    const versionToSet = targetVersion || window._pendingUpdateVersion || '6.0.1';
+    const versionToSet = targetVersion || window._pendingUpdateVersion || '6.0.2';
     try {
         localStorage.setItem('bayan_pos_version', versionToSet);
         sessionStorage.setItem('bayan_updating_to', versionToSet);

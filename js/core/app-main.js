@@ -3440,7 +3440,7 @@
                 <div class="ai-insight" style="text-align: center;">
                     <div style="font-size: 40px; margin-bottom: 10px;">📊</div>
                     <h3>تطبيق المحاسبة اليومي</h3>
-                    <p style="color: var(--muted);">الإصدار v6.0.0 Pro Max</p>
+                    <p style="color: var(--muted);">الإصدار v6.0.2 Pro Max</p>
                     <p style="color: var(--gold2);">تطوير شامل وتحديث مستمر</p>
                 </div>
                 
@@ -7593,7 +7593,7 @@
                         
                         <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
                             <div style="background: rgba(212, 175, 55, 0.15); border: 1px solid rgba(212, 175, 55, 0.4); padding: 5px 14px; border-radius: 30px; font-size: 11.5px; color: #fbbf24; font-weight: 800;">
-                                🚀 إصدار النظام: <span id="about-app-version">v6.0.0 Pro Max</span>
+                                🚀 إصدار النظام: <span id="about-app-version">v6.0.2 Pro Max</span>
                             </div>
                             <div style="background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.4); padding: 5px 14px; border-radius: 30px; font-size: 11.5px; color: #4ade80; font-weight: 800;">
                                 🤖 الذكاء الاصطناعي أوفلاين 100%
