@@ -1,9 +1,9 @@
 // ============================================================
-//  Bayan Mobile Lite - Core Application Engine & Cloud Sync v1.0.2
+//  Bayan Mobile Lite - Core Application Engine & Cloud Sync v1.0.3
 //  Hot-Update & High-Resilience Cloud Sync Pipeline 🚀
 // ============================================================
 
-window.MOBILE_APP_VERSION = '1.0.2';
+window.MOBILE_APP_VERSION = '1.0.3';
 window._mobileSWReg = null;
 
 const firebaseConfig = {
@@ -203,19 +203,90 @@ function checkSerialAuth() {
     }
 }
 
+// مسح وتفريغ كاش المعاملات السابقة بالكامل لمنع أي تداخل بين الحسابات
+function clearLocalAccountingCache() {
+    try {
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k && k.startsWith('acc_') && k !== 'acc_whatsapp_phone') {
+                keysToRemove.push(k);
+            }
+        }
+        keysToRemove.forEach(k => localStorage.removeItem(k));
+        window.MobileState.records = [];
+        window.MobileState.storeName = 'بيان لايت';
+        const titleEl = document.getElementById('brand-store-name');
+        if (titleEl) titleEl.textContent = 'بيان لايت 📱';
+        renderUI();
+    } catch (e) {
+        console.warn('Clear local cache note:', e);
+    }
+}
+
+// التحقق السحابي الفوري من وجود السيريال في قاعدة بيانات فايربيس
+async function verifySerialOnCloud(serial) {
+    if (!serial) return false;
+    if (!db || !navigator.onLine) {
+        // في حالة عدم وجود إنترنت، نسمح بالسيريال طالما اجتاز فحص الصيغة BYN-
+        return true;
+    }
+
+    try {
+        // 1. فحص ملف السيريال الرئيسي في كوليكشن المستخدمين
+        const userDoc = await db.collection("users").doc(serial).get();
+        if (userDoc.exists) return true;
+
+        // 2. فحص كوليكشن المحاسبة هل يحتوي على أي بيانات
+        const accSnap = await db.collection("users").doc(serial).collection("accounting").limit(1).get().catch(() => null);
+        if (accSnap && !accSnap.empty) return true;
+
+        // 3. فحص كوليكشن الأجهزة هل يحتوي على أي جهاز مصرح
+        const devSnap = await db.collection("users").doc(serial).collection("devices").limit(1).get().catch(() => null);
+        if (devSnap && !devSnap.empty) return true;
+
+        return false;
+    } catch (err) {
+        console.warn('Cloud serial verification error:', err);
+        return true;
+    }
+}
+
 window.submitSerialLogin = async function() {
     const input = document.getElementById('serial-code-input');
     if (!input) return;
-    const serial = input.value.trim().toUpperCase();
+    const rawInput = input.value.trim().toUpperCase();
 
-    if (!serial) {
+    if (!rawInput) {
         showToast('⚠️ يرجى إدخال كود السيريال الخاص بك', 'error');
         return;
     }
 
-    showToast('⏳ جاري التحقق من السيريال...', 'info');
+    const serial = extractSerialFromScannedText(rawInput);
+    if (!serial) {
+        showToast('⚠️ كود السيريال غير صالح! يجب أن يبدأ بـ BYN- (مثال: BYN-XXXX-XXXX)', 'error');
+        return;
+    }
+
+    showToast('⏳ جاري التحقق من صحة السيريال على السيرفر...', 'info');
+
+    const isValid = await verifySerialOnCloud(serial);
+    if (!isValid) {
+        if (typeof window.showCustomAlert === 'function') {
+            await window.showCustomAlert({
+                title: '❌ سيريال غير مسجل في السيرفر',
+                desc: `كود السيريال (${serial}) غير مسجل في السيرفر السحابي!\nيرجى التأكد من كتابة الكود بشكل صحيح ومطابقته مع برنامج الكمبيوتر.`,
+                iconType: 'error',
+                okText: 'حسناً، فهمت'
+            });
+        } else {
+            showToast(`❌ كود السيريال (${serial}) غير مسجل في السيرفر السحابي`, 'error');
+        }
+        return;
+    }
 
     try {
+        clearLocalAccountingCache();
         localStorage.setItem('app_auth_serial', serial);
         window.MobileState.serial = serial;
         
@@ -237,7 +308,7 @@ window.submitSerialLogin = async function() {
 window.logoutSerial = async function() {
     const confirmed = await window.showCustomConfirm({
         title: 'تسجيل الخروج من السيريال؟',
-        desc: 'هل تريد تسجيل الخروج وتغيير كود السيريال الحالي؟ سيتوقف الربط السحابي مع كمبيوتر المحل حتى تقوم بإدخال الكود مرة أخرى.',
+        desc: 'هل تريد تسجيل الخروج وتغيير كود السيريال الحالي؟ سيتوقف الربط السحابي وسيتم تفريغ الجلسة الحالية حتى تقوم بإدخال الكود مرة أخرى.',
         iconType: 'warning',
         okText: 'تسجيل الخروج 🚪',
         cancelText: 'إلغاء البقاء'
@@ -249,11 +320,16 @@ window.logoutSerial = async function() {
 
     if (window.MobileState.unsubscribeSync) {
         window.MobileState.unsubscribeSync();
+        window.MobileState.unsubscribeSync = null;
     }
+    
+    // مسح السيريال وتفريغ الكاش بالكامل
     localStorage.removeItem('app_auth_serial');
+    clearLocalAccountingCache();
     window.MobileState.serial = '';
+    
     checkSerialAuth();
-    showToast('ℹ️ تم تسجيل الخروج بنجاح');
+    showToast('ℹ️ تم تسجيل الخروج وتفريغ الجلسة بنجاح');
 };
 
 // ------------------------------------------------------------
@@ -334,6 +410,11 @@ function saveLocalCache(dateStr, records) {
 
 function loadLocalCache() {
     try {
+        if (!window.MobileState.serial) {
+            window.MobileState.records = [];
+            renderUI();
+            return;
+        }
         const raw = localStorage.getItem(`acc_${window.MobileState.currentDate}`);
         if (raw) {
             const parsed = JSON.parse(raw);
@@ -1833,7 +1914,7 @@ async function checkMobileAppUpdate(silent = true) {
         if (!response.ok) return;
         const remoteVersion = (await response.text()).trim();
 
-        const codeVersion = window.MOBILE_APP_VERSION || '1.0.2';
+        const codeVersion = window.MOBILE_APP_VERSION || '1.0.3';
         const installedVersion = localStorage.getItem('mobile_lite_version');
 
         // إذا كان المستخدم قام بتطبيق التحديث للتو في هذه الجلسة، نعتمد التحديث ونمنع التكرار
@@ -1893,7 +1974,7 @@ function showMobileUpdateBanner(newVersion) {
 }
 
 window.handleMobileAppUpdate = function(targetVersion) {
-    const versionToSet = targetVersion || window._pendingMobileUpdateVersion || '1.0.2';
+    const versionToSet = targetVersion || window._pendingMobileUpdateVersion || '1.0.3';
     try {
         localStorage.setItem('mobile_lite_version', versionToSet);
         sessionStorage.setItem('mobile_updating_to', versionToSet);
@@ -2022,7 +2103,7 @@ function extractSerialFromScannedText(rawText) {
         if (text.includes('serial=')) {
             const match = text.match(/[?&]serial=([^&#\s]+)/i);
             if (match && match[1]) {
-                text = decodeURIComponent(match[1]);
+                text = decodeURIComponent(match[1]).trim();
             }
         }
     } catch (e) {}
@@ -2031,30 +2112,41 @@ function extractSerialFromScannedText(rawText) {
     if (text.startsWith('{') && text.endsWith('}')) {
         try {
             const parsed = JSON.parse(text);
-            if (parsed.serial) text = parsed.serial;
-            else if (parsed.code) text = parsed.code;
-            else if (parsed.id) text = parsed.id;
+            if (parsed.serial) text = String(parsed.serial).trim();
+            else if (parsed.code) text = String(parsed.code).trim();
+            else if (parsed.id) text = String(parsed.id).trim();
         } catch (e) {}
     }
 
-    // 3. Match BYN pattern if present (e.g. BYN-XXXX-XXXX)
-    const bynMatch = text.match(/BYN-[A-Z0-9_-]+/i);
+    // 3. Strict Check: If it's a pure numeric barcode (like commercial EAN-13 / UPC goods barcode) -> REJECT!
+    const pureNumbers = text.replace(/[\s-]/g, '');
+    if (/^\d{6,16}$/.test(pureNumbers)) {
+        return '';
+    }
+
+    // 4. Match BYN pattern if present (e.g. BYN-XXXX-XXXX, BYN_XXXX, BYNXXXX)
+    const bynMatch = text.match(/BYN[-_]?[A-Z0-9_-]{3,}/i);
     if (bynMatch) {
         return bynMatch[0].toUpperCase();
     }
 
-    // 4. Return clean uppercase text
-    return text.replace(/[\r\n\t]/g, '').trim().toUpperCase();
+    // 5. Must start with BYN
+    if (text.toUpperCase().startsWith('BYN')) {
+        return text.replace(/[\r\n\t]/g, '').trim().toUpperCase();
+    }
+
+    return '';
 }
 
 // Universal QR Decoder (uses native BarcodeDetector if available, with jsQR canvas fallback)
+// STRICTLY CONFIGURED FOR QR CODES ONLY!
 async function decodeQrFromSource(sourceElement) {
     if (!sourceElement) return null;
 
-    // 1. Try native BarcodeDetector (fast, hardware accelerated)
+    // 1. Native BarcodeDetector: STRICTLY QR Code ONLY! (Rejects 1D commercial barcodes)
     if ('BarcodeDetector' in window) {
         try {
-            const detector = new BarcodeDetector({ formats: ['qr_code', 'code_128', 'ean_13', 'code_39'] });
+            const detector = new BarcodeDetector({ formats: ['qr_code'] });
             const barcodes = await detector.detect(sourceElement);
             if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
                 return barcodes[0].rawValue.trim();
@@ -2064,7 +2156,7 @@ async function decodeQrFromSource(sourceElement) {
         }
     }
 
-    // 2. Fallback to jsQR via Canvas
+    // 2. Fallback to jsQR via Canvas (inherently only decodes QR codes)
     if (typeof jsQR !== 'undefined') {
         try {
             const width = sourceElement.videoWidth || sourceElement.naturalWidth || sourceElement.width || 0;
@@ -2100,16 +2192,22 @@ async function decodeQrFromSource(sourceElement) {
     return null;
 }
 
+let _isProcessingScannedCode = false;
+
 // Master Handler when ANY QR code is detected:
-// STOPS CAMERAS AND ENTERS / LOGS IN IMMEDIATELY! ("يدخلني على طول")
-function handleDetectedCode(code) {
-    if (!code) return;
+// Validates format, checks cloud existence, and logs in!
+async function handleDetectedCode(code) {
+    if (!code || _isProcessingScannedCode) return;
 
     const cleaned = extractSerialFromScannedText(code);
     if (!cleaned) {
-        showToast('⚠️ تم مسح الكود ولكن لم يتم العثور على سيريال صالح', 'warning');
+        if (typeof showToast === 'function') {
+            showToast('⚠️ هذا الكود ليس كود بيان QR! وجّه الكاميرا لمربع QR في البرنامج (BYN-XXXX)', 'warning');
+        }
         return;
     }
+
+    _isProcessingScannedCode = true;
 
     // Stop all active camera feeds immediately
     window.stopAllCameraStreams();
@@ -2118,6 +2216,27 @@ function handleDetectedCode(code) {
     if (navigator.vibrate) {
         try { navigator.vibrate([50, 50, 100]); } catch (e) {}
     }
+
+    // التحقق السحابي الفوري من صحة السيريال على السيرفر
+    showToast('⏳ جاري التحقق من صحة السيريال على السيرفر...', 'info');
+    const isCloudValid = await verifySerialOnCloud(cleaned);
+    if (!isCloudValid) {
+        _isProcessingScannedCode = false;
+        if (typeof window.showCustomAlert === 'function') {
+            await window.showCustomAlert({
+                title: '❌ سيريال غير مسجل في السيرفر',
+                desc: `كود السيريال (${cleaned}) غير مسجل في السيرفر السحابي!\nيرجى التأكد من مسح كود QR الصحيح من شاشة الإعدادات في برنامج الكمبيوتر.`,
+                iconType: 'error',
+                okText: 'حسناً، فهمت'
+            });
+        } else {
+            showToast(`❌ كود السيريال (${cleaned}) غير مسجل في السيرفر`, 'error');
+        }
+        return;
+    }
+
+    // تنظيف أي بيانات جلسة سابقة لضمان عدم تداخل الحسابات
+    clearLocalAccountingCache();
 
     // Save Serial & Log In Immediately
     localStorage.setItem('app_auth_serial', cleaned);
@@ -2150,7 +2269,9 @@ function handleDetectedCode(code) {
     }
 
     // 4. Instant Feedback Toast
-    showToast(`⚡ تم التعرف والدخول الفوري بنجاح! السيريال: ${cleaned}`, 'success');
+    showToast(`⚡ تم ربط السيريال والدخول الفوري بنجاح! السيريال: ${cleaned}`, 'success');
+
+    _isProcessingScannedCode = false;
 
     // 5. Trigger live cloud sync & date records
     startCloudSync();

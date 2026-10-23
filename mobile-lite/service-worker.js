@@ -1,9 +1,9 @@
 // ============================================================
-//  Bayan Mobile Lite - Ultra-Fast Service Worker (v1.0.2)
+//  Bayan Mobile Lite - Ultra-Fast Service Worker (v1.0.3)
 //  Auto-Update & Resilient Cloud Sync Engine 🚀
 // ============================================================
 
-const CACHE_NAME = 'bayan-mobile-lite-v102';
+const CACHE_NAME = 'bayan-mobile-lite-v103';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
