@@ -1670,13 +1670,30 @@ async function checkMobileAppUpdate(silent = true) {
         });
         if (!response.ok) return;
         const remoteVersion = (await response.text()).trim();
-        const currentVersion = window.MOBILE_APP_VERSION || '1.0.0';
+
+        const codeVersion = window.MOBILE_APP_VERSION || '1.0.1';
+        const installedVersion = localStorage.getItem('mobile_lite_version');
+
+        // إذا كان المستخدم قام بتطبيق التحديث للتو في هذه الجلسة، نعتمد التحديث ونمنع التكرار
+        if (sessionStorage.getItem('mobile_updating_to') === remoteVersion) {
+            localStorage.setItem('mobile_lite_version', remoteVersion);
+            return;
+        }
+
+        const currentVersion = installedVersion || codeVersion;
+
+        // إذا كانت النسخة مطابقة للنسخة البعيدة
+        if (remoteVersion === currentVersion || remoteVersion === codeVersion) {
+            localStorage.setItem('mobile_lite_version', remoteVersion);
+            if (!silent) {
+                showToast('✅ نسخة بيان لايت محدثة لأحدث إصدار مستقر (v' + remoteVersion + ')', 'success');
+            }
+            return;
+        }
 
         if (remoteVersion && remoteVersion !== currentVersion) {
             console.log(`🚀 [Mobile Update] تم اكتشاف إصدار جديد: ${remoteVersion} (الحالي: ${currentVersion})`);
             showMobileUpdateBanner(remoteVersion);
-        } else if (!silent) {
-            showToast('✅ نسخة بيان لايت محدثة لأحدث إصدار مستقر (v' + currentVersion + ')', 'success');
         }
     } catch (err) {
         if (window.location.protocol !== 'file:' && !silent) {
@@ -1687,6 +1704,7 @@ async function checkMobileAppUpdate(silent = true) {
 
 function showMobileUpdateBanner(newVersion) {
     if (document.getElementById('mobile-update-pill')) return;
+    window._pendingMobileUpdateVersion = newVersion;
 
     const safeVersion = String(newVersion || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     const pill = document.createElement('div');
@@ -1700,23 +1718,30 @@ function showMobileUpdateBanner(newVersion) {
                 <span class="mobile-update-pill-sub">تحديث واستبدال فوري للملفات بنقرة واحدة</span>
             </div>
         </div>
-        <button class="mobile-update-pill-btn" onclick="window.handleMobileAppUpdate()">
-            تحديث الآن ⚡
-        </button>
+        <div style="display: flex; align-items: center; gap: 6px;">
+            <button class="mobile-update-pill-btn" onclick="window.handleMobileAppUpdate('${safeVersion}')">
+                تحديث الآن ⚡
+            </button>
+            <button onclick="document.getElementById('mobile-update-pill')?.remove()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 13px;">
+                ✕
+            </button>
+        </div>
     `;
     document.body.appendChild(pill);
 }
 
-window.handleMobileAppUpdate = function() {
+window.handleMobileAppUpdate = function(targetVersion) {
+    const versionToSet = targetVersion || window._pendingMobileUpdateVersion || '1.0.1';
+    try {
+        localStorage.setItem('mobile_lite_version', versionToSet);
+        sessionStorage.setItem('mobile_updating_to', versionToSet);
+    } catch(e) {}
+
     const btn = document.querySelector('.mobile-update-pill-btn');
     if (btn) {
         btn.disabled = true;
         btn.textContent = 'جاري التحديث...';
     }
-
-    try {
-        window.sessionStorage.setItem('mobile_is_updating', 'true');
-    } catch(e) {}
 
     // 1. تجاوز أي عامل خدمة معلق
     if ('serviceWorker' in navigator && window._mobileSWReg && window._mobileSWReg.waiting) {
@@ -1730,13 +1755,16 @@ window.handleMobileAppUpdate = function() {
         }).catch(err => console.warn('Cache clear note:', err));
     }
 
+    const pill = document.getElementById('mobile-update-pill');
+    if (pill) pill.remove();
+
     // 3. إعادة تحميل الصفحة الفورية مع كود التحديث
     setTimeout(() => {
         const baseUrl = window.location.protocol === 'file:' 
             ? window.location.href.split('?')[0] 
             : (window.location.origin + window.location.pathname);
-        window.location.replace(baseUrl + '?update=' + Date.now());
-    }, 250);
+        window.location.replace(baseUrl + '?v=' + encodeURIComponent(versionToSet) + '&t=' + Date.now());
+    }, 400);
 };
 
 window.checkMobileUpdateManual = function() {

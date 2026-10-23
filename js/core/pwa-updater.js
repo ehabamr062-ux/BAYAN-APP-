@@ -78,7 +78,6 @@ window.takeScreenshot = window.takeScreenshot || function () { };
 // --- وظيفة التحديث التلقائي الشامل (Automation Instant Hot-Update) ---
 async function checkAppUpdate(silent = true) {
     try {
-        // إضافة كود عشوائي لمنع المتصفح أو السيرفر من سحب نسخة قديمة مخزنة بالـ Cache
         const response = await fetch('version.txt?t=' + Date.now(), {
             cache: 'no-store',
             headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache' }
@@ -86,13 +85,29 @@ async function checkAppUpdate(silent = true) {
         if (!response.ok) return;
         const remoteVersion = (await response.text()).trim();
 
-        const currentVersion = (typeof APP_VERSION !== 'undefined') ? APP_VERSION : (window.APP_VERSION || '6.0.0');
+        const codeVersion = (typeof APP_VERSION !== 'undefined') ? APP_VERSION : (window.APP_VERSION || '6.0.1');
+        const installedVersion = localStorage.getItem('bayan_pos_version');
+
+        // إذا كان المستخدم قام بتطبيق هذا التحديث للتو في هذه الجلسة، نعتمد التحديث فوراً ونمنع ظهور النافذة
+        if (sessionStorage.getItem('bayan_updating_to') === remoteVersion) {
+            localStorage.setItem('bayan_pos_version', remoteVersion);
+            return;
+        }
+
+        const currentVersion = installedVersion || codeVersion;
+
+        // إذا كانت النسخة الحالية مطابقة للنسخة البعيدة
+        if (remoteVersion === currentVersion || remoteVersion === codeVersion) {
+            localStorage.setItem('bayan_pos_version', remoteVersion);
+            if (!silent && typeof showToast === 'function') {
+                showToast('✅ تطبيق بيان POS محدث لأحدث إصدار مستقر (' + remoteVersion + ')', 'success');
+            }
+            return;
+        }
 
         if (remoteVersion && remoteVersion !== currentVersion) {
             console.log(`🚀 تم اكتشاف تحديث جديد تلقائياً: ${remoteVersion} (الحالي: ${currentVersion})`);
             showUpdateModal(remoteVersion);
-        } else if (!silent && typeof showToast === 'function') {
-            showToast('✅ تطبيق بيان POS محدث لأحدث إصدار مستقر (' + currentVersion + ')', 'success');
         }
     } catch (error) {
         if (window.location.protocol !== 'file:' && !silent) {
@@ -103,16 +118,19 @@ async function checkAppUpdate(silent = true) {
 
 function showUpdateModal(newVersion) {
     if (document.getElementById('update-modal-overlay')) return;
+    window._pendingUpdateVersion = newVersion;
 
     const overlay = document.createElement('div');
     overlay.id = 'update-modal-overlay';
     overlay.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.94); z-index:10000000; display:flex; justify-content:center; align-items:center; backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); font-family:'El Messiri', sans-serif; direction:rtl; animation: fadeIn 0.4s ease;";
 
     const safeVersion = typeof escapeHtml === 'function' ? escapeHtml(newVersion) : String(newVersion || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    const currentVersion = (typeof APP_VERSION !== 'undefined') ? APP_VERSION : (window.APP_VERSION || '6.0.0');
+    const currentVersion = localStorage.getItem('bayan_pos_version') || (typeof APP_VERSION !== 'undefined' ? APP_VERSION : (window.APP_VERSION || '6.0.1'));
 
     overlay.innerHTML = `
         <div style="background: rgba(30, 41, 59, 0.96); padding: 35px; border-radius: 28px; text-align: center; border: 1.5px solid rgba(56, 189, 248, 0.5); box-shadow: 0 25px 60px rgba(0,0,0,0.85), 0 0 40px rgba(56, 189, 248, 0.25); max-width: 440px; width: 90%; position: relative; overflow: hidden; color: #fff;">
+            <button onclick="this.closest('#update-modal-overlay').remove()" style="position: absolute; top: 16px; left: 16px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px;">✕</button>
+
             <div style="width: 72px; height: 72px; border-radius: 22px; background: linear-gradient(135deg, #0ea5e9, #0284c7); margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center; font-size: 34px; box-shadow: 0 0 25px rgba(14, 165, 233, 0.6);">🚀</div>
             
             <h2 style="color: #38bdf8; margin: 0 0 10px 0; font-size: 24px; font-weight: 900;">تحديث فوري جديد متاح!</h2>
@@ -121,12 +139,16 @@ function showUpdateModal(newVersion) {
                 سيتم تنظيف الملفات القديمة واستبدالها بالنسخة الجديدة فوراً بدون فقد أي بيانات مخزنة.
             </p>
             
-            <button onclick="handleAppUpdate()" style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: #fff; border: none; padding: 16px 30px; border-radius: 16px; font-weight: 900; font-size: 16px; cursor: pointer; box-shadow: 0 10px 25px rgba(14, 165, 233, 0.4); transition: 0.3s; width: 100%;">
+            <button onclick="handleAppUpdate('${safeVersion}')" style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: #fff; border: none; padding: 16px 30px; border-radius: 16px; font-weight: 900; font-size: 16px; cursor: pointer; box-shadow: 0 10px 25px rgba(14, 165, 233, 0.4); transition: 0.3s; width: 100%;">
                 ⚡ تطبيق التحديث والاستبدال التلقائي الآن
             </button>
+
+            <button onclick="this.closest('#update-modal-overlay').remove()" style="background: transparent; color: #94a3b8; border: none; padding: 10px; margin-top: 8px; font-size: 13px; cursor: pointer; width: 100%;">
+                تذكيري لاحقاً
+            </button>
             
-            <div style="margin-top: 20px; font-size: 12.5px; color: #94a3b8; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 15px;">
-                الإصدار الحالي المثبت: v${currentVersion} ➔ الجديد: v${safeVersion}
+            <div style="margin-top: 15px; font-size: 12px; color: #64748b; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px;">
+                الإصدار الحالي: v${currentVersion} ➔ الجديد: v${safeVersion}
             </div>
         </div>
         <style>
@@ -136,16 +158,18 @@ function showUpdateModal(newVersion) {
     document.body.appendChild(overlay);
 }
 
-window.handleAppUpdate = function () {
+window.handleAppUpdate = function (targetVersion) {
+    const versionToSet = targetVersion || window._pendingUpdateVersion || '6.0.1';
+    try {
+        localStorage.setItem('bayan_pos_version', versionToSet);
+        sessionStorage.setItem('bayan_updating_to', versionToSet);
+    } catch(e) {}
+
     const btn = document.querySelector('#update-modal-overlay button');
     if (btn) {
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> جاري استبدال الملفات وتحديث النسخة...';
     }
-
-    try {
-        window.sessionStorage.setItem('bayan_is_updating', 'true');
-    } catch(e) {}
 
     // 1. إرسال أمر تخطي الانتظار لأي عامل خدمة قيد الانتظار
     if ('serviceWorker' in navigator && window._bayanSWReg && window._bayanSWReg.waiting) {
@@ -159,13 +183,17 @@ window.handleAppUpdate = function () {
         }).catch(err => console.warn('⚠️ حذف الكاش:', err));
     }
 
-    // 3. إعادة تحميل فورية مع كود التحديث لكسر أي كاش متبقي
+    // 3. إزالة النافذة فوراً
+    const modal = document.getElementById('update-modal-overlay');
+    if (modal) modal.remove();
+
+    // 4. إعادة تحميل فورية مع كود التحديث لكسر أي كاش متبقي
     setTimeout(() => {
         const baseUrl = window.location.protocol === 'file:' 
             ? window.location.href.split('?')[0] 
             : (window.location.origin + window.location.pathname);
-        window.location.replace(baseUrl + '?update=' + Date.now());
-    }, 250);
+        window.location.replace(baseUrl + '?v=' + encodeURIComponent(versionToSet) + '&t=' + Date.now());
+    }, 400);
 };
 
 // فحص تلقائي فور التحميل وكل 45 ثانية، وعند استعادة الاتصال أو التركيز على التطبيق
