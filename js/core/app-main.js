@@ -663,8 +663,8 @@
                         <input type="text" id="onboardName" placeholder="الاسم الكريم" style="width: 100%;">
                     </div>
                     <div class="field" style="text-align: right; margin-top: 10px;">
-                        <label>رقم الهاتف</label>
-                        <input type="tel" id="onboardPhone" placeholder="01xxxxxxxxx" style="width: 100%;">
+                        <label>رقم الهاتف (11 رقماً إجباري)</label>
+                        <input type="tel" id="onboardPhone" placeholder="01012345678" maxlength="11" oninput="this.value = this.value.replace(/\D/g, '').slice(0, 11);" style="width: 100%;">
                     </div>
 
                     <button class="btn green glowing" onclick="submitOnboarding()" style="width: 100%; margin-top: 20px; padding: 12px;">بدء الاستخدام 🚀</button>
@@ -682,8 +682,18 @@
                 return;
             }
 
+            if (phone) {
+                let cleanP = phone.replace(/\D/g, '');
+                if (cleanP.startsWith('20') && cleanP.length === 12) cleanP = '0' + cleanP.slice(2);
+                if (cleanP.length !== 11 || !cleanP.startsWith('01')) {
+                    alert(`⚠️ رقم الهاتف غير صحيح! يجب أن يتكون من 11 رقماً بالضبط ويبدأ بـ 01 (مثال: 01012345678). لقد أدخلت (${cleanP.length}) أرقام.`);
+                    return;
+                }
+            }
+
             localStorage.setItem('acc_user_name', name);
             localStorage.setItem('acc_user_phone', phone);
+            if (phone) localStorage.setItem('acc_whatsapp_phone', phone);
 
             updateHeaderName();
             document.querySelector('.onboarding-overlay').remove();
@@ -710,7 +720,7 @@
         function saveUserProfileFromSettings() {
             const name = document.getElementById('settingsName').value.trim();
             const prefix = document.getElementById('settingsAppPrefix').value.trim();
-            const phone = document.getElementById('settingsPhone').value.trim();
+            let phone = document.getElementById('settingsPhone').value.trim();
             const addressEl = document.getElementById('settingsAddress');
             const address = addressEl ? addressEl.value.trim() : '';
             const notes = document.getElementById('settingsNotes').value.trim();
@@ -720,14 +730,20 @@
                 return;
             }
 
-            if (phone && phone.length !== 11) {
-                showModernAlert('رقم الهاتف يجب أن يتكون من 11 رقم بالضبط لضمان المزامنة والطباعة السليمة', 'warning');
-                return;
+            if (phone) {
+                let cleanP = phone.replace(/\D/g, '');
+                if (cleanP.startsWith('20') && cleanP.length === 12) cleanP = '0' + cleanP.slice(2);
+                if (cleanP.length !== 11 || !cleanP.startsWith('01')) {
+                    showModernAlert(`⚠️ رقم الهاتف غير صحيح! يجب أن يتكون من 11 رقماً بالضبط ويبدأ بـ 01 (مثال: 01012345678). لقد أدخلت (${cleanP.length}) أرقام.`, 'warning');
+                    return;
+                }
+                phone = cleanP;
             }
 
             localStorage.setItem('acc_user_name', name);
             localStorage.setItem('acc_app_name_prefix', prefix || 'تطبيق المحاسبة اليومي');
             localStorage.setItem('acc_user_phone', phone);
+            if (phone) localStorage.setItem('acc_whatsapp_phone', phone);
             if (address) localStorage.setItem('acc_user_address', address);
             localStorage.setItem('acc_user_notes', notes);
 
@@ -5229,8 +5245,87 @@
 
 
         /* ---------- Sharing ---------- */
+        function promptDesktopWhatsAppPhone(onSuccess) {
+            const current = (localStorage.getItem('acc_whatsapp_phone') || localStorage.getItem('acc_user_phone') || '').trim();
+            
+            const overlay = document.createElement('div');
+            overlay.className = 'modal-overlay';
+            overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); backdrop-filter:blur(10px); display:flex; justify-content:center; align-items:center; z-index:999999; direction:rtl; font-family:"El Messiri", sans-serif;';
+            overlay.innerHTML = `
+                <div style="background: linear-gradient(145deg, #0f172a, #1e293b); border: 1.5px solid #22c55e; border-radius: 22px; max-width: 440px; width: 92%; padding: 26px; color: #fff; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.7), 0 0 30px rgba(34, 197, 94, 0.2);">
+                    <div style="font-size: 40px; margin-bottom: 10px;">📱</div>
+                    <h3 style="margin: 0 0 8px 0; color: #4ade80; font-size: 19px; font-weight: 800;">تسجيل رقم واتساب المستلم</h3>
+                    <p style="margin: 0 0 16px 0; font-size: 13px; color: #94a3b8; line-height: 1.5;">
+                        أدخل رقم هاتف واتساب لاستلام تقرير الحسابات والوردية.<br>
+                        <strong style="color: #fbbf24;">(إجباري 11 رقماً بالضبط ويبدأ بـ 01)</strong>
+                    </p>
+
+                    <div style="display: flex; direction: ltr; align-items: center; background: rgba(0,0,0,0.4); border: 1.5px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 6px 12px; margin-bottom: 8px;">
+                        <span style="color: #4ade80; font-weight: bold; font-size: 14px; margin-right: 8px;">🇪🇬 +20</span>
+                        <input type="tel" id="desktop-wa-phone-input" value="${current}" placeholder="01012345678" maxlength="11" style="flex: 1; background: transparent; border: none; outline: none; color: #fff; font-size: 16px; font-weight: bold; letter-spacing: 1px;" autocomplete="off">
+                    </div>
+                    <div style="font-size: 11px; color: #fbbf24; text-align: right; margin-bottom: 16px; font-weight: bold;">
+                        ⚠️ إجباري: يجب أن يكون 11 رقماً بدون حروف أو مسافات
+                    </div>
+
+                    <div style="display: flex; gap: 10px;">
+                        <button id="btn-save-desktop-wa" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; border: none; border-radius: 12px; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4); transition: 0.2s;">
+                            حفظ ومتابعة الإرسال 🚀
+                        </button>
+                        <button id="btn-cancel-desktop-wa" style="padding: 12px 18px; background: rgba(255,255,255,0.08); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; font-weight: bold; font-size: 13px; cursor: pointer;">
+                            إلغاء
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+
+            const input = overlay.querySelector('#desktop-wa-phone-input');
+            if (input) {
+                input.focus();
+                input.addEventListener('input', function() {
+                    this.value = this.value.replace(/\D/g, '').slice(0, 11);
+                });
+            }
+
+            overlay.querySelector('#btn-cancel-desktop-wa').onclick = () => overlay.remove();
+
+            overlay.querySelector('#btn-save-desktop-wa').onclick = function() {
+                const rawVal = (input ? input.value : '').trim();
+                let digits = rawVal.replace(/\D/g, '');
+                if (digits.startsWith('20') && digits.length === 12) digits = '0' + digits.slice(2);
+
+                if (digits.length !== 11 || !digits.startsWith('01')) {
+                    const errorMsg = `⚠️ رقم الهاتف غير صحيح! يجب أن يتكون من 11 رقماً بالضبط ويبدأ بـ 01 (مثال: 01012345678). لقد أدخلت (${digits.length}) أرقام.`;
+                    if (typeof showModernAlert === 'function') {
+                        showModernAlert(errorMsg, 'warning');
+                    } else {
+                        alert(errorMsg);
+                    }
+                    if (input) input.focus();
+                    return;
+                }
+
+                localStorage.setItem('acc_whatsapp_phone', digits);
+                overlay.remove();
+                if (typeof showToast === 'function') showToast(`✅ تم حفظ رقم واتساب: ${digits}`, 'success');
+                if (typeof onSuccess === 'function') onSuccess(digits);
+            };
+        }
+
         function shareToWhatsApp() {
-            shareReport('whatsapp');
+            let targetPhone = (localStorage.getItem('acc_whatsapp_phone') || localStorage.getItem('acc_user_phone') || '').trim();
+            let digits = targetPhone.replace(/\D/g, '');
+            if (digits.startsWith('20') && digits.length === 12) digits = '0' + digits.slice(2);
+
+            if (digits.length !== 11 || !digits.startsWith('01')) {
+                promptDesktopWhatsAppPhone((savedPhone) => {
+                    shareReport('whatsapp', savedPhone);
+                });
+                return;
+            }
+
+            shareReport('whatsapp', digits);
         }
 
         function shareToTelegram() {
@@ -5241,7 +5336,7 @@
             shareReport('copy');
         }
 
-        function shareReport(platform) {
+        function shareReport(platform, customPhone) {
             const date = dateInput.value || (new Date()).toISOString().slice(0, 10);
             const sumTop = sumTopEl.textContent;
             const sumBottom = sumBottomEl.textContent;
@@ -5461,7 +5556,11 @@
             let shareUrl = '';
 
             if (platform === 'whatsapp') {
-                shareUrl = `https://wa.me/?text=${encodedMessage}`;
+                const targetPhone = customPhone || (localStorage.getItem('acc_whatsapp_phone') || localStorage.getItem('acc_user_phone') || '').trim();
+                let cleanWa = targetPhone.replace(/\D/g, '');
+                if (cleanWa.startsWith('20') && cleanWa.length === 12) cleanWa = '0' + cleanWa.slice(2);
+                const waPhone = (cleanWa.length === 11 && cleanWa.startsWith('01')) ? `20${cleanWa.slice(1)}` : '';
+                shareUrl = waPhone ? `https://wa.me/${waPhone}?text=${encodedMessage}` : `https://wa.me/?text=${encodedMessage}`;
             } else if (platform === 'telegram') {
                 shareUrl = `tg://msg?text=${encodedMessage}`;
                 try { navigator.clipboard.writeText(message); } catch (e) { }
@@ -6926,8 +7025,8 @@
                             <input type="text" id="settingsAppPrefix" value="${escapeHtml(localStorage.getItem('acc_app_name_prefix') || 'تطبيق المحاسبة اليومي')}" placeholder="اسم المحل أو المؤسسة..." class="settings-input">
                         </div>
                         <div class="settings-field-group">
-                            <label class="settings-field-label">📱 رقم الهاتف للتواصل والطباعة (11 رقم)</label>
-                            <input type="tel" id="settingsPhone" value="${escapeHtml(localStorage.getItem('acc_user_phone') || '')}" placeholder="01xxxxxxxxx" class="settings-input">
+                            <label class="settings-field-label">📱 رقم الهاتف للتواصل والطباعة (11 رقماً إجباري)</label>
+                            <input type="tel" id="settingsPhone" value="${escapeHtml(localStorage.getItem('acc_user_phone') || '')}" placeholder="01012345678" maxlength="11" oninput="this.value = this.value.replace(/\D/g, '').slice(0, 11);" class="settings-input">
                         </div>
                         <div class="settings-field-group">
                             <label class="settings-field-label">📍 العنوان / المحافظة</label>

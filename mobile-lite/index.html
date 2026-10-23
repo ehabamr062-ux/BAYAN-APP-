@@ -123,14 +123,14 @@
         </div>
 
         <!-- Informational Top Bar (عرض إجمالي خانة فوق للعلم فقط دون التأثير على حسابات الدرج) -->
-        <div id="kpi-top-info-banner" onclick="window.showCardDetailsModal('top')" style="cursor: pointer; display: flex; align-items: center; justify-content: space-between; background: rgba(59, 130, 246, 0.08); border: 1px dashed rgba(59, 130, 246, 0.35); border-radius: 12px; padding: 9px 14px; margin-top: 10px; font-size: 12.5px;">
-            <div style="display: flex; align-items: center; gap: 8px; color: #93c5fd; font-weight: 700;">
-                <i class="fa-solid fa-circle-info" style="color: #60a5fa;"></i>
+        <div id="kpi-top-info-banner" class="kpi-top-info-banner" onclick="window.showCardDetailsModal('top')" style="cursor: pointer;" title="اضغط لعرض تفاصيل خانة فوق">
+            <div class="kpi-top-banner-label">
+                <i class="fa-solid fa-circle-info"></i>
                 <span>إجمالي خانة (فوق ⬆️ للعلم فقط):</span>
             </div>
-            <div style="display: flex; align-items: center; gap: 6px;">
-                <span id="kpi-top-amount" style="font-weight: 900; color: #60a5fa; font-size: 14px;">0 ج.م</span>
-                <i class="fa-solid fa-chevron-left" style="font-size: 10px; color: #94a3b8;"></i>
+            <div class="kpi-top-banner-val-wrap">
+                <span id="kpi-top-amount" class="kpi-top-banner-val">0 ج.م</span>
+                <i class="fa-solid fa-chevron-left kpi-top-banner-arrow"></i>
             </div>
         </div>
 
@@ -365,11 +365,11 @@
             
             <div class="modal-input-wrap">
                 <span class="modal-input-prefix">🇪🇬 +20</span>
-                <input type="tel" id="whatsapp-phone-input" class="modal-text-input" placeholder="01012345678" inputmode="tel">
+                <input type="tel" id="whatsapp-phone-input" class="modal-text-input" placeholder="01012345678" inputmode="numeric" maxlength="11" autocomplete="tel">
             </div>
             
-            <div id="whatsapp-phone-status" style="font-size: 11px; color: var(--text-muted); line-height: 1.4;">
-                لم يتم تحديد رقم مسبقاً (سيتم فتح جهات الاتصال لاختيار المستلم)
+            <div id="whatsapp-phone-status" style="font-size: 11.5px; color: #f59e0b; line-height: 1.4; font-weight: 700; margin-top: 5px;">
+                ⚠️ إجباري: يجب أن يتكون الرقم من 11 رقماً بالضبط ويبدأ بـ 01 (مثال: 01012345678)
             </div>
 
             <div class="modal-btn-row">
@@ -540,8 +540,11 @@
                             رقم المدير المعتمد لاستلام تقارير تقفيل اليومية:
                         </div>
                         <div class="settings-inline-input-row">
-                            <input type="tel" id="settings-inline-phone" class="settings-inline-input" placeholder="01012345678" inputmode="tel">
+                            <input type="tel" id="settings-inline-phone" class="settings-inline-input" placeholder="01012345678" inputmode="numeric" maxlength="11" autocomplete="tel">
                             <button type="button" class="settings-inline-save-btn" onclick="window.saveInlineWhatsAppPhone()">حفظ 💾</button>
+                        </div>
+                        <div style="font-size: 11px; color: #f59e0b; margin-top: 4px; font-weight: 700;">
+                            ⚠️ إجباري: 11 رقماً بالضبط يبدأ بـ 01
                         </div>
                         <div id="settings-whatsapp-preview" class="settings-info-pill">
                             لم يتم تحديد رقم (اختيار يدوي من جهات الاتصال)

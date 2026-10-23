@@ -1345,24 +1345,46 @@ window.closeWhatsAppModal = function() {
 
 window.saveWhatsAppConfig = function() {
     const input = document.getElementById('whatsapp-phone-input');
-    const val = (input ? input.value : '').trim().replace(/\s+/g, '');
+    const rawVal = (input ? input.value : '').trim();
 
+    if (!rawVal) {
+        window.showCustomAlert({
+            title: '⚠️ رقم الهاتف مطلوب',
+            desc: 'يرجى إدخال رقم هاتف واتساب (11 رقماً إجباري يبدأ بـ 01). الحقل إجباري لتثبيت الرقم.',
+            iconType: 'warning'
+        });
+        if (input) input.focus();
+        return;
+    }
+
+    let digits = rawVal.replace(/\D/g, '');
+    if (digits.startsWith('20') && digits.length === 12) {
+        digits = '0' + digits.slice(2);
+    }
+
+    if (digits.length !== 11 || !digits.startsWith('01')) {
+        window.showCustomAlert({
+            title: '⚠️ رقم هاتف غير صحيح',
+            desc: `يجب أن يتكون رقم الهاتف من 11 رقماً بالضبط ويبدأ بـ 01 (مثال: 01012345678).\nلقد قمت بإدخال (${digits.length}) أرقام فقط: "${rawVal}".`,
+            iconType: 'warning'
+        });
+        if (input) input.focus();
+        return;
+    }
+
+    const val = digits;
     localStorage.setItem('acc_whatsapp_phone', val);
     window.MobileState.managerPhone = val;
     window.closeWhatsAppModal();
 
     const phonePreview = document.getElementById('settings-whatsapp-preview');
     if (phonePreview) {
-        phonePreview.textContent = val ? `الرقم المسجل: ${val}` : 'لم يتم تحديد رقم (اختيار يدوي من جهات الاتصال)';
+        phonePreview.textContent = `الرقم المسجل: ${val}`;
     }
     const inlinePhoneInp = document.getElementById('settings-inline-phone');
     if (inlinePhoneInp) inlinePhoneInp.value = val;
 
-    if (val) {
-        showToast(`✅ تم حفظ رقم واتساب المدير: ${val}`, 'success');
-    } else {
-        showToast('ℹ️ تم إلغاء الرقم المخصص (سيتم فتح جهات الاتصال)', 'info');
-    }
+    showToast(`✅ تم حفظ وتأكيد رقم واتساب المدير: ${val}`, 'success');
 };
 
 window.clearWhatsAppConfig = function() {
@@ -1384,11 +1406,13 @@ window.clearWhatsAppConfig = function() {
 
 window.shareViaWhatsApp = function() {
     let targetPhone = (window.MobileState.managerPhone || localStorage.getItem('acc_whatsapp_phone') || '').trim();
+    let digits = targetPhone.replace(/\D/g, '');
+    if (digits.startsWith('20') && digits.length === 12) digits = '0' + digits.slice(2);
 
-    if (!targetPhone) {
+    if (!digits || digits.length !== 11 || !digits.startsWith('01')) {
         window.showCustomAlert({
-            title: '⚠️ رقم واتساب غير مسجل',
-            desc: 'لم يتم تسجيل رقم واتساب المدير بعد!\nيرجى تحديد وتسجيل رقم هاتف المدير أولاً لتتمكن من إرسال تقارير الحسابات إليه مباشرة.',
+            title: '📱 تسجيل رقم واتساب المدير',
+            desc: 'لم يتم تسجيل رقم واتساب معتمد أو أن الرقم المسجل غير صحيح!\nيرجى إدخال رقم هاتف المدير (11 رقماً إجباري يبدأ بـ 01) لتتمكن من إرسال تقارير الحسابات إليه مباشرة.',
             iconType: 'warning',
             okText: 'تسجيل الرقم الآن 📱'
         }).then(() => {
@@ -1396,6 +1420,8 @@ window.shareViaWhatsApp = function() {
         });
         return;
     }
+
+    targetPhone = digits;
 
     const records = window.MobileState.records;
     const dateStr = window.MobileState.currentDate;
@@ -1564,9 +1590,9 @@ window.shareViaWhatsApp = function() {
     msg += `   🔒 التوثيق: *معتمد ومطابق دفترياً وإلكترونياً*\n`;
     msg += `✨ *صادر عبر تطبيق بيان موبايل لايت الذكي*`;
 
-    let digits = targetPhone.replace(/\D/g, '');
-    if (digits.startsWith('01')) digits = '2' + digits; // مصر كود الدولة +20
-    const phoneParam = `phone=${digits}&`;
+    let cleanWaPhone = targetPhone;
+    if (cleanWaPhone.startsWith('01')) cleanWaPhone = '2' + cleanWaPhone; // مصر كود الدولة +20
+    const phoneParam = `phone=${cleanWaPhone}&`;
     showToast(`📤 جاري الإرسال لرقم المدير: ${targetPhone}`, 'info');
 
     const url = `https://api.whatsapp.com/send?${phoneParam}text=${encodeURIComponent(msg)}`;
@@ -1734,6 +1760,16 @@ function setupEventListeners() {
     });
 
     setupSalesTopInputGuard();
+
+    // حصر إدخال أرقام هواتف الواتساب على الأرقام فقط وبحد أقصى 11 رقماً
+    ['whatsapp-phone-input', 'settings-inline-phone'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', function() {
+                this.value = this.value.replace(/\D/g, '').slice(0, 11);
+            });
+        }
+    });
 }
 
 function registerServiceWorker() {
@@ -2391,22 +2427,45 @@ function escapeHtml(str) {
 // ============================================================
 window.saveInlineWhatsAppPhone = function() {
     const inp = document.getElementById('settings-inline-phone');
-    const val = (inp ? inp.value : '').trim().replace(/\s+/g, '');
+    const rawVal = (inp ? inp.value : '').trim();
+
+    if (!rawVal) {
+        window.showCustomAlert({
+            title: '⚠️ رقم الهاتف مطلوب',
+            desc: 'يرجى إدخال رقم هاتف واتساب (11 رقماً إجباري يبدأ بـ 01).',
+            iconType: 'warning'
+        });
+        if (inp) inp.focus();
+        return;
+    }
+
+    let digits = rawVal.replace(/\D/g, '');
+    if (digits.startsWith('20') && digits.length === 12) {
+        digits = '0' + digits.slice(2);
+    }
+
+    if (digits.length !== 11 || !digits.startsWith('01')) {
+        window.showCustomAlert({
+            title: '⚠️ رقم هاتف غير صحيح',
+            desc: `يجب أن يتكون رقم الهاتف من 11 رقماً بالضبط ويبدأ بـ 01 (مثال: 01012345678).\nلقد قمت بإدخال (${digits.length}) أرقام فقط: "${rawVal}".`,
+            iconType: 'warning'
+        });
+        if (inp) inp.focus();
+        return;
+    }
+
+    const val = digits;
     localStorage.setItem('acc_whatsapp_phone', val);
     window.MobileState.managerPhone = val;
 
     const phoneEl = document.getElementById('settings-whatsapp-preview');
     if (phoneEl) {
-        phoneEl.textContent = val ? `الرقم المسجل: ${val}` : 'لم يتم تحديد رقم (اختيار يدوي من جهات الاتصال)';
+        phoneEl.textContent = `الرقم المسجل: ${val}`;
     }
     const modalInp = document.getElementById('whatsapp-phone-input');
     if (modalInp) modalInp.value = val;
 
-    if (val) {
-        showToast(`✅ تم حفظ رقم واتساب المدير: ${val}`, 'success');
-    } else {
-        showToast('ℹ️ تم إلغاء الرقم المخصص (سيتم فتح جهات الاتصال)', 'info');
-    }
+    showToast(`✅ تم حفظ رقم واتساب المدير: ${val}`, 'success');
 };
 
 // ============================================================

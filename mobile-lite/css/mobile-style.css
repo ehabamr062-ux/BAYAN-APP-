@@ -461,6 +461,74 @@ body.light-mode .kpi-card.profit-full {
     align-items: center;
 }
 
+/* Informational Top Bar (فوق للعلم فقط) */
+.kpi-top-info-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(59, 130, 246, 0.08);
+    border: 1px dashed rgba(59, 130, 246, 0.35);
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-top: 10px;
+    font-size: 12.5px;
+    transition: all 0.2s ease;
+}
+.kpi-top-info-banner:active {
+    transform: scale(0.99);
+}
+.kpi-top-info-banner .kpi-top-banner-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #93c5fd;
+    font-weight: 700;
+}
+.kpi-top-info-banner .kpi-top-banner-label i {
+    color: #60a5fa;
+    font-size: 14px;
+}
+.kpi-top-info-banner .kpi-top-banner-val-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.kpi-top-info-banner .kpi-top-banner-val {
+    font-weight: 900;
+    color: #60a5fa;
+    font-size: 14px;
+}
+.kpi-top-info-banner .kpi-top-banner-arrow {
+    font-size: 10px;
+    color: #94a3b8;
+}
+
+/* الوضع الفاتح (Light Mode): وضوح فائق وتباين عالي يمنع بهتان النص */
+body.light-mode .kpi-top-info-banner,
+html.light-mode .kpi-top-info-banner {
+    background: #ebf5ff !important;
+    border: 1.5px dashed #2563eb !important;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08) !important;
+}
+body.light-mode .kpi-top-info-banner .kpi-top-banner-label,
+html.light-mode .kpi-top-info-banner .kpi-top-banner-label {
+    color: #1e3a8a !important; /* كحلي داكن وبارز جداً */
+    font-weight: 800 !important;
+}
+body.light-mode .kpi-top-info-banner .kpi-top-banner-label i,
+html.light-mode .kpi-top-info-banner .kpi-top-banner-label i {
+    color: #1d4ed8 !important;
+}
+body.light-mode .kpi-top-info-banner .kpi-top-banner-val,
+html.light-mode .kpi-top-info-banner .kpi-top-banner-val {
+    color: #1e40af !important; /* أزرق ملكي بارز وقوي */
+    font-weight: 900 !important;
+}
+body.light-mode .kpi-top-info-banner .kpi-top-banner-arrow,
+html.light-mode .kpi-top-info-banner .kpi-top-banner-arrow {
+    color: #2563eb !important;
+}
+
 /* Payment Methods Breakdown Ribbon */
 .payment-ribbon {
     display: flex;
