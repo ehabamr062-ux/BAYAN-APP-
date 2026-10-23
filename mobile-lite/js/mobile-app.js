@@ -1,9 +1,9 @@
 // ============================================================
-//  Bayan Mobile Lite - Core Application Engine & Cloud Sync v1.0.3
+//  Bayan Mobile Lite - Core Application Engine & Cloud Sync v1.0.4
 //  Hot-Update & High-Resilience Cloud Sync Pipeline 🚀
 // ============================================================
 
-window.MOBILE_APP_VERSION = '1.0.3';
+window.MOBILE_APP_VERSION = '1.0.4';
 window._mobileSWReg = null;
 
 const firebaseConfig = {
@@ -264,7 +264,7 @@ window.submitSerialLogin = async function() {
 
     const serial = extractSerialFromScannedText(rawInput);
     if (!serial) {
-        showToast('⚠️ كود السيريال غير صالح! يجب أن يبدأ بـ BYN- (مثال: BYN-XXXX-XXXX)', 'error');
+        showToast('⚠️ يرجى إدخال كود سيريال صالح', 'error');
         return;
     }
 
@@ -1914,7 +1914,7 @@ async function checkMobileAppUpdate(silent = true) {
         if (!response.ok) return;
         const remoteVersion = (await response.text()).trim();
 
-        const codeVersion = window.MOBILE_APP_VERSION || '1.0.3';
+        const codeVersion = window.MOBILE_APP_VERSION || '1.0.4';
         const installedVersion = localStorage.getItem('mobile_lite_version');
 
         // إذا كان المستخدم قام بتطبيق التحديث للتو في هذه الجلسة، نعتمد التحديث ونمنع التكرار
@@ -1974,7 +1974,7 @@ function showMobileUpdateBanner(newVersion) {
 }
 
 window.handleMobileAppUpdate = function(targetVersion) {
-    const versionToSet = targetVersion || window._pendingMobileUpdateVersion || '1.0.3';
+    const versionToSet = targetVersion || window._pendingMobileUpdateVersion || '1.0.4';
     try {
         localStorage.setItem('mobile_lite_version', versionToSet);
         sessionStorage.setItem('mobile_updating_to', versionToSet);
@@ -2118,9 +2118,9 @@ function extractSerialFromScannedText(rawText) {
         } catch (e) {}
     }
 
-    // 3. Strict Check: If it's a pure numeric barcode (like commercial EAN-13 / UPC goods barcode) -> REJECT!
+    // 3. Strict Check: If it's a pure numeric barcode (like commercial EAN-13 / UPC goods barcode 8 to 14 digits) -> REJECT!
     const pureNumbers = text.replace(/[\s-]/g, '');
-    if (/^\d{6,16}$/.test(pureNumbers)) {
+    if (/^\d{8,14}$/.test(pureNumbers)) {
         return '';
     }
 
@@ -2130,8 +2130,8 @@ function extractSerialFromScannedText(rawText) {
         return bynMatch[0].toUpperCase();
     }
 
-    // 5. Must start with BYN
-    if (text.toUpperCase().startsWith('BYN')) {
+    // 5. Allow custom and quick serials (such as 123, 500, 03099-ACC)
+    if (text.length >= 1) {
         return text.replace(/[\r\n\t]/g, '').trim().toUpperCase();
     }
 
